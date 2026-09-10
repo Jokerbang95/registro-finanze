@@ -97,6 +97,15 @@
     padding: 20px 26px 16px;
     border-bottom: 1px solid var(--border);
   }
+  .panel-head.collapsed{ border-bottom-color: transparent; padding-bottom: 20px; }
+  .panel-head-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .panel-collapse-btn{
+    flex:0 0 auto; width:24px; height:24px; border:none; background:none; padding:0;
+    color: var(--ink-faint); cursor:pointer; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; transition: transform .15s, background .15s, color .15s;
+  }
+  .panel-collapse-btn:hover{ background: var(--bg); color: var(--ink); }
+  .panel-collapse-btn.expanded{ transform: rotate(90deg); }
   .panel-head h2{
     font-family:'Fraunces', serif; font-weight:600; font-size:19px; margin:0;
   }
@@ -105,6 +114,25 @@
     background: var(--bg); padding: 5px 11px; border-radius: var(--r-pill);
   }
   .panel-body{ padding: 22px 26px 26px; }
+
+  .view-toggle{ display:flex; gap:4px; background: var(--bg); padding:3px; border-radius: var(--r-pill); }
+  .view-toggle-btn{
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color: var(--ink-soft);
+    background:none; border:none; padding:7px 14px; border-radius: var(--r-pill); cursor:pointer;
+    transition: background .15s, color .15s;
+  }
+  .view-toggle-btn.active{ background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+  .view-toggle-btn:not(.active):hover{ color: var(--ink); }
+
+  .granularity-row{
+    display:flex; align-items:center; gap:12px; margin-top:22px; padding-top:20px;
+    border-top: 1px solid var(--border);
+  }
+  .granularity-label{ font-size:12.5px; font-weight:600; color: var(--ink-soft); }
+
+  tbody tr.week-row td{ font-weight:600; }
+  tbody tr.week-row td:first-child{ color: var(--ink); font-family:'Fraunces', serif; font-size:14px; }
+  .week-progress{ font-size:11px; font-weight:500; color: var(--ink-faint); display:block; margin-top:2px; }
 
   .grid4{
     display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;
@@ -171,9 +199,9 @@
   .masked{ letter-spacing: 2px; }
 
   .thresholds{
-    display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px;
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 20px;
   }
-  @media (max-width: 900px){ .thresholds{ grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 1000px){ .thresholds{ grid-template-columns: 1fr 1fr; } }
   @media (max-width: 640px){ .thresholds{ grid-template-columns: 1fr; } }
   .threshold-card{
     border-radius: var(--r-md); padding: 18px 20px; position:relative;
@@ -182,6 +210,7 @@
   .threshold-card.pareggio{ border-left: 3px solid var(--red); }
   .threshold-card.stipendio{ border-left: 3px solid var(--green); }
   .threshold-card.disponibile{ border-left: 3px solid var(--amber); }
+  .threshold-card.live{ border-left: 3px solid var(--accent); }
   .threshold-card .label{
     font-size:12.5px; font-weight:600; color: var(--ink-soft);
     margin-bottom: 8px;
@@ -190,6 +219,8 @@
     font-family:'Fraunces', serif; font-size: 25px; font-weight:600;
   }
   .threshold-card.disponibile .value.neg{ color: var(--red); }
+  .threshold-card.live .value.pos{ color: var(--green); }
+  .threshold-card.live .value.neg{ color: var(--red); }
   .threshold-card .sub{ font-size:12.5px; color: var(--ink-soft); margin-top: 5px; line-height:1.5; }
 
   table{ width:100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
@@ -214,6 +245,14 @@
     font-family:'Inter', sans-serif; font-size:13.5px; color: var(--ink-soft);
     background: var(--bg); border:1px solid var(--border); border-radius: var(--r-sm);
   }
+  .readonly-cell.adjusted{
+    background: var(--accent-bg); border-color: var(--accent); color: var(--ink); font-weight:700;
+  }
+  .field-adjusted-tag{
+    display:inline-block; font-size:9.5px; font-weight:700; color: var(--accent);
+    background: var(--accent-bg); padding:1px 6px; border-radius: var(--r-pill); margin-left:4px;
+    text-transform:uppercase; letter-spacing:0.3px; vertical-align:middle;
+  }
   .margine{ font-family:'Inter', sans-serif; font-weight:700; }
   .margine.pos{ color: var(--green); }
   .margine.neg{ color: var(--red); }
@@ -221,6 +260,140 @@
   .delta.pos{ color: var(--green); }
   .delta.neg{ color: var(--red); }
   .delta.zero{ color: var(--ink-soft); }
+
+  /* ===== REGISTRO SPESE: righe comprimibili con voci multiple ===== */
+  .entry-list{ display:flex; flex-direction:column; gap:8px; }
+  .entry-row{ border:1px solid var(--border); border-radius: var(--r-md); overflow:hidden; }
+  .entry-row.today{ border-color: var(--amber); }
+  .entry-row-header{
+    display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer;
+    background: var(--surface); transition: background .12s;
+  }
+  .entry-row-header:hover{ background: var(--bg); }
+  .entry-row.today .entry-row-header{ background: var(--amber-bg); }
+  .entry-chevron{
+    width:16px; height:16px; flex:0 0 auto; color: var(--ink-faint);
+    transition: transform .15s; display:flex; align-items:center; justify-content:center;
+  }
+  .entry-row.expanded .entry-chevron{ transform: rotate(90deg); }
+  .entry-label{
+    font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; color: var(--ink);
+    min-width:70px;
+  }
+  .entry-summary{ flex:1; display:flex; align-items:center; gap:10px; justify-content:flex-end; }
+  .entry-summary-note{ font-size:12px; color: var(--ink-faint); }
+  .entry-summary-margine{ font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px; }
+  .entry-summary-margine.pos{ color: var(--green); }
+  .entry-summary-margine.neg{ color: var(--red); }
+  .entry-row-body{ padding:16px; border-top:1px solid var(--border); background: var(--bg); }
+  .entry-fields{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:16px; }
+  .entry-fields.entry-fields-2col{ grid-template-columns: repeat(2, 1fr); }
+  @media (max-width:640px){ .entry-fields{ grid-template-columns: 1fr; } }
+  .entry-field label{ display:block; font-size:11.5px; font-weight:600; color: var(--ink-soft); margin-bottom:5px; }
+  .entry-field .readonly-cell, .entry-field .num-input{ width:100%; }
+
+  .expense-list-title{ font-size:11.5px; font-weight:600; color: var(--ink-soft); margin-bottom:8px; }
+
+  .item-section{ margin-bottom:18px; }
+  .item-section:last-of-type{ margin-bottom:0; }
+  .item-section-header{
+    display:flex; align-items:center; gap:8px; cursor:pointer; padding:2px; margin-bottom:6px;
+    user-select:none;
+  }
+  .item-section-chevron{
+    width:12px; height:12px; flex:0 0 auto; color: var(--ink-faint);
+    transition: transform .15s; display:inline-flex; align-items:center; justify-content:center;
+  }
+  .item-section-chevron.expanded{ transform: rotate(90deg); }
+  .item-section-title{ font-size:11.5px; font-weight:600; color: var(--ink-soft); }
+  .item-section-summary{ margin-left:auto; font-size:12px; font-weight:700; color: var(--ink); }
+  .item-section-body{ padding-left:20px; }
+  @media (max-width:640px){ .item-section-body{ padding-left:0; } }
+  .expense-item{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .expense-item .expense-day-select{
+    flex:0 0 auto; padding:8px 8px; border:1px solid var(--border); border-radius: var(--r-sm);
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color: var(--ink-soft); background: var(--surface);
+  }
+  .expense-item .expense-day-select:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+  .expense-item .expense-importo, .expense-item .income-importo{
+    width:110px; flex:0 0 auto; text-align:right; padding:8px 10px; border:1px solid var(--border);
+    border-radius: var(--r-sm); font-family:'Inter', sans-serif; font-size:13.5px; background: var(--surface);
+  }
+  .expense-item .expense-nota, .expense-item .income-nota{
+    flex:1; min-width:140px; padding:8px 10px; border:1px solid var(--border); border-radius: var(--r-sm);
+    font-family:'Inter', sans-serif; font-size:13.5px; background: var(--surface);
+  }
+  .expense-item .expense-importo:focus, .expense-item .expense-nota:focus,
+  .expense-item .income-importo:focus, .expense-item .income-nota:focus{
+    outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+  .expense-item .expense-del{
+    flex:0 0 auto; width:30px; height:30px; border:1px solid var(--border); border-radius: var(--r-sm);
+    background: var(--surface); color: var(--red); cursor:pointer; font-size:14px; line-height:1;
+  }
+  .expense-item .expense-del:hover{ background: var(--red-bg); border-color: var(--red); }
+  .expense-save{
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:700; color:#fff;
+    background: var(--accent); border:none; border-radius: var(--r-sm); padding:8px 16px; cursor:pointer;
+  }
+  .expense-save:hover{ filter: brightness(1.12); }
+
+  /* voce salvata: riga sottile senza riquadro, separata solo da un filo */
+  .expense-item.saved{
+    background:none; border:none; border-radius:0; padding:9px 2px; margin-bottom:0;
+    border-bottom:1px solid var(--border); gap:9px;
+  }
+  .expense-item.saved:last-child{ border-bottom:none; }
+  .expense-saved-day{
+    flex:0 0 auto; font-size:11px; font-weight:600; color: var(--ink-faint);
+    letter-spacing:0.2px;
+  }
+  .expense-saved-importo{
+    flex:0 0 auto; min-width:62px; text-align:right; font-family:'Inter', sans-serif;
+    font-weight:700; font-size:13.5px; color: var(--ink);
+  }
+  .expense-saved-sep{ flex:0 0 auto; color: var(--ink-faint); font-size:13px; }
+  .expense-saved-nota{ flex:1; min-width:80px; font-size:13px; color: var(--ink-soft); font-weight:400; }
+  .expense-saved-nota.empty{ font-style:italic; color: var(--ink-faint); }
+  .expense-saved-avg{
+    flex:0 0 auto; font-size:11px; color: var(--accent); font-weight:600;
+    background: var(--accent-bg); padding:2px 8px; border-radius: var(--r-pill);
+  }
+  .week-amort-note{
+    font-size:12px; color: var(--ink-soft); background: var(--accent-bg); border-radius: var(--r-sm);
+    padding:8px 10px; margin-bottom:14px;
+  }
+  .expense-item.saved .expense-edit,
+  .expense-item.saved .expense-del{
+    flex:0 0 auto; width:26px; height:26px; border:none; border-radius:50%;
+    background:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+    opacity:0.45; transition: opacity .15s, background .15s;
+  }
+  .expense-item.saved .expense-edit{ color: var(--accent); }
+  .expense-item.saved .expense-del{ color: var(--red); font-size:14px; line-height:1; }
+  .expense-item.saved .expense-edit:hover, .expense-item.saved .expense-del:hover{ opacity:1; background: var(--bg); }
+  .expense-edit{
+    flex:0 0 auto; width:30px; height:30px; border:1px solid var(--border); border-radius: var(--r-sm);
+    background: var(--surface); color: var(--accent); cursor:pointer; display:inline-flex;
+    align-items:center; justify-content:center;
+  }
+  .expense-edit:hover{ background: var(--accent-bg); border-color: var(--accent); }
+
+  .add-expense-btn, .add-income-btn{
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color: var(--green);
+    background: var(--green-bg); border:none; border-radius: var(--r-pill); padding:8px 15px;
+    cursor:pointer; margin-top:2px;
+  }
+  .add-expense-btn:hover, .add-income-btn:hover{ filter: brightness(0.96); }
+  .entry-empty-note{ font-size:12.5px; color: var(--ink-faint); margin-bottom:10px; }
+  .entry-final{
+    display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:14px;
+    border-top:1px dashed var(--border);
+  }
+  .entry-final .label{ font-size:12.5px; font-weight:600; color: var(--ink-soft); }
+  .entry-final .value{ font-family:'Fraunces', serif; font-weight:600; font-size:19px; }
+  .entry-final .value.pos{ color: var(--green); }
+  .entry-final .value.neg{ color: var(--red); }
 
   .summary-grid{
     display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 20px;
@@ -443,11 +616,14 @@
 
   <!-- SETUP -->
   <div class="panel">
-    <div class="panel-head">
-      <h2>Impostazione del mese</h2>
+    <div class="panel-head" id="panel-head-setup">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="setup" type="button"></button>
+        <h2>Impostazione del mese</h2>
+      </div>
       <span class="tag" id="setup-tag">non salvato</span>
     </div>
-    <div class="panel-body">
+    <div class="panel-body" id="panel-body-setup">
       <div class="grid4">
         <div class="field">
           <label for="mese">Mese</label>
@@ -471,22 +647,46 @@
         <div id="costi-rows"></div>
         <button class="add-row-btn" id="add-costo">+ aggiungi voce</button>
       </div>
+    </div>
+  </div>
+
+  <!-- SOGLIE DI RIFERIMENTO -->
+  <div class="panel">
+    <div class="panel-head" id="panel-head-soglie">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="soglie" type="button"></button>
+        <h2>Soglie di riferimento</h2>
+      </div>
+    </div>
+    <div class="panel-body" id="panel-body-soglie">
+      <div class="granularity-row" style="margin-top:0; padding-top:0; border-top:none;">
+        <span class="granularity-label">Vista:</span>
+        <div class="view-toggle" id="granularity-toggle">
+          <button class="view-toggle-btn gran-toggle-btn active" data-mode="day" type="button">Giornaliera</button>
+          <button class="view-toggle-btn gran-toggle-btn" data-mode="week" type="button">Settimanale</button>
+        </div>
+      </div>
 
       <div class="thresholds">
         <div class="threshold-card pareggio">
-          <div class="label">Soglia di pareggio &middot; al giorno</div>
+          <div class="label" id="target-pareggio-label">Soglia di pareggio &middot; al giorno</div>
           <div class="value" id="target-pareggio">€ 0,00</div>
-          <div class="sub">Costi fissi &divide; giorni nel mese &mdash; il minimo da incassare ogni giorno per coprire i costi fissi</div>
+          <div class="sub" id="target-pareggio-sub">Costi fissi &divide; giorni nel mese &mdash; il minimo da incassare ogni giorno per coprire i costi fissi</div>
         </div>
         <div class="threshold-card stipendio">
-          <div class="label">Stipendio &middot; equivalente al giorno</div>
+          <div class="label" id="target-stipendio-label">Stipendio &middot; equivalente al giorno</div>
           <div class="value" id="target-stipendio">€ 0,00</div>
-          <div class="sub">Stipendio &divide; giorni nel mese &mdash; quanto vale una giornata del tuo stipendio</div>
+          <div class="sub" id="target-stipendio-sub">Stipendio &divide; giorni nel mese &mdash; quanto vale una giornata del tuo stipendio</div>
         </div>
         <div class="threshold-card disponibile">
-          <div class="label">Margine giornaliero disponibile</div>
+          <div class="label" id="target-disponibile-label">Margine giornaliero disponibile</div>
           <div class="value" id="target-disponibile">€ 0,00</div>
-          <div class="sub">Stipendio al giorno &minus; soglia di pareggio &mdash; quanto puoi spendere al giorno senza andare in negativo</div>
+          <div class="sub" id="target-disponibile-sub">Stipendio al giorno &minus; soglia di pareggio &mdash; quanto puoi spendere al giorno senza andare in negativo</div>
+        </div>
+        <div class="threshold-card live">
+          <div class="label" id="target-live-label">Margine giornaliero live &middot; spese</div>
+          <div class="value" id="target-live">€ 0,00</div>
+          <div class="sub" id="target-live-sub">Margine disponibile + scostamento accumulato dai giorni registrati &mdash; si aggiorna con le spese reali</div>
         </div>
       </div>
     </div>
@@ -494,11 +694,14 @@
 
   <!-- SUMMARY -->
   <div class="panel">
-    <div class="panel-head">
-      <h2>Bilancio del mese</h2>
+    <div class="panel-head" id="panel-head-bilancio">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="bilancio" type="button"></button>
+        <h2>Bilancio del mese</h2>
+      </div>
       <button class="reset-btn" id="reset-entries">Azzera giorni</button>
     </div>
-    <div class="panel-body">
+    <div class="panel-body" id="panel-body-bilancio">
       <div class="summary-grid">
         <div class="sum-card">
           <div class="label">Margine cumulato</div>
@@ -523,26 +726,21 @@
     </div>
   </div>
 
-  <!-- DAILY TABLE -->
+  <!-- DAILY / WEEKLY REGISTER -->
   <div class="panel">
-    <div class="panel-head">
-      <h2>Giorno per giorno</h2>
-      <span class="tag">incasso &middot; spesa &middot; margine</span>
+    <div class="panel-head" id="panel-head-registro">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="registro" type="button"></button>
+        <h2>Registro spese</h2>
+      </div>
+      <div class="view-toggle">
+        <button class="view-toggle-btn gran-toggle-btn active" data-mode="day" type="button">Giornaliera</button>
+        <button class="view-toggle-btn gran-toggle-btn" data-mode="week" type="button">Settimanale</button>
+      </div>
     </div>
-    <div class="panel-body" style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>Giorno</th>
-            <th>Incasso &euro;</th>
-            <th>Entrate extra &euro;</th>
-            <th>Margine disp. &euro;</th>
-            <th>Spesa &euro;</th>
-            <th>Margine</th>
-          </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-      </table>
+    <div class="panel-body" id="panel-body-registro">
+      <div id="daily-view" class="entry-list"></div>
+      <div id="weekly-view" class="entry-list" style="display:none;"></div>
       <div class="save-note" id="save-note">&nbsp;</div>
     </div>
   </div>
@@ -569,14 +767,17 @@
     <!-- TRADING -->
     <div id="section-trading">
       <div class="panel" style="margin-top:14px;">
-        <div class="panel-head trading-head">
-          <h2>Trading</h2>
+        <div class="panel-head trading-head" id="panel-head-trading">
+          <div class="panel-head-left">
+            <button class="panel-collapse-btn" data-panel="trading" type="button"></button>
+            <h2>Trading</h2>
+          </div>
           <div style="display:flex; align-items:center; gap:10px;">
             <span class="tag trading-tag" id="trading-total-tag">P/L: € 0,00</span>
             <button class="eye-btn" id="eye-trading" type="button" title="Mostra/nascondi importi" style="color:var(--trading);"></button>
           </div>
         </div>
-        <div class="panel-body">
+        <div class="panel-body" id="panel-body-trading">
           <div class="invest-totals" style="margin-top:0; padding-top:0; border-top:none;">
             <div class="invest-total-card">
               <div class="label">Importo disponibile (broker/sito)</div>
@@ -599,14 +800,17 @@
     <!-- BETTING -->
     <div id="section-betting" style="display:none">
       <div class="panel" style="margin-top:14px;">
-        <div class="panel-head betting-head">
-          <h2>Betting</h2>
+        <div class="panel-head betting-head" id="panel-head-betting">
+          <div class="panel-head-left">
+            <button class="panel-collapse-btn" data-panel="betting" type="button"></button>
+            <h2>Betting</h2>
+          </div>
           <div style="display:flex; align-items:center; gap:10px;">
             <span class="tag betting-tag" id="betting-total-tag">P/L: € 0,00</span>
             <button class="eye-btn" id="eye-betting" type="button" title="Mostra/nascondi importi" style="color:var(--betting);"></button>
           </div>
         </div>
-        <div class="panel-body">
+        <div class="panel-body" id="panel-body-betting">
           <div class="invest-totals" style="margin-top:0; padding-top:0; border-top:none;">
             <div class="invest-total-card">
               <div class="label">Importo disponibile (broker/sito)</div>
@@ -640,14 +844,17 @@
 
   <div class="wrap">
     <div class="panel">
-      <div class="panel-head emergency-head">
-        <h2>Conto di emergenza</h2>
+      <div class="panel-head emergency-head" id="panel-head-altriconti">
+        <div class="panel-head-left">
+          <button class="panel-collapse-btn" data-panel="altriconti" type="button"></button>
+          <h2>Conto di emergenza</h2>
+        </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <span class="tag emergency-tag">fondo di riserva</span>
           <button class="eye-btn" id="eye-altriconti" type="button" title="Mostra/nascondi importo" style="color:var(--emergency);"></button>
         </div>
       </div>
-      <div class="panel-body">
+      <div class="panel-body" id="panel-body-altriconti">
         <div class="grid4" style="grid-template-columns: 1fr 220px;">
           <div class="field">
             <label for="emergenza-nome">Nome del conto (opzionale)</label>
@@ -719,7 +926,8 @@ function defaultState(){
     giorni: 30,
     costiItems: [], // [{id, label, amount}, ...]
     stipendio: 0,
-    entries: {}, // { "1": {incasso: x, spesa: y}, ... }
+    entries: {}, // { "1": {spese: [{id, importo, nota}, ...], entrate: [...]}, ... }
+    weekItems: {}, // { "1": {spese:[...], entrate:[...]}, ... } — voci non legate a un giorno preciso, ammortizzate su tutta la settimana
     investimenti: {
       trading: { disponibile: null, investito: null },
       betting: { disponibile: null, investito: null }
@@ -737,6 +945,59 @@ function nextCostiId(){
 
 function totaleCostiFissi(){
   return (state.costiItems || []).reduce((sum, it) => sum + (parseFloat(it.amount) || 0), 0);
+}
+
+// ===== SPESE GIORNALIERE E SETTIMANALI (voci multiple, ognuna con nota) =====
+
+function dailyItems(day, kind){ // kind: 'spese' oppure 'entrate'
+  const entry = state.entries[day];
+  return (entry && Array.isArray(entry[kind])) ? entry[kind] : [];
+}
+function dailyItemsTotal(day, kind){
+  return dailyItems(day, kind).reduce((sum, s) => sum + (parseFloat(s.importo) || 0), 0);
+}
+function dailySpese(day){ return dailyItems(day, 'spese'); }
+function dailySpesaTotal(day){ return dailyItemsTotal(day, 'spese'); }
+function dailyEntrate(day){ return dailyItems(day, 'entrate'); }
+function dailyEntrateTotal(day){ return dailyItemsTotal(day, 'entrate'); }
+function weekIndexForDay(day){
+  return Math.ceil(day / 7);
+}
+function weekRange(weekIndex, giorni){
+  const start = (weekIndex - 1) * 7 + 1;
+  const end = Math.min(start + 6, giorni);
+  return { start, end };
+}
+function totalWeeks(giorni){
+  return Math.ceil(Math.max(1, giorni) / 7);
+}
+
+// ===== VOCI A LIVELLO DI SETTIMANA (non legate a un giorno preciso) =====
+// Una spesa/entrata inserita "a livello di settimana" viene ripartita in
+// egual misura su tutti i giorni di quella settimana (stesso ragionamento
+// dei costi fissi divisi per i giorni del mese).
+function weekItemsList(weekIndex, kind){
+  return (state.weekItems && state.weekItems[weekIndex] && Array.isArray(state.weekItems[weekIndex][kind]))
+    ? state.weekItems[weekIndex][kind] : [];
+}
+function weekItemsTotal(weekIndex, kind){
+  return weekItemsList(weekIndex, kind).reduce((sum, s) => sum + (parseFloat(s.importo) || 0), 0);
+}
+// quota giornaliera media (per un singolo giorno) delle voci settimanali di quella settimana
+function dailyAmortizedTotal(day, kind){
+  const g = Math.max(1, state.giorni || 1);
+  const wIdx = weekIndexForDay(day);
+  const { start, end } = weekRange(wIdx, g);
+  const numDays = end - start + 1;
+  return weekItemsTotal(wIdx, kind) / numDays;
+}
+// margine effettivo di un giorno, comprensivo della quota ammortizzata delle voci settimanali
+function dailyEntrateEffective(day){ return dailyEntrateTotal(day) + dailyAmortizedTotal(day, 'entrate'); }
+function dailySpesaEffective(day){ return dailySpesaTotal(day) + dailyAmortizedTotal(day, 'spese'); }
+function dayHasEffectiveData(day){
+  const wIdx = weekIndexForDay(day);
+  return dailySpese(day).length > 0 || dailyEntrate(day).length > 0 ||
+    weekItemsList(wIdx, 'spese').length > 0 || weekItemsList(wIdx, 'entrate').length > 0;
 }
 
 let saveTimer = null;
@@ -880,6 +1141,64 @@ async function load(){
   }
   if(state.altriConti.nome === undefined) state.altriConti.nome = '';
   if(state.altriConti.importo === undefined) state.altriConti.importo = null;
+
+  // migrazione: la vecchia "spesa" era un numero singolo per giorno, ora è
+  // un elenco di voci (importo + nota). Converto i dati salvati in precedenza
+  // senza perdere nulla.
+  Object.keys(state.entries || {}).forEach(day => {
+    const entry = state.entries[day];
+    if(!entry) return;
+    if(!Array.isArray(entry.spese)){
+      if(entry.spesa !== undefined && entry.spesa !== null && entry.spesa !== 0){
+        entry.spese = [{ id: nextCostiId(), importo: entry.spesa, nota: '' }];
+      }else{
+        entry.spese = [];
+      }
+    }
+    delete entry.spesa;
+    entry.spese.forEach(s => { if(!s.id) s.id = nextCostiId(); });
+
+    // stessa migrazione per le "entrate extra", che prima erano un numero
+    // singolo (campo "extra") e ora sono un elenco di voci.
+    if(!Array.isArray(entry.entrate)){
+      if(entry.extra !== undefined && entry.extra !== null && entry.extra !== 0){
+        entry.entrate = [{ id: nextCostiId(), importo: entry.extra, nota: '' }];
+      }else{
+        entry.entrate = [];
+      }
+    }
+    delete entry.extra;
+    entry.entrate.forEach(s => { if(!s.id) s.id = nextCostiId(); });
+  });
+  // migrazione: le spese "di settimana" non legate a un giorno preciso
+  // (versione precedente) vengono ora spostate sull'ultimo giorno di quella
+  // settimana, così finiscono anche loro nel registro giornaliero.
+  if(state.weekExpenses && typeof state.weekExpenses === 'object'){
+    const g = Math.max(1, state.giorni || 1);
+    Object.keys(state.weekExpenses).forEach(w => {
+      const items = Array.isArray(state.weekExpenses[w]) ? state.weekExpenses[w] : [];
+      if(items.length === 0) return;
+      const { end } = weekRange(parseInt(w, 10), g);
+      if(!state.entries[end]) state.entries[end] = {};
+      if(!Array.isArray(state.entries[end].spese)) state.entries[end].spese = [];
+      items.forEach(it => {
+        if(!it.id) it.id = nextCostiId();
+        state.entries[end].spese.push(it);
+      });
+    });
+    delete state.weekExpenses;
+  }
+
+  // normalizza le voci a livello di settimana (nuovo formato, ammortizzato sui giorni)
+  if(!state.weekItems || typeof state.weekItems !== 'object'){ state.weekItems = {}; }
+  Object.keys(state.weekItems).forEach(w => {
+    const bucket = state.weekItems[w];
+    if(!bucket || typeof bucket !== 'object'){ state.weekItems[w] = { spese: [], entrate: [] }; return; }
+    if(!Array.isArray(bucket.spese)) bucket.spese = [];
+    if(!Array.isArray(bucket.entrate)) bucket.entrate = [];
+    bucket.spese.forEach(s => { if(!s.id) s.id = nextCostiId(); });
+    bucket.entrate.forEach(s => { if(!s.id) s.id = nextCostiId(); });
+  });
 
   hydrateInputs();
   renderAll();
@@ -1055,10 +1374,14 @@ function cashPatrimonio(){
   const g = Math.max(1, state.giorni || 1);
   const baseMensile = t.disponibile * g; // = stipendio - totale costi fissi
   let extraSum = 0, spesaSum = 0;
-  Object.values(state.entries || {}).forEach(e => {
-    extraSum += parseFloat(e && e.extra) || 0;
-    spesaSum += parseFloat(e && e.spesa) || 0;
+  Object.keys(state.entries || {}).forEach(day => {
+    extraSum += dailyEntrateTotal(day);
+    spesaSum += dailySpesaTotal(day);
   });
+  for(let w = 1; w <= totalWeeks(g); w++){
+    extraSum += weekItemsTotal(w, 'entrate');
+    spesaSum += weekItemsTotal(w, 'spese');
+  }
   return baseMensile + extraSum - spesaSum;
 }
 
@@ -1092,83 +1415,617 @@ function targets(){
 
 function renderThresholds(){
   const t = targets();
-  document.getElementById('target-pareggio').textContent = fmt(t.pareggio);
-  document.getElementById('target-stipendio').textContent = fmt(t.stipendioGiorno);
+  const mult = granularity === 'week' ? 7 : 1;
+  const periodo = granularity === 'week' ? 'a settimana' : 'al giorno';
+  const ogni = granularity === 'week' ? 'ogni settimana' : 'ogni giorno';
+  const divisore = granularity === 'week' ? 'giorni nel mese &divide; 7' : 'giorni nel mese';
+
+  document.getElementById('target-pareggio-label').innerHTML = 'Soglia di pareggio &middot; ' + periodo;
+  document.getElementById('target-pareggio').textContent = fmt(t.pareggio * mult);
+  document.getElementById('target-pareggio-sub').innerHTML = 'Costi fissi &divide; ' + divisore + ' &mdash; il minimo da incassare ' + ogni + ' per coprire i costi fissi';
+
+  document.getElementById('target-stipendio-label').innerHTML = 'Stipendio &middot; equivalente ' + periodo;
+  document.getElementById('target-stipendio').textContent = fmt(t.stipendioGiorno * mult);
+  document.getElementById('target-stipendio-sub').innerHTML = 'Stipendio &divide; ' + divisore + ' &mdash; quanto vale ' + (granularity === 'week' ? 'una settimana' : 'una giornata') + ' del tuo stipendio';
+
+  document.getElementById('target-disponibile-label').textContent = granularity === 'week' ? 'Margine settimanale disponibile' : 'Margine giornaliero disponibile';
   const dispEl = document.getElementById('target-disponibile');
-  dispEl.textContent = fmt(t.disponibile);
+  dispEl.textContent = fmt(t.disponibile * mult);
   dispEl.className = 'value' + (t.disponibile < 0 ? ' neg' : '');
+  document.getElementById('target-disponibile-sub').textContent = 'Stipendio ' + periodo + ' − soglia di pareggio — quanto puoi spendere ' + ogni.replace('ogni','a') + ' senza andare in negativo';
+
+  // Margine giornaliero live: parte dal margine disponibile e lo aggiusta
+  // "rateizzando" lo scostamento reale accumulato (spese fuori budget o
+  // risparmi) su TUTTI i giorni del mese — con lo stesso ragionamento con
+  // cui un costo fisso viene diviso per i giorni nel mese. Così un paio di
+  // giornate fuori budget abbassano leggermente il margine di ogni giorno,
+  // invece di scaricare tutto il colpo su un solo giorno.
+  const g = Math.max(1, state.giorni || 1);
+  const { daysWithData, points } = computeSeries();
+  const cumMargine = daysWithData > 0 ? points[daysWithData - 1].cumMargine : 0;
+  const liveMargin = (t.disponibile + (cumMargine / g)) * mult;
+  document.getElementById('target-live-label').textContent = granularity === 'week' ? 'Margine settimanale live · spese' : 'Margine giornaliero live · spese';
+  const liveEl = document.getElementById('target-live');
+  const liveSubEl = document.getElementById('target-live-sub');
+  liveEl.textContent = fmt(liveMargin);
+  liveEl.className = 'value' + (liveMargin >= 0 ? ' pos' : ' neg');
+  if(daysWithData === 0){
+    liveSubEl.textContent = 'Nessun giorno ancora registrato: coincide con il margine disponibile';
+  }else{
+    liveSubEl.textContent = (cumMargine >= 0 ? '+' : '') + fmt(cumMargine) + ' di scostamento sui giorni registrati, ripartiti su ' + g + ' giorni';
+  }
 }
 
+const CHEVRON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
+const PENCIL_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+
+let expandedDays = new Set();
+let expandedWeeks = new Set();
+let editingItems = new Set(); // id delle voci (spesa/entrata) attualmente in modifica, non ancora salvate
+let collapsedSections = new Set(); // chiavi tipo "day-5-spese" o "week-1-entrate": sezioni compresse
+
+// Costruisce una sezione comprimibile (Entrate extra / Spese) dentro la riga
+// di un giorno o di una settimana: intestazione con freccia + riepilogo
+// quando chiusa, elenco voci + pulsante "aggiungi" quando aperta.
+// pairs: [{day, item}, ...] — per la vista giorno "day" è sempre lo stesso;
+// per la vista settimana ogni voce porta il proprio giorno.
+function buildItemSection(sectionKey, title, pairs, kind, ctx){
+  const collapsed = collapsedSections.has(sectionKey);
+  const count = pairs.length;
+  const total = pairs.reduce((sum, p) => sum + (parseFloat(p.item.importo) || 0), 0);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'item-section';
+
+  const header = document.createElement('div');
+  header.className = 'item-section-header';
+  header.innerHTML = `
+    <span class="item-section-chevron${collapsed ? '' : ' expanded'}">${CHEVRON_SVG}</span>
+    <span class="item-section-title">${title}</span>
+    ${count > 0 ? `<span class="item-section-summary">${fmt(total)} &middot; ${count} ${count === 1 ? 'voce' : 'voci'}</span>` : ''}
+  `;
+  header.addEventListener('click', () => {
+    if(collapsedSections.has(sectionKey)) collapsedSections.delete(sectionKey); else collapsedSections.add(sectionKey);
+    if(ctx.isWeek) rerenderWeekRow(ctx.weekIndex); else rerenderDayRow(ctx.day);
+  });
+  wrap.appendChild(header);
+
+  if(!collapsed){
+    const body = document.createElement('div');
+    body.className = 'item-section-body';
+
+    const itemsContainer = document.createElement('div');
+    itemsContainer.className = kind === 'entrate' ? 'income-items' : 'expense-items';
+    if(count === 0){
+      const empty = document.createElement('div');
+      empty.className = 'entry-empty-note';
+      empty.textContent = kind === 'entrate'
+        ? (ctx.isWeek ? 'Nessuna entrata extra registrata in questa settimana.' : 'Nessuna entrata extra registrata per questo giorno.')
+        : (ctx.isWeek ? 'Nessuna spesa registrata in questa settimana.' : 'Nessuna spesa registrata per questo giorno.');
+      itemsContainer.appendChild(empty);
+    }else{
+      pairs.forEach(({ day, item }) => {
+        itemsContainer.appendChild(makeItemRow(day, item, kind, ctx.isWeek ? { showDaySelector: true, weekIndex: ctx.weekIndex } : {}));
+      });
+    }
+    body.appendChild(itemsContainer);
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = kind === 'entrate' ? 'add-income-btn' : 'add-expense-btn';
+    addBtn.textContent = kind === 'entrate' ? '+ aggiungi entrata' : '+ aggiungi spesa';
+    const importoClass = kind === 'entrate' ? 'income-importo' : 'expense-importo';
+    addBtn.addEventListener('click', () => {
+      const newItem = { id: nextCostiId(), importo: null, nota: '' };
+      editingItems.add(newItem.id);
+      const targetDay = ctx.isWeek ? ctx.defaultDay : ctx.day;
+      if(!state.entries[targetDay]) state.entries[targetDay] = {};
+      if(!Array.isArray(state.entries[targetDay][kind])) state.entries[targetDay][kind] = [];
+      state.entries[targetDay][kind].push(newItem);
+      if(ctx.isWeek){ rerenderWeekRow(ctx.weekIndex); rerenderDayRow(targetDay); }
+      else{ rerenderDayRow(ctx.day); renderWeeklyTable(); }
+      renderThresholds(); renderSummary(); renderChart(); updatePatrimonio();
+      scheduleSave();
+      if(typeof requestAnimationFrame === 'function'){
+        requestAnimationFrame(() => {
+          const el = document.querySelector(`.${importoClass}[data-item="${newItem.id}"]`);
+          if(el) el.focus();
+        });
+      }
+    });
+    body.appendChild(addBtn);
+
+    wrap.appendChild(body);
+  }
+
+  return wrap;
+}
+
+// ===== VISTA GIORNALIERA =====
+
 function renderTable(){
-  const tbody = document.getElementById('table-body');
-  tbody.innerHTML = '';
+  const container = document.getElementById('daily-view');
+  container.innerHTML = '';
   const g = Math.max(1, state.giorni || 1);
   const t = targets();
   const tt = today();
   const isCurrentMonth = state.mese === currentMonthDefault();
 
   for(let day = 1; day <= g; day++){
-    const entry = state.entries[day] || {};
-    const extra = entry.extra !== undefined && entry.extra !== null ? entry.extra : '';
-    const spesa = entry.spesa !== undefined && entry.spesa !== null ? entry.spesa : '';
-    const hasData = extra !== '' || spesa !== '';
-    const margine = t.disponibile + (parseFloat(extra) || 0) - (parseFloat(spesa) || 0);
-    const spesaNum = parseFloat(spesa) || 0;
-    const overBudget = spesa !== '' && spesaNum > t.disponibile;
+    container.appendChild(makeDayRow(day, t, isCurrentMonth && day === tt.day));
+  }
+}
 
-    const tr = document.createElement('tr');
-    tr.className = (isCurrentMonth && day === tt.day) ? 'today' : '';
+function makeDayRow(day, t, isToday){
+  t = t || targets();
+  const spese = dailySpese(day);
+  const entrate = dailyEntrate(day);
+  const hasData = dayHasEffectiveData(day);
+  const margine = t.disponibile + dailyEntrateEffective(day) - dailySpesaEffective(day);
+  const expanded = expandedDays.has(day);
+  const voci = spese.length + entrate.length;
 
-    tr.innerHTML = `
-      <td>${String(day).padStart(2,'0')}</td>
-      <td><span class="readonly-cell">${fmt(t.stipendioGiorno)}</span></td>
-      <td><input class="num-input" type="number" step="0.01" data-day="${day}" data-field="extra" value="${extra}" placeholder="0,00"></td>
-      <td><span class="readonly-cell">${fmt(t.disponibile)}</span></td>
-      <td><input class="num-input ${overBudget ? 'over-budget' : ''}" type="number" step="0.01" data-day="${day}" data-field="spesa" value="${spesa}" placeholder="0,00"></td>
-      <td class="margine ${hasData ? (margine >= 0 ? 'pos' : 'neg') : ''}">${hasData ? fmt(margine) : '—'}</td>
-    `;
-    tbody.appendChild(tr);
+  const row = document.createElement('div');
+  row.className = 'entry-row' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '');
+  row.dataset.day = day;
+
+  const header = document.createElement('div');
+  header.className = 'entry-row-header';
+  header.innerHTML = `
+    <span class="entry-chevron">${CHEVRON_SVG}</span>
+    <span class="entry-label">Giorno ${String(day).padStart(2,'0')}</span>
+    <span class="entry-summary">
+      ${voci > 0 ? `<span class="entry-summary-note">${voci} ${voci === 1 ? 'voce' : 'voci'}</span>` : ''}
+      <span class="entry-summary-margine ${hasData ? (margine >= 0 ? 'pos' : 'neg') : ''}">${hasData ? fmt(margine) : '—'}</span>
+    </span>
+  `;
+  header.addEventListener('click', () => {
+    if(expandedDays.has(day)) expandedDays.delete(day); else expandedDays.add(day);
+    renderTable();
+  });
+  row.appendChild(header);
+
+  if(expanded){
+    row.appendChild(makeDayRowBody(day, t));
+  }
+  return row;
+}
+
+function makeDayRowBody(day, t){
+  const spese = dailySpese(day);
+  const entrate = dailyEntrate(day);
+  const hasData = dayHasEffectiveData(day);
+  const margine = t.disponibile + dailyEntrateEffective(day) - dailySpesaEffective(day);
+  const amortSpesa = dailyAmortizedTotal(day, 'spese');
+  const amortEntrata = dailyAmortizedTotal(day, 'entrate');
+  // margine disponibile "aggiustato": la soglia base del giorno, già al netto
+  // di eventuali voci inserite a livello di intera settimana — così sai
+  // subito quanto ti resta per quel giorno prima di aggiungere altro.
+  const dispAdjusted = t.disponibile + amortEntrata - amortSpesa;
+  const isAdjusted = amortSpesa > 0 || amortEntrata > 0;
+
+  const body = document.createElement('div');
+  body.className = 'entry-row-body';
+  body.innerHTML = `
+    <div class="entry-fields entry-fields-2col">
+      <div class="entry-field"><label>Incasso &euro;</label><span class="readonly-cell">${fmt(t.stipendioGiorno)}</span></div>
+      <div class="entry-field">
+        <label>Margine disp. &euro;${isAdjusted ? ' <span class="field-adjusted-tag">aggiornato</span>' : ''}</label>
+        <span class="readonly-cell${isAdjusted ? ' adjusted' : ''}">${fmt(dispAdjusted)}</span>
+      </div>
+    </div>
+    ${isAdjusted ? `<div class="week-amort-note">Margine di base ${fmt(t.disponibile)} &mdash; quota media da voci "tutta la settimana": ${amortEntrata > 0 ? '+' + fmt(amortEntrata) : ''}${(amortEntrata > 0 && amortSpesa > 0) ? ' &middot; ' : ''}${amortSpesa > 0 ? '−' + fmt(amortSpesa) : ''}</div>` : ''}
+    <div class="entry-final">
+      <span class="label">Margine del giorno</span>
+      <span class="value ${hasData ? (margine >= 0 ? 'pos' : 'neg') : ''}">${hasData ? fmt(margine) : '—'}</span>
+    </div>
+  `;
+
+  const finalBlock = body.querySelector('.entry-final');
+  const ctx = { isWeek: false, day };
+  const entratePairs = entrate.map(item => ({ day, item }));
+  const spesePairs = spese.map(item => ({ day, item }));
+  body.insertBefore(buildItemSection('day-' + day + '-entrate', 'Entrate extra del giorno', entratePairs, 'entrate', ctx), finalBlock);
+  body.insertBefore(buildItemSection('day-' + day + '-spese', 'Spese del giorno', spesePairs, 'spese', ctx), finalBlock);
+
+  return body;
+}
+
+// Ricostruisce solo la riga di UN giorno (usato quando cambia il numero di
+// voci di spesa), senza toccare le altre righe né perdere il loro stato.
+function rerenderDayRow(day){
+  const old = document.querySelector(`.entry-row[data-day="${day}"]`);
+  if(!old) return;
+  const fresh = makeDayRow(day, targets(), old.classList.contains('today'));
+  old.replaceWith(fresh);
+}
+
+// Aggiorna solo i numeri (margine, conteggio spese) di una riga giorno già
+// visibile, senza ricreare input — così chi sta scrivendo non perde il focus.
+function refreshDayRow(day){
+  const t = targets();
+  const spese = dailySpese(day);
+  const entrate = dailyEntrate(day);
+  const hasData = dayHasEffectiveData(day);
+  const margine = t.disponibile + dailyEntrateEffective(day) - dailySpesaEffective(day);
+  const voci = spese.length + entrate.length;
+
+  const row = document.querySelector(`.entry-row[data-day="${day}"]`);
+  if(!row) return;
+
+  const summary = row.querySelector('.entry-summary');
+  if(summary){
+    let noteEl = summary.querySelector('.entry-summary-note');
+    if(voci > 0){
+      const txt = voci + (voci === 1 ? ' voce' : ' voci');
+      if(noteEl){ noteEl.textContent = txt; }
+      else{
+        noteEl = document.createElement('span');
+        noteEl.className = 'entry-summary-note';
+        summary.insertBefore(noteEl, summary.firstChild);
+      }
+    }else if(noteEl){ noteEl.remove(); }
+    const margineEl = summary.querySelector('.entry-summary-margine');
+    if(margineEl){
+      margineEl.textContent = hasData ? fmt(margine) : '—';
+      margineEl.className = 'entry-summary-margine' + (hasData ? (margine >= 0 ? ' pos' : ' neg') : '');
+    }
+  }
+  const finalValue = row.querySelector('.entry-final .value');
+  if(finalValue){
+    finalValue.textContent = hasData ? fmt(margine) : '—';
+    finalValue.className = 'value' + (hasData ? (margine >= 0 ? ' pos' : ' neg') : '');
+  }
+}
+
+// ===== VOCE DI SPESA (riutilizzata da vista giorno e vista settimana) =====
+// scope: 'day' oppure 'week'; scopeId: numero del giorno oppure indice settimana
+// day: il giorno (numero) a cui appartiene la voce.
+// opts.showDaySelector: true quando mostrata nella vista settimanale, per
+// poter scegliere/cambiare a quale giorno della settimana appartiene.
+// opts.weekIndex: necessario solo se showDaySelector è true.
+// day: il giorno (numero) a cui appartiene la voce.
+// kind: 'spese' oppure 'entrate' — determina in quale elenco vive la voce.
+// opts.showDaySelector: true quando mostrata nella vista settimanale, per
+// poter scegliere/cambiare a quale giorno della settimana appartiene.
+// opts.weekIndex: necessario solo se showDaySelector è true.
+// day: il giorno (numero) a cui appartiene la voce.
+// kind: 'spese' oppure 'entrate' — determina in quale elenco vive la voce.
+// opts.showDaySelector: true quando mostrata nella vista settimanale, per
+// poter scegliere/cambiare a quale giorno della settimana appartiene.
+// opts.weekIndex: necessario solo se showDaySelector è true.
+//
+// Ogni voce ha due stati: "in modifica" (campi editabili + pulsante Salva)
+// e "salvata" (testo fisso + matita per rientrare in modifica). Le modifiche
+// ai campi non toccano i dati finché non si preme Salva.
+// storeFor: restituisce l'array giusto in cui vive la voce, sia che stia su
+// un giorno preciso sia che sia a livello di intera settimana ("week").
+function storeFor(day, kind, weekIndex){
+  return day === 'week' ? weekItemsList(weekIndex, kind) : dailyItems(day, kind);
+}
+function pushToStore(day, kind, weekIndex, item){
+  if(day === 'week'){
+    if(!state.weekItems[weekIndex]) state.weekItems[weekIndex] = { spese: [], entrate: [] };
+    if(!Array.isArray(state.weekItems[weekIndex][kind])) state.weekItems[weekIndex][kind] = [];
+    state.weekItems[weekIndex][kind].push(item);
+  }else{
+    if(!state.entries[day]) state.entries[day] = {};
+    if(!Array.isArray(state.entries[day][kind])) state.entries[day][kind] = [];
+    state.entries[day][kind].push(item);
+  }
+}
+
+function makeItemRow(day, item, kind, opts){
+  opts = opts || {};
+  const isIncome = kind === 'entrate';
+  const importoClass = isIncome ? 'income-importo' : 'expense-importo';
+  const notaClass = isIncome ? 'income-nota' : 'expense-nota';
+  const notaPlaceholder = isIncome ? 'Motivo dell\'entrata (facoltativo)' : 'Motivo della spesa (facoltativo)';
+  const editing = editingItems.has(item.id);
+
+  const row = document.createElement('div');
+  row.dataset.rowItem = item.id;
+
+  // giorni "affetti" da un cambiamento su questa voce: se è a livello di
+  // settimana, l'effetto (ammortizzato) tocca tutti i giorni della settimana.
+  function affectedDaysFor(d){
+    if(d === 'week'){
+      const g = Math.max(1, state.giorni || 1);
+      const { start, end } = weekRange(opts.weekIndex, g);
+      const days = [];
+      for(let x = start; x <= end; x++) days.push(x);
+      return days;
+    }
+    return [d];
+  }
+  function fullRefresh(affectedDays){
+    affectedDays.forEach(d => rerenderDayRow(d));
+    if(opts.showDaySelector) rerenderWeekRow(opts.weekIndex); else renderWeeklyTable();
+    renderThresholds(); renderSummary(); renderChart(); updatePatrimonio();
+    scheduleSave();
+  }
+  function removeItem(){
+    const list = storeFor(day, kind, opts.weekIndex);
+    const idx = list.findIndex(i => i.id === item.id);
+    if(idx !== -1) list.splice(idx, 1);
+    editingItems.delete(item.id);
+    fullRefresh(affectedDaysFor(day));
+  }
+  function rerenderThisRow(){
+    const fresh = makeItemRow(day, item, kind, opts);
+    row.replaceWith(fresh);
   }
 
-  tbody.querySelectorAll('input.num-input').forEach(inp => {
-    inp.addEventListener('input', onEntryInput);
-  });
-}
+  if(editing){
+    row.className = 'expense-item';
 
-function onEntryInput(e){
-  const day = e.target.dataset.day;
-  const field = e.target.dataset.field;
-  const val = e.target.value === '' ? null : parseFloat(e.target.value);
-  if(!state.entries[day]) state.entries[day] = {};
-  state.entries[day][field] = val;
-  updateRowDisplay(day);
-  renderSummary();
-  renderChart();
-  updatePatrimonio();
-  scheduleSave();
-}
-
-function updateRowDisplay(day){
-  const t = targets();
-  const entry = state.entries[day] || {};
-  const extra = entry.extra !== undefined && entry.extra !== null ? entry.extra : '';
-  const spesa = entry.spesa !== undefined && entry.spesa !== null ? entry.spesa : '';
-  const hasData = extra !== '' || spesa !== '';
-  const margine = t.disponibile + (parseFloat(extra) || 0) - (parseFloat(spesa) || 0);
-  const spesaNum = parseFloat(spesa) || 0;
-  const overBudget = spesa !== '' && spesaNum > t.disponibile;
-
-  const spesaInput = document.querySelector(`input[data-day="${day}"][data-field="spesa"]`);
-  if(spesaInput){
-    spesaInput.classList.toggle('over-budget', overBudget);
-    const row = spesaInput.closest('tr');
-    if(row){
-      const margineCell = row.querySelector('.margine');
-      if(margineCell){
-        margineCell.textContent = hasData ? fmt(margine) : '—';
-        margineCell.className = 'margine ' + (hasData ? (margine >= 0 ? 'pos' : 'neg') : '');
+    let daySelect = null;
+    if(opts.showDaySelector){
+      const g = Math.max(1, state.giorni || 1);
+      const { start, end } = weekRange(opts.weekIndex, g);
+      daySelect = document.createElement('select');
+      daySelect.className = 'expense-day-select';
+      for(let d = start; d <= end; d++){
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = 'Giorno ' + String(d).padStart(2, '0');
+        if(d === day) opt.selected = true;
+        daySelect.appendChild(opt);
       }
+      const weekOpt = document.createElement('option');
+      weekOpt.value = 'week';
+      weekOpt.textContent = '— Tutta la settimana (media) —';
+      if(day === 'week') weekOpt.selected = true;
+      daySelect.appendChild(weekOpt);
     }
+
+    const importoInput = document.createElement('input');
+    importoInput.type = 'number';
+    importoInput.step = '0.01';
+    importoInput.className = importoClass;
+    importoInput.placeholder = '0,00';
+    importoInput.dataset.item = item.id;
+    importoInput.value = (item.importo !== null && item.importo !== undefined) ? item.importo : '';
+
+    const notaInput = document.createElement('input');
+    notaInput.type = 'text';
+    notaInput.className = notaClass;
+    notaInput.placeholder = notaPlaceholder;
+    notaInput.dataset.item = item.id;
+    notaInput.value = item.nota || '';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'expense-save';
+    saveBtn.textContent = 'Salva';
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'expense-del';
+    delBtn.innerHTML = '&times;';
+    delBtn.title = 'Rimuovi voce';
+
+    saveBtn.addEventListener('click', () => {
+      const rawValue = daySelect ? daySelect.value : String(day);
+      const targetDay = rawValue === 'week' ? 'week' : parseInt(rawValue, 10);
+      const newImporto = importoInput.value === '' ? null : parseFloat(importoInput.value);
+      const newNota = notaInput.value;
+
+      if(targetDay !== day){
+        const oldList = storeFor(day, kind, opts.weekIndex);
+        const idx = oldList.findIndex(i => i.id === item.id);
+        if(idx !== -1) oldList.splice(idx, 1);
+        item.importo = newImporto;
+        item.nota = newNota;
+        pushToStore(targetDay, kind, opts.weekIndex, item);
+        editingItems.delete(item.id);
+        fullRefresh([...affectedDaysFor(day), ...affectedDaysFor(targetDay)]);
+      }else{
+        item.importo = newImporto;
+        item.nota = newNota;
+        editingItems.delete(item.id);
+        fullRefresh(affectedDaysFor(day));
+      }
+    });
+    delBtn.addEventListener('click', removeItem);
+
+    if(daySelect) row.appendChild(daySelect);
+    row.appendChild(importoInput);
+    row.appendChild(notaInput);
+    row.appendChild(saveBtn);
+    row.appendChild(delBtn);
+
+  }else{
+    row.className = 'expense-item saved';
+
+    if(opts.showDaySelector){
+      const dayBadge = document.createElement('span');
+      dayBadge.className = 'expense-saved-day';
+      dayBadge.textContent = day === 'week' ? 'Settimana' : 'Giorno ' + String(day).padStart(2, '0');
+      row.appendChild(dayBadge);
+    }
+
+    const importoSpan = document.createElement('span');
+    importoSpan.className = 'expense-saved-importo';
+    importoSpan.textContent = fmt(parseFloat(item.importo) || 0);
+    row.appendChild(importoSpan);
+
+    const sepSpan = document.createElement('span');
+    sepSpan.className = 'expense-saved-sep';
+    sepSpan.textContent = '·';
+    row.appendChild(sepSpan);
+
+    const notaSpan = document.createElement('span');
+    notaSpan.className = 'expense-saved-nota' + (item.nota ? '' : ' empty');
+    notaSpan.textContent = item.nota ? item.nota : 'Nessuna nota';
+    row.appendChild(notaSpan);
+
+    if(day === 'week'){
+      const g = Math.max(1, state.giorni || 1);
+      const { start, end } = weekRange(opts.weekIndex, g);
+      const numDays = end - start + 1;
+      const perDay = (parseFloat(item.importo) || 0) / numDays;
+      const avgSpan = document.createElement('span');
+      avgSpan.className = 'expense-saved-avg';
+      avgSpan.textContent = '~' + fmt(perDay) + '/giorno';
+      row.appendChild(avgSpan);
+    }
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'expense-edit';
+    editBtn.title = 'Modifica voce';
+    editBtn.innerHTML = PENCIL_SVG;
+    editBtn.addEventListener('click', () => {
+      editingItems.add(item.id);
+      rerenderThisRow();
+      if(typeof requestAnimationFrame === 'function'){
+        requestAnimationFrame(() => {
+          const el = document.querySelector(`.${importoClass}[data-item="${item.id}"]`);
+          if(el) el.focus();
+        });
+      }
+    });
+    row.appendChild(editBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'expense-del';
+    delBtn.innerHTML = '&times;';
+    delBtn.title = 'Rimuovi voce';
+    delBtn.addEventListener('click', removeItem);
+    row.appendChild(delBtn);
+  }
+
+  return row;
+}
+
+// ===== VISTA SETTIMANALE =====
+
+function renderWeeklyTable(){
+  const container = document.getElementById('weekly-view');
+  container.innerHTML = '';
+  const g = Math.max(1, state.giorni || 1);
+  const t = targets();
+  const nWeeks = totalWeeks(g);
+
+  for(let w = 1; w <= nWeeks; w++){
+    container.appendChild(makeWeekRow(w, t));
+  }
+}
+
+function weekAggregates(weekIndex, t){
+  const g = Math.max(1, state.giorni || 1);
+  const { start, end } = weekRange(weekIndex, g);
+  const numDays = end - start + 1;
+  let extraTot = 0, spesaTot = 0, registrati = 0;
+  const speseItems = []; // voci di spesa della settimana: giorno preciso o 'week' (ammortizzata)
+  const entrateItems = []; // voci di entrata extra della settimana: giorno preciso o 'week'
+  for(let day = start; day <= end; day++){
+    const spese = dailySpese(day);
+    const entrate = dailyEntrate(day);
+    const hasData = spese.length > 0 || entrate.length > 0;
+    if(hasData){
+      extraTot += dailyEntrateTotal(day);
+      spesaTot += dailySpesaTotal(day);
+      registrati++;
+    }
+    spese.forEach(item => speseItems.push({ day, item }));
+    entrate.forEach(item => entrateItems.push({ day, item }));
+  }
+  // voci a livello di intera settimana, non legate a un giorno
+  const weekSpese = weekItemsList(weekIndex, 'spese');
+  const weekEntrate = weekItemsList(weekIndex, 'entrate');
+  weekSpese.forEach(item => speseItems.push({ day: 'week', item }));
+  weekEntrate.forEach(item => entrateItems.push({ day: 'week', item }));
+  const weekSpesaTot = weekItemsTotal(weekIndex, 'spese');
+  const weekEntrataTot = weekItemsTotal(weekIndex, 'entrate');
+  extraTot += weekEntrataTot;
+  spesaTot += weekSpesaTot;
+
+  const incassoTot = t.stipendioGiorno * numDays;
+  const dispTot = t.disponibile * numDays;
+  const margineTot = dispTot + extraTot - spesaTot;
+  const haQualcosa = registrati > 0 || weekSpese.length > 0 || weekEntrate.length > 0;
+  return { start, end, numDays, extraTot, spesaTot, incassoTot, dispTot, margineTot, registrati, haQualcosa, speseItems, entrateItems };
+}
+
+function makeWeekRow(weekIndex, t){
+  t = t || targets();
+  const a = weekAggregates(weekIndex, t);
+  const expanded = expandedWeeks.has(weekIndex);
+
+  const row = document.createElement('div');
+  row.className = 'entry-row' + (expanded ? ' expanded' : '');
+  row.dataset.week = weekIndex;
+
+  const header = document.createElement('div');
+  header.className = 'entry-row-header';
+  header.innerHTML = `
+    <span class="entry-chevron">${CHEVRON_SVG}</span>
+    <span class="entry-label">Sett. ${weekIndex}</span>
+    <span class="entry-summary">
+      <span class="entry-summary-note">giorni ${String(a.start).padStart(2,'0')}&ndash;${String(a.end).padStart(2,'0')} &middot; ${a.registrati}/${a.numDays} registrati</span>
+      <span class="entry-summary-margine ${a.haQualcosa ? (a.margineTot >= 0 ? 'pos' : 'neg') : ''}">${a.haQualcosa ? fmt(a.margineTot) : '—'}</span>
+    </span>
+  `;
+  header.addEventListener('click', () => {
+    if(expandedWeeks.has(weekIndex)) expandedWeeks.delete(weekIndex); else expandedWeeks.add(weekIndex);
+    renderWeeklyTable();
+  });
+  row.appendChild(header);
+
+  if(expanded){
+    row.appendChild(makeWeekRowBody(weekIndex, t));
+  }
+  return row;
+}
+
+function makeWeekRowBody(weekIndex, t){
+  const a = weekAggregates(weekIndex, t);
+
+  const body = document.createElement('div');
+  body.className = 'entry-row-body';
+  body.innerHTML = `
+    <div class="entry-fields entry-fields-2col">
+      <div class="entry-field"><label>Incasso &euro;</label><span class="readonly-cell">${fmt(a.incassoTot)}</span></div>
+      <div class="entry-field"><label>Margine disp. &euro;</label><span class="readonly-cell">${fmt(a.dispTot)}</span></div>
+    </div>
+    <div class="entry-final">
+      <span class="label">Margine della settimana</span>
+      <span class="value ${a.haQualcosa ? (a.margineTot >= 0 ? 'pos' : 'neg') : ''}">${a.haQualcosa ? fmt(a.margineTot) : '—'}</span>
+    </div>
+  `;
+
+  const finalBlock = body.querySelector('.entry-final');
+  const ctx = { isWeek: true, weekIndex, defaultDay: a.start };
+  body.insertBefore(buildItemSection('week-' + weekIndex + '-entrate', 'Entrate extra della settimana — scegli il giorno per ognuna', a.entrateItems, 'entrate', ctx), finalBlock);
+  body.insertBefore(buildItemSection('week-' + weekIndex + '-spese', 'Spese della settimana — scegli il giorno per ognuna', a.speseItems, 'spese', ctx), finalBlock);
+
+  return body;
+}
+
+function rerenderWeekRow(weekIndex){
+  const old = document.querySelector(`.entry-row[data-week="${weekIndex}"]`);
+  if(!old) return;
+  const fresh = makeWeekRow(weekIndex, targets());
+  old.replaceWith(fresh);
+}
+
+function refreshWeekRow(weekIndex){
+  const t = targets();
+  const a = weekAggregates(weekIndex, t);
+  const row = document.querySelector(`.entry-row[data-week="${weekIndex}"]`);
+  if(!row) return;
+  const margineEl = row.querySelector('.entry-summary-margine');
+  if(margineEl){
+    margineEl.textContent = a.haQualcosa ? fmt(a.margineTot) : '—';
+    margineEl.className = 'entry-summary-margine' + (a.haQualcosa ? (a.margineTot >= 0 ? ' pos' : ' neg') : '');
+  }
+  const finalValue = row.querySelector('.entry-final .value');
+  if(finalValue){
+    finalValue.textContent = a.haQualcosa ? fmt(a.margineTot) : '—';
+    finalValue.className = 'value' + (a.haQualcosa ? (a.margineTot >= 0 ? ' pos' : ' neg') : '');
   }
 }
 
@@ -1180,10 +2037,9 @@ function computeSeries(){
   let daysOnBudget = 0;
   const points = [];
   for(let day = 1; day <= g; day++){
-    const entry = state.entries[day];
-    const hasData = !!(entry && (entry.extra !== undefined && entry.extra !== null || entry.spesa !== undefined && entry.spesa !== null));
+    const hasData = dayHasEffectiveData(day);
     if(hasData){
-      const m = t.disponibile + (entry.extra || 0) - (entry.spesa || 0);
+      const m = t.disponibile + dailyEntrateEffective(day) - dailySpesaEffective(day);
       cumMargine += m;
       daysWithData = day;
       if(m >= 0) daysOnBudget++;
@@ -1333,6 +2189,7 @@ function renderChart(){
 function renderAll(){
   renderThresholds();
   renderTable();
+  renderWeeklyTable();
   renderSummary();
   renderChart();
   updatePatrimonio();
@@ -1513,6 +2370,48 @@ async function bootstrap(){
   }catch(e){ /* server irraggiungibile: mostra comunque la schermata di accesso */ }
   showAuthScreen();
 }
+
+let granularity = 'day'; // 'day' | 'week' — controlla sia i quadranti sia la tabella sotto
+
+function setGranularity(mode){
+  granularity = mode;
+  document.querySelectorAll('.gran-toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  document.getElementById('daily-view').style.display = mode === 'day' ? '' : 'none';
+  document.getElementById('weekly-view').style.display = mode === 'week' ? '' : 'none';
+  renderThresholds();
+  if(mode === 'week') renderWeeklyTable();
+}
+document.querySelectorAll('.gran-toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => setGranularity(btn.dataset.mode));
+});
+
+// ===== PANNELLI COMPRIMIBILI =====
+// Ogni sezione principale (Impostazione del mese, Bilancio, Registro spese,
+// Trading, Betting, Conto di emergenza) può essere compressa per alleggerire
+// la pagina. Stato solo di sessione: riparte sempre espanso al ricaricamento.
+let collapsedPanels = new Set();
+
+function applyPanelState(panelId){
+  const collapsed = collapsedPanels.has(panelId);
+  const body = document.getElementById('panel-body-' + panelId);
+  const head = document.getElementById('panel-head-' + panelId);
+  const btn = document.querySelector('.panel-collapse-btn[data-panel="' + panelId + '"]');
+  if(body) body.style.display = collapsed ? 'none' : '';
+  if(head) head.classList.toggle('collapsed', collapsed);
+  if(btn) btn.classList.toggle('expanded', !collapsed);
+}
+
+document.querySelectorAll('.panel-collapse-btn').forEach(btn => {
+  btn.innerHTML = CHEVRON_SVG;
+  btn.classList.add('expanded'); // stato iniziale: tutti espansi
+  btn.addEventListener('click', () => {
+    const panelId = btn.dataset.panel;
+    if(collapsedPanels.has(panelId)) collapsedPanels.delete(panelId); else collapsedPanels.add(panelId);
+    applyPanelState(panelId);
+  });
+});
 
 bootstrap();
 </script>
