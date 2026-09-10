@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+<script>
+  // Applica subito il tema salvato, prima che la pagina si disegni, per
+  // evitare un lampeggio del tema sbagliato all'apertura.
+  (function(){
+    try{
+      var saved = localStorage.getItem('registro-cassa-theme');
+      if(saved === 'dark'){ document.documentElement.setAttribute('data-theme', 'dark'); }
+    }catch(e){ /* localStorage non disponibile: resta sul tema chiaro di default */ }
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Registro di Cassa</title>
@@ -28,6 +38,8 @@
     --trading: #3D5A80;
     --betting: #9C4F72;
     --emergency: #3F7C6B;
+    --betting-bg: #F7ECF1;
+    --emergency-bg: #E9F3F0;
 
     --cover: #17181C;
     --cover-2: #23252B;
@@ -39,6 +51,36 @@
 
     --shadow-sm: 0 1px 2px rgba(20,20,25,0.04);
     --shadow-md: 0 10px 30px rgba(20,20,25,0.07), 0 2px 8px rgba(20,20,25,0.04);
+  }
+
+  [data-theme="dark"]{
+    --bg: #16171B;
+    --surface: #1F2126;
+    --border: #33353D;
+    --ink: #ECEDEF;
+    --ink-soft: #9BA0AA;
+    --ink-faint: #686C76;
+
+    --accent: #7A9FC9;
+    --accent-bg: #202C3A;
+    --green: #3FC094;
+    --green-bg: #113228;
+    --red: #E5837C;
+    --red-bg: #351E1D;
+    --amber: #D9AA5F;
+    --amber-bg: #332810;
+
+    --trading: #7A9FC9;
+    --betting: #CB8AAD;
+    --emergency: #63B79D;
+    --betting-bg: #33232D;
+    --emergency-bg: #123128;
+
+    --cover: #0C0D10;
+    --cover-2: #17181D;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
   }
 
   *{box-sizing:border-box;}
@@ -55,11 +97,12 @@
   .cover{
     background: linear-gradient(155deg, var(--cover) 0%, var(--cover-2) 100%);
     color: #F4F4F2;
-    padding: 40px 40px 34px;
+    padding: 26px 40px 30px;
     position: relative;
     overflow:hidden;
     border-radius: 0 0 var(--r-lg) var(--r-lg);
   }
+  .cover-eyebrow-row{ display:flex; align-items:center; gap:8px; margin-bottom: 14px; }
   .cover-eyebrow{
     display:inline-block;
     font-family:'Inter', sans-serif;
@@ -70,18 +113,30 @@
     background: rgba(255,255,255,0.08);
     padding: 5px 12px;
     border-radius: var(--r-pill);
-    margin-bottom: 16px;
   }
+  .cover-info-btn{
+    width:22px; height:22px; flex:0 0 auto; border-radius:50%; border:none; cursor:pointer;
+    background: rgba(255,255,255,0.08); color:#C9CDE0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-style:italic; font-weight:600; font-size:13px;
+    transition: background .15s, color .15s;
+  }
+  .cover-info-btn:hover, .cover-info-btn.active{ background: rgba(255,255,255,0.18); color:#fff; }
   .cover h1{
     font-family:'Fraunces', serif;
     font-weight: 600;
-    font-size: 32px;
-    margin: 0 0 8px 0;
+    font-size: 30px;
+    margin: 0;
     letter-spacing: -0.2px;
   }
-  .cover p{
-    margin:0; color: #B5B9C4; font-size: 14.5px; max-width: 520px; line-height:1.6;
+  .cover-info-popover{
+    max-width: 980px; margin: 0 auto;
+    background: var(--surface); border:1px solid var(--border); border-top:none;
+    border-radius: 0 0 var(--r-md) var(--r-md);
+    padding: 14px 28px 16px;
+    box-shadow: var(--shadow-sm);
   }
+  .cover-info-popover p{ margin:0; color: var(--ink-soft); font-size: 13.5px; max-width: 560px; line-height:1.6; }
 
   .wrap{ max-width: 980px; margin: 0 auto; padding: 0 28px; }
 
@@ -156,7 +211,7 @@
     background: var(--bg); font-family:'Inter', sans-serif; font-size:14.5px; color: var(--ink);
     transition: border-color .15s, box-shadow .15s;
   }
-  .field input:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background:#fff; }
+  .field input:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background: var(--surface); }
 
   .costi-section{ margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
   .costi-section .costi-head{
@@ -181,13 +236,13 @@
     font-family:'Inter', sans-serif; font-size:14px; color: var(--ink);
     transition: border-color .15s, box-shadow .15s;
   }
-  .costi-row input[type="text"]:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background:#fff; }
+  .costi-row input[type="text"]:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background: var(--surface); }
   .costi-row input[type="number"]{
     padding:10px 13px; border:1px solid var(--border); border-radius: var(--r-sm); background: var(--bg);
     font-family:'Inter', sans-serif; font-size:14px; text-align:right; color: var(--ink);
     transition: border-color .15s, box-shadow .15s;
   }
-  .costi-row input[type="number"]:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background:#fff; }
+  .costi-row input[type="number"]:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background: var(--surface); }
   .costi-row .del-row{
     background: var(--bg); border:1px solid var(--border); border-radius: var(--r-sm); color: var(--red);
     cursor:pointer; font-size:15px; line-height:1; padding:9px 0; width:38px;
@@ -250,7 +305,7 @@
     font-family:'Inter', sans-serif; font-size:13.5px; background: var(--bg);
     transition: border-color .15s, box-shadow .15s;
   }
-  .num-input:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background:#fff; }
+  .num-input:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background: var(--surface); }
   .num-input.over-budget{ background: var(--red-bg); border-color: var(--red); color: var(--red); font-weight:700; }
   .readonly-cell{
     width: 88px; display:inline-block; text-align:right; padding:7px 9px;
@@ -421,7 +476,7 @@
   .chart-wrap{ background: var(--surface); border:1px solid var(--border); border-radius: var(--r-md); padding: 18px 18px 10px; position:relative; }
   .chart-tooltip{
     position:absolute; pointer-events:none; z-index:5;
-    background: var(--ink); color:#fff; font-family:'Inter', sans-serif;
+    background: #1C1E22; color:#fff; font-family:'Inter', sans-serif;
     font-size:12.5px; padding:8px 12px; border-radius: var(--r-sm);
     box-shadow: var(--shadow-md);
     opacity:0; transform: translate(-50%, -100%) translateY(-10px);
@@ -450,34 +505,38 @@
   /* NAVIGAZIONE PRINCIPALE */
   .topnav{
     position: sticky; top: 0; z-index: 20;
-    background: var(--cover);
+    background: var(--surface); border-bottom: 1px solid var(--border);
   }
   .topnav-inner{
-    max-width: 980px; margin: 0 auto; padding: 0 28px;
-    display:flex; align-items:center; justify-content:space-between; gap: 16px;
+    max-width: 980px; margin: 0 auto; padding: 10px 28px;
+    display:flex; align-items:center; justify-content:flex-end; gap: 16px;
     flex-wrap: wrap;
   }
-  .nav-tabs{ display:flex; gap: 4px; padding: 12px 0; }
+  .nav-tabs-bar{
+    background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  .nav-tabs-bar-inner{ max-width: 980px; margin: 0 auto; padding: 0 28px; }
+  .nav-tabs{ display:flex; gap: 4px; padding: 10px 0; }
   .nav-tab{
     font-family:'Inter', sans-serif; font-size:13.5px; font-weight:600;
-    color: #9EA3B0; background:none; border:1px solid transparent; border-radius: var(--r-pill);
+    color: var(--ink-soft); background:none; border:1px solid transparent; border-radius: var(--r-pill);
     padding: 9px 16px; cursor:pointer; transition: background .15s, color .15s;
   }
-  .nav-tab:hover{ color:#F4F4F2; background: rgba(255,255,255,0.06); }
+  .nav-tab:hover{ color: var(--ink); background: var(--surface); }
   .nav-tab.active{
-    color:#17181C; background:#F4F4F2; font-weight:700;
+    color: var(--surface); background: var(--ink); font-weight:700;
   }
   .patrimonio-badge{
-    display:flex; align-items:center; gap: 10px; padding: 8px 0;
+    display:flex; align-items:center; gap: 10px;
   }
   .patrimonio-label{
     font-family:'Inter', sans-serif; font-size:12px; font-weight:600;
-    color:#8489A0;
+    color: var(--ink-soft);
   }
   .patrimonio-value{
-    font-family:'Fraunces', serif; font-weight:600; font-size:19px; color:#F4F4F2;
+    font-family:'Fraunces', serif; font-weight:600; font-size:19px; color: var(--ink);
   }
-  .patrimonio-value.neg{ color:#E8A19A; }
+  .patrimonio-value.neg{ color: var(--red); }
 
   /* SOTTO-NAVIGAZIONE INVESTIMENTI */
   .invest-subnav{ display:flex; gap:8px; margin-top:24px; }
@@ -493,9 +552,9 @@
   .panel-head.trading-head h2::before{ content:''; display:inline-block; width:8px; height:8px; border-radius:50%; background: var(--trading); margin-right:9px; vertical-align:middle; }
   .panel-head.betting-head h2::before{ content:''; display:inline-block; width:8px; height:8px; border-radius:50%; background: var(--betting); margin-right:9px; vertical-align:middle; }
   .panel-head.emergency-head h2::before{ content:''; display:inline-block; width:8px; height:8px; border-radius:50%; background: var(--emergency); margin-right:9px; vertical-align:middle; }
-  .tag.trading-tag{ color: var(--trading); background: #EBF0F6; }
-  .tag.betting-tag{ color: var(--betting); background: #F7ECF1; }
-  .tag.emergency-tag{ color: var(--emergency); background: #E9F3F0; }
+  .tag.trading-tag{ color: var(--trading); background: var(--accent-bg); }
+  .tag.betting-tag{ color: var(--betting); background: var(--betting-bg); }
+  .tag.emergency-tag{ color: var(--emergency); background: var(--emergency-bg); }
 
   .invest-totals{
     display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;
@@ -512,7 +571,7 @@
     font-family:'Inter', sans-serif; font-size:21px; font-weight:700; color: var(--ink);
     padding:9px 11px; transition: border-color .15s, box-shadow .15s;
   }
-  .box-input:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background:#fff; }
+  .box-input:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background: var(--surface); }
 
   /* SCHERMATA DI AUTENTICAZIONE */
   .auth-screen{
@@ -544,7 +603,7 @@
   }
   .auth-submit{
     width:100%; padding:13px; margin-top:6px;
-    background: var(--ink); color:#fff; font-family:'Inter', sans-serif; font-size:14.5px; font-weight:700;
+    background: #1C1E22; color:#fff; font-family:'Inter', sans-serif; font-size:14.5px; font-weight:700;
     border:none; border-radius: var(--r-pill); cursor:pointer; transition: filter .15s;
   }
   .auth-submit:hover{ filter: brightness(1.15); }
@@ -559,11 +618,41 @@
   .auth-switch button:hover{ text-decoration: underline; }
 
   .logout-btn{
-    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color:#9EA3B0;
-    background: rgba(255,255,255,0.06); border:none; border-radius: var(--r-pill);
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color: var(--ink-soft);
+    background: var(--bg); border:1px solid var(--border); border-radius: var(--r-pill);
     padding: 7px 13px; cursor:pointer; transition: background .15s, color .15s;
   }
-  .logout-btn:hover{ background: rgba(255,255,255,0.12); color:#F4F4F2; }
+  .logout-btn:hover{ background: var(--border); color: var(--ink); }
+  .theme-toggle-btn{
+    width:32px; height:32px; flex:0 0 auto; border:1px solid var(--border); border-radius:50%;
+    background: var(--bg); color: var(--ink); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition: background .15s, color .15s;
+  }
+  .theme-toggle-btn:hover{ background: var(--border); }
+  .auth-top-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px; }
+  .auth-top-row .auth-eyebrow{ margin-bottom:0; }
+  .password-field-wrap{ position:relative; }
+  .password-field-wrap input{ width:100%; padding-right:42px; }
+  .password-eye-btn{
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; padding:6px; line-height:1; border-radius: var(--r-pill);
+    color: var(--ink-faint); opacity:0.75; display:inline-flex; align-items:center; transition: opacity .15s, color .15s;
+  }
+  .password-eye-btn:hover{ opacity:1; color: var(--ink-soft); }
+  .password-eye-btn svg{ display:block; }
+
+  .onboarding-slide h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size:24px; margin:0 0 4px 0; line-height:1.3;
+  }
+  .onboarding-tagline{ font-size:28px !important; text-align:center; margin: 18px 0 !important; }
+  .onboarding-slide .field{ margin-top:16px; }
+  .onboarding-slide input{ text-align:center; font-size:16px; }
+  .onboarding-dots{ display:flex; justify-content:center; gap:8px; margin: 26px 0 18px; }
+  .onboarding-dot{
+    width:8px; height:8px; border-radius:50%; background: var(--border);
+    transition: background .2s, transform .2s;
+  }
+  .onboarding-dot.active{ background: var(--accent); transform: scale(1.3); }
 </style>
 </head>
 <body>
@@ -571,7 +660,10 @@
 <!-- SCHERMATA DI AUTENTICAZIONE -->
 <div id="auth-screen" class="auth-screen">
   <div class="auth-card">
-    <div class="auth-eyebrow">Registro di Cassa</div>
+    <div class="auth-top-row">
+      <div class="auth-eyebrow">Registro di Cassa</div>
+      <button class="theme-toggle-btn" id="theme-toggle-btn-auth" type="button" title="Cambia tema"></button>
+    </div>
     <h1 id="auth-title">Bentornato</h1>
     <p id="auth-subtitle">Accedi per ritrovare il tuo registro di cassa, i tuoi investimenti e il tuo patrimonio, sincronizzati su ogni dispositivo.</p>
 
@@ -582,7 +674,10 @@
       </div>
       <div class="field" style="margin-bottom:6px;">
         <label for="auth-password">Password</label>
-        <input type="password" id="auth-password" autocomplete="current-password" required placeholder="Almeno 8 caratteri">
+        <div class="password-field-wrap">
+          <input type="password" id="auth-password" autocomplete="current-password" required placeholder="Almeno 8 caratteri">
+          <button type="button" class="password-eye-btn" id="auth-password-eye" title="Mostra/nascondi password"></button>
+        </div>
       </div>
       <div id="auth-error" class="auth-error" style="display:none;"></div>
       <button type="submit" class="auth-submit" id="auth-submit">Accedi</button>
@@ -595,34 +690,83 @@
   </div>
 </div>
 
+<!-- SLIDE DI BENVENUTO DOPO LA REGISTRAZIONE -->
+<div id="onboarding-screen" class="auth-screen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-top-row">
+      <div class="auth-eyebrow">Registro di Cassa</div>
+      <button class="theme-toggle-btn" id="theme-toggle-btn-onboarding" type="button" title="Cambia tema"></button>
+    </div>
+
+    <div class="onboarding-slide" data-slide="1">
+      <h1 class="onboarding-tagline">Organizza le tue finanze</h1>
+    </div>
+
+    <div class="onboarding-slide" data-slide="2" style="display:none;">
+      <h1>Come ti chiami?</h1>
+      <div class="field" style="margin-top:18px;">
+        <input type="text" id="onboarding-nome" placeholder="Es. Alessandro" autocomplete="given-name">
+      </div>
+      <div id="onboarding-nome-error" class="auth-error" style="display:none;">Inserisci il tuo nome per continuare.</div>
+    </div>
+
+    <div class="onboarding-slide" data-slide="3" style="display:none;">
+      <h1>Da quante persone è composto il nucleo familiare?</h1>
+      <div class="field" style="margin-top:18px;">
+        <input type="number" id="onboarding-persone" min="1" step="1" placeholder="Es. 1">
+      </div>
+      <div id="onboarding-persone-error" class="auth-error" style="display:none;">Inserisci un numero valido (almeno 1).</div>
+    </div>
+
+    <div class="onboarding-dots">
+      <span class="onboarding-dot active" data-dot="1"></span>
+      <span class="onboarding-dot" data-dot="2"></span>
+      <span class="onboarding-dot" data-dot="3"></span>
+    </div>
+
+    <button type="button" class="auth-submit" id="onboarding-next-btn">Continua</button>
+  </div>
+</div>
+
 <!-- APP -->
 <div id="app-root" style="display:none;">
 
 <div class="topnav">
   <div class="topnav-inner">
-    <div class="nav-tabs">
-      <button class="nav-tab active" data-screen="cassa">Registro di Cassa</button>
-      <button class="nav-tab" data-screen="investimenti">Investimenti</button>
-      <button class="nav-tab" data-screen="altriconti">Altri Conti</button>
-    </div>
     <div class="patrimonio-badge">
       <span class="patrimonio-label">Patrimonio totale</span>
       <span class="patrimonio-value" id="patrimonio-value">€ 0,00</span>
-      <button class="eye-btn" id="eye-patrimonio" type="button" title="Mostra/nascondi importo" style="color:#9EA3B0;"></button>
+      <button class="eye-btn" id="eye-patrimonio" type="button" title="Mostra/nascondi importo" style="color:var(--ink-soft);"></button>
+      <button class="theme-toggle-btn" id="theme-toggle-btn" type="button" title="Cambia tema"></button>
       <button class="logout-btn" id="logout-btn" type="button" title="Esci"><span id="user-email-label"></span> · Esci</button>
     </div>
   </div>
 </div>
 
-<div id="screen-cassa">
-
-<div class="cover">
+<div class="cover" id="shared-cover">
   <div class="wrap">
-    <div class="cover-eyebrow">Pianificazione &middot; Finanza personale</div>
-    <h1>Registro di Cassa</h1>
-    <p>Spalma costi fissi e stipendio sui giorni del mese, registra incasso e spesa quotidiani, e tieni il margine sotto controllo per chiudere il mese in risparmio.</p>
+    <div class="cover-eyebrow-row">
+      <span class="cover-eyebrow" id="cover-eyebrow-text">Pianificazione &middot; Finanza personale</span>
+      <button class="cover-info-btn" id="cover-info-btn" type="button" title="Informazioni">i</button>
+    </div>
+    <h1 id="cover-title">Registro di Cassa</h1>
   </div>
 </div>
+<div class="cover-info-popover" id="cover-info-popover" style="display:none;">
+  <p id="cover-info-text">Spalma costi fissi e stipendio sui giorni del mese, registra incasso e spesa quotidiani, e tieni il margine sotto controllo per chiudere il mese in risparmio.</p>
+</div>
+
+<div class="nav-tabs-bar">
+  <div class="nav-tabs-bar-inner">
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-screen="cassa">Registro di Cassa</button>
+      <button class="nav-tab" data-screen="investimenti">Investimenti</button>
+      <button class="nav-tab" data-screen="altriconti">Altri Conti</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-cassa">
 
 <div class="wrap">
 
@@ -761,14 +905,6 @@
 </div><!-- /screen-cassa -->
 
 <div id="screen-investimenti" style="display:none">
-  <div class="cover">
-    <div class="wrap">
-      <div class="cover-eyebrow">Patrimonio &middot; Posizioni a rischio</div>
-      <h1>Investimenti</h1>
-      <p>Trading e betting separati: importo disponibile sul broker/sito, somma investita e percentuale realizzata. L'importo disponibile si somma sempre al patrimonio totale in alto.</p>
-    </div>
-  </div>
-
   <div class="wrap">
 
     <div class="invest-subnav">
@@ -846,14 +982,6 @@
 </div><!-- /screen-investimenti -->
 
 <div id="screen-altriconti" style="display:none">
-  <div class="cover">
-    <div class="wrap">
-      <div class="cover-eyebrow">Fondo di riserva</div>
-      <h1>Altri Conti</h1>
-      <p>Un conto tenuto separato dal resto, da usare solo in caso di emergenza. Anche questo importo si somma al tuo patrimonio totale.</p>
-    </div>
-  </div>
-
   <div class="wrap">
     <div class="panel">
       <div class="panel-head emergency-head" id="panel-head-altriconti">
@@ -944,7 +1072,8 @@ function defaultState(){
       trading: { disponibile: null, investito: null },
       betting: { disponibile: null, investito: null }
     },
-    altriConti: { nome: '', importo: null }
+    altriConti: { nome: '', importo: null },
+    profilo: { nome: '', persone: null } // raccolto durante le slide di onboarding dopo la registrazione
   };
 }
 let state = defaultState();
@@ -1153,6 +1282,13 @@ async function load(){
   }
   if(state.altriConti.nome === undefined) state.altriConti.nome = '';
   if(state.altriConti.importo === undefined) state.altriConti.importo = null;
+
+  // normalizza il profilo utente (nome e nucleo familiare, raccolti in onboarding)
+  if(!state.profilo || typeof state.profilo !== 'object'){
+    state.profilo = { nome: '', persone: null };
+  }
+  if(state.profilo.nome === undefined) state.profilo.nome = '';
+  if(state.profilo.persone === undefined) state.profilo.persone = null;
 
   // migrazione: la vecchia "spesa" era un numero singolo per giorno, ora è
   // un elenco di voci (importo + nota). Converto i dati salvati in precedenza
@@ -1637,8 +1773,8 @@ function makeDayRowBody(day, t){
   const ctx = { isWeek: false, day };
   const entratePairs = entrate.map(item => ({ day, item }));
   const spesePairs = spese.map(item => ({ day, item }));
-  body.insertBefore(buildItemSection('day-' + day + '-entrate', 'Entrate extra del giorno', entratePairs, 'entrate', ctx), finalBlock);
   body.insertBefore(buildItemSection('day-' + day + '-spese', 'Spese del giorno', spesePairs, 'spese', ctx), finalBlock);
+  body.insertBefore(buildItemSection('day-' + day + '-entrate', 'Entrate extra del giorno', entratePairs, 'entrate', ctx), finalBlock);
 
   return body;
 }
@@ -2011,8 +2147,8 @@ function makeWeekRowBody(weekIndex, t){
 
   const finalBlock = body.querySelector('.entry-final');
   const ctx = { isWeek: true, weekIndex, defaultDay: a.start };
-  body.insertBefore(buildItemSection('week-' + weekIndex + '-entrate', 'Entrate extra della settimana — scegli il giorno per ognuna', a.entrateItems, 'entrate', ctx), finalBlock);
   body.insertBefore(buildItemSection('week-' + weekIndex + '-spese', 'Spese della settimana — scegli il giorno per ognuna', a.speseItems, 'spese', ctx), finalBlock);
+  body.insertBefore(buildItemSection('week-' + weekIndex + '-entrate', 'Entrate extra della settimana — scegli il giorno per ognuna', a.entrateItems, 'entrate', ctx), finalBlock);
 
   return body;
 }
@@ -2113,28 +2249,28 @@ function renderChart(){
 
   const offsetZero = ((maxV - 0) / (maxV - minV) * 100).toFixed(1);
   const dots = coords.filter(c => c.hasData).map(c =>
-    `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3.2" fill="#fff" stroke="#1C1E22" stroke-width="2"/>`
+    `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3.2" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>`
   ).join('');
 
   const svg = `
   <svg id="margine-svg" viewBox="0 0 ${W} ${H}" width="100%" height="${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;font-family:'Inter',sans-serif;overflow:visible;">
     <defs>
       <linearGradient id="areaGrad" x1="0" y1="${y(maxV).toFixed(1)}" x2="0" y2="${y(minV).toFixed(1)}" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stop-color="#1E8E6B" stop-opacity="0.22"/>
-        <stop offset="${offsetZero}%" stop-color="#1E8E6B" stop-opacity="0.03"/>
-        <stop offset="${offsetZero}%" stop-color="#D14B4B" stop-opacity="0.03"/>
-        <stop offset="100%" stop-color="#D14B4B" stop-opacity="0.18"/>
+        <stop offset="0%" stop-color="var(--green)" stop-opacity="0.22"/>
+        <stop offset="${offsetZero}%" stop-color="var(--green)" stop-opacity="0.03"/>
+        <stop offset="${offsetZero}%" stop-color="var(--red)" stop-opacity="0.03"/>
+        <stop offset="100%" stop-color="var(--red)" stop-opacity="0.18"/>
       </linearGradient>
     </defs>
-    <line x1="${padL}" y1="${zeroY.toFixed(1)}" x2="${W-padR}" y2="${zeroY.toFixed(1)}" stroke="#D14B4B" stroke-width="1.4" stroke-dasharray="4 3"/>
-    <text x="${padL - 6}" y="${zeroY.toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="10" fill="#AEB2B8">0</text>
-    <text x="${padL - 6}" y="${y(maxV).toFixed(1)}" text-anchor="end" dominant-baseline="hanging" font-size="10" fill="#AEB2B8">${fmt(maxV)}</text>
-    <text x="${padL - 6}" y="${y(minV).toFixed(1)}" text-anchor="end" dominant-baseline="baseline" font-size="10" fill="#AEB2B8">${fmt(minV)}</text>
+    <line x1="${padL}" y1="${zeroY.toFixed(1)}" x2="${W-padR}" y2="${zeroY.toFixed(1)}" stroke="var(--red)" stroke-width="1.4" stroke-dasharray="4 3"/>
+    <text x="${padL - 6}" y="${zeroY.toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--ink-faint)">0</text>
+    <text x="${padL - 6}" y="${y(maxV).toFixed(1)}" text-anchor="end" dominant-baseline="hanging" font-size="10" fill="var(--ink-faint)">${fmt(maxV)}</text>
+    <text x="${padL - 6}" y="${y(minV).toFixed(1)}" text-anchor="end" dominant-baseline="baseline" font-size="10" fill="var(--ink-faint)">${fmt(minV)}</text>
     <path d="${areaPath}" fill="url(#areaGrad)" stroke="none"/>
-    <path id="margine-line" d="${linePath}" fill="none" stroke="#1C1E22" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="margine-line" d="${linePath}" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
     ${dots}
-    <line id="hover-guide" x1="0" y1="${padT}" x2="0" y2="${H-padB}" stroke="#1C1E22" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>
-    <circle id="hover-dot" r="4.5" fill="#1C1E22" stroke="#fff" stroke-width="2" opacity="0"/>
+    <line id="hover-guide" x1="0" y1="${padT}" x2="0" y2="${H-padB}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>
+    <circle id="hover-dot" r="4.5" fill="var(--ink)" stroke="var(--surface)" stroke-width="2" opacity="0"/>
     <rect id="hover-capture" x="${padL}" y="0" width="${W-padL-padR}" height="${H}" fill="transparent" style="cursor:crosshair;"/>
   </svg>`;
   holder.innerHTML = svg;
@@ -2255,6 +2391,33 @@ document.getElementById('emergenza-importo').addEventListener('input', e => {
 
 // NAVIGAZIONE TRA SCHERMATE
 const SCREENS = ['cassa', 'investimenti', 'altriconti'];
+// contenuto della cover condivisa per ciascuna schermata
+const SCREEN_META = {
+  cassa: {
+    eyebrow: 'Pianificazione &middot; Finanza personale',
+    title: 'Registro di Cassa',
+    info: 'Spalma costi fissi e stipendio sui giorni del mese, registra incasso e spesa quotidiani, e tieni il margine sotto controllo per chiudere il mese in risparmio.'
+  },
+  investimenti: {
+    eyebrow: 'Patrimonio &middot; Posizioni a rischio',
+    title: 'Investimenti',
+    info: 'Trading e betting separati: importo disponibile sul broker/sito, somma investita e percentuale realizzata. L\'importo disponibile si somma sempre al patrimonio totale in alto.'
+  },
+  altriconti: {
+    eyebrow: 'Fondo di riserva',
+    title: 'Altri Conti',
+    info: 'Un conto tenuto separato dal resto, da usare solo in caso di emergenza. Anche questo importo si somma al tuo patrimonio totale.'
+  }
+};
+
+function updateSharedCover(screen){
+  const meta = SCREEN_META[screen];
+  if(!meta) return;
+  document.getElementById('cover-eyebrow-text').innerHTML = meta.eyebrow;
+  document.getElementById('cover-title').textContent = meta.title;
+  document.getElementById('cover-info-text').textContent = meta.info;
+}
+
 document.querySelectorAll('.nav-tab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b === btn));
@@ -2262,8 +2425,21 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
     SCREENS.forEach(s => {
       document.getElementById('screen-' + s).style.display = (s === screen) ? '' : 'none';
     });
+    updateSharedCover(screen);
+    // chiudo il popover informazioni quando si cambia schermata
+    document.getElementById('cover-info-popover').style.display = 'none';
+    document.getElementById('cover-info-btn').classList.remove('active');
     updatePatrimonio();
   });
+});
+
+// ICONA INFORMAZIONI: mostra/nasconde la breve descrizione della schermata attuale
+document.getElementById('cover-info-btn').addEventListener('click', () => {
+  const popover = document.getElementById('cover-info-popover');
+  const btn = document.getElementById('cover-info-btn');
+  const showing = popover.style.display !== 'none';
+  popover.style.display = showing ? 'none' : '';
+  btn.classList.toggle('active', !showing);
 });
 
 // SOTTO-NAVIGAZIONE TRADING / BETTING
@@ -2289,13 +2465,80 @@ let authMode = 'login';
 
 function showAuthScreen(){
   document.getElementById('app-root').style.display = 'none';
+  document.getElementById('onboarding-screen').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
 }
 function showApp(email){
   document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('onboarding-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
-  document.getElementById('user-email-label').textContent = email || '';
+  document.getElementById('user-email-label').textContent = (state.profilo && state.profilo.nome) ? state.profilo.nome : (email || '');
 }
+
+// ===== SLIDE DI ONBOARDING (solo dopo la registrazione, o se il profilo non è ancora stato compilato) =====
+let onboardingStep = 1;
+const ONBOARDING_STEPS = 3;
+let onboardingEmail = '';
+
+function showOnboarding(email){
+  onboardingEmail = email;
+  onboardingStep = 1;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = 'none';
+  document.getElementById('onboarding-screen').style.display = 'flex';
+  document.getElementById('onboarding-nome').value = '';
+  document.getElementById('onboarding-persone').value = '';
+  renderOnboardingStep();
+}
+
+function renderOnboardingStep(){
+  document.querySelectorAll('.onboarding-slide').forEach(s => {
+    s.style.display = (parseInt(s.dataset.slide, 10) === onboardingStep) ? '' : 'none';
+  });
+  document.querySelectorAll('.onboarding-dot').forEach(d => {
+    d.classList.toggle('active', parseInt(d.dataset.dot, 10) === onboardingStep);
+  });
+  document.getElementById('onboarding-next-btn').textContent = onboardingStep === ONBOARDING_STEPS ? 'Entra' : 'Continua';
+  if(onboardingStep === 2){
+    requestAnimationFrame(() => document.getElementById('onboarding-nome').focus());
+  }else if(onboardingStep === 3){
+    requestAnimationFrame(() => document.getElementById('onboarding-persone').focus());
+  }
+}
+
+document.getElementById('onboarding-next-btn').addEventListener('click', async () => {
+  if(onboardingStep === 2){
+    const nome = document.getElementById('onboarding-nome').value.trim();
+    const errEl = document.getElementById('onboarding-nome-error');
+    if(!nome){ errEl.style.display = 'block'; document.getElementById('onboarding-nome').focus(); return; }
+    errEl.style.display = 'none';
+    onboardingStep = 3;
+    renderOnboardingStep();
+    return;
+  }
+  if(onboardingStep === 3){
+    const personeRaw = document.getElementById('onboarding-persone').value;
+    const persone = parseInt(personeRaw, 10);
+    const errEl = document.getElementById('onboarding-persone-error');
+    if(!personeRaw || isNaN(persone) || persone < 1){ errEl.style.display = 'block'; document.getElementById('onboarding-persone').focus(); return; }
+    errEl.style.display = 'none';
+    const nome = document.getElementById('onboarding-nome').value.trim();
+    state.profilo = { nome, persone };
+    showApp(onboardingEmail);
+    scheduleSave();
+    return;
+  }
+  onboardingStep++;
+  renderOnboardingStep();
+});
+
+// invio con Invio (Enter) dentro i campi delle slide
+['onboarding-nome', 'onboarding-persone'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('onboarding-next-btn').click(); }
+  });
+});
+
 
 function setAuthMode(mode){
   authMode = mode;
@@ -2351,8 +2594,13 @@ document.getElementById('auth-form').addEventListener('submit', async (e) => {
       errorEl.style.display = 'block';
       return;
     }
-    showApp(json.email);
     await load();
+    if(!state.profilo || !state.profilo.nome){
+      // primo accesso: profilo non ancora compilato, si passa dalle slide di benvenuto
+      showOnboarding(json.email);
+    }else{
+      showApp(json.email);
+    }
   }catch(err){
     errorEl.textContent = 'Impossibile contattare il server. Controlla la connessione.';
     errorEl.style.display = 'block';
@@ -2361,6 +2609,62 @@ document.getElementById('auth-form').addEventListener('submit', async (e) => {
     submitBtn.textContent = prevLabel;
   }
 });
+
+// ===== TEMA CHIARO / SCURO =====
+const SUN_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+const MOON_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const THEME_KEY = 'registro-cassa-theme';
+
+function applyTheme(theme){
+  if(theme === 'dark'){
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }else{
+    document.documentElement.removeAttribute('data-theme');
+  }
+  // due pulsanti in pagina (barra in alto nell'app + schermata di accesso):
+  // tengo entrambi sincronizzati con lo stesso stato.
+  ['theme-toggle-btn', 'theme-toggle-btn-auth', 'theme-toggle-btn-onboarding'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn){
+      btn.innerHTML = theme === 'dark' ? SUN_SVG : MOON_SVG;
+      btn.title = theme === 'dark' ? 'Passa al tema chiaro' : 'Passa al tema scuro';
+    }
+  });
+}
+
+function currentTheme(){
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+}
+
+applyTheme(currentTheme()); // sincronizza l'icona con il tema già applicato all'apertura (vedi script in head)
+
+document.getElementById('theme-toggle-btn').addEventListener('click', () => {
+  const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){ /* se localStorage non è disponibile, il tema resta solo per questa sessione */ }
+});
+document.getElementById('theme-toggle-btn-auth').addEventListener('click', () => {
+  const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){ /* se localStorage non è disponibile, il tema resta solo per questa sessione */ }
+});
+document.getElementById('theme-toggle-btn-onboarding').addEventListener('click', () => {
+  const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){ /* se localStorage non è disponibile, il tema resta solo per questa sessione */ }
+});
+
+// occhio mostra/nascondi password nella schermata di accesso/registrazione
+(function(){
+  const pwInput = document.getElementById('auth-password');
+  const eyeBtn = document.getElementById('auth-password-eye');
+  eyeBtn.innerHTML = EYE_OPEN;
+  eyeBtn.addEventListener('click', () => {
+    const showing = pwInput.type === 'text';
+    pwInput.type = showing ? 'password' : 'text';
+    eyeBtn.innerHTML = showing ? EYE_OPEN : EYE_CLOSED;
+  });
+})();
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
   try{ await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); }catch(e){}
@@ -2371,15 +2675,14 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 });
 
 async function bootstrap(){
+  // Per scelta esplicita, l'accesso non viene mai ricordato tra un'apertura
+  // e l'altra: ogni volta che si apre il sito va sempre mostrata la
+  // schermata di accesso/registrazione, anche se una sessione precedente
+  // era ancora valida. Invalidiamo subito l'eventuale cookie rimasto, così
+  // non c'è modo di rientrare in automatico nell'ultimo account usato.
   try{
-    const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
-    if(res.ok){
-      const json = await res.json();
-      showApp(json.email);
-      await load();
-      return;
-    }
-  }catch(e){ /* server irraggiungibile: mostra comunque la schermata di accesso */ }
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+  }catch(e){ /* nessun problema se il server non risponde qui: mostriamo comunque l'accesso */ }
   showAuthScreen();
 }
 
