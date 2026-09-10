@@ -98,7 +98,11 @@
     border-bottom: 1px solid var(--border);
   }
   .panel-head.collapsed{ border-bottom-color: transparent; padding-bottom: 20px; }
-  .panel-head-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .panel-head-left{ display:flex; align-items:center; gap:10px; min-width:0; cursor:pointer; }
+  @media (max-width: 480px){
+    .panel-head{ flex-wrap: wrap; row-gap: 10px; }
+    .panel-head-left{ flex: 1 1 100%; }
+  }
   .panel-collapse-btn{
     flex:0 0 auto; width:24px; height:24px; border:none; background:none; padding:0;
     color: var(--ink-faint); cursor:pointer; display:flex; align-items:center; justify-content:center;
@@ -137,7 +141,11 @@
   .grid4{
     display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;
   }
-  @media (max-width: 720px){ .grid4{ grid-template-columns: 1fr;} }
+  .grid4.grid-emergenza{ grid-template-columns: 1fr 220px; }
+  @media (max-width: 720px){
+    .grid4{ grid-template-columns: 1fr;}
+    .grid4.grid-emergenza{ grid-template-columns: 1fr; }
+  }
 
   .field label{
     display:block; font-size:13px; color: var(--ink-soft); margin-bottom:7px;
@@ -163,6 +171,10 @@
   }
   .costi-row{
     display:grid; grid-template-columns: 1fr 140px 38px; gap:8px; margin-bottom:9px; align-items:center;
+  }
+  .costi-row input[type="text"], .costi-row input[type="number"]{ min-width:0; width:100%; box-sizing:border-box; }
+  @media (max-width: 480px){
+    .costi-row{ grid-template-columns: 1fr 96px 34px; gap:6px; }
   }
   .costi-row input[type="text"]{
     padding:10px 13px; border:1px solid var(--border); border-radius: var(--r-sm); background: var(--bg);
@@ -855,7 +867,7 @@
         </div>
       </div>
       <div class="panel-body" id="panel-body-altriconti">
-        <div class="grid4" style="grid-template-columns: 1fr 220px;">
+        <div class="grid4 grid-emergenza">
           <div class="field">
             <label for="emergenza-nome">Nome del conto (opzionale)</label>
             <input type="text" id="emergenza-nome" placeholder="es. Conto deposito, libretto di risparmio...">
@@ -2388,9 +2400,13 @@ document.querySelectorAll('.gran-toggle-btn').forEach(btn => {
 });
 
 // ===== PANNELLI COMPRIMIBILI =====
-// Ogni sezione principale (Impostazione del mese, Bilancio, Registro spese,
-// Trading, Betting, Conto di emergenza) può essere compressa per alleggerire
-// la pagina. Stato solo di sessione: riparte sempre espanso al ricaricamento.
+// Ogni sezione principale (Impostazione del mese, Soglie, Bilancio, Registro
+// spese, Trading, Betting, Conto di emergenza) può essere compressa per
+// alleggerire la pagina. Stato solo di sessione: riparte sempre espanso al
+// ricaricamento. Comportamento voluto: cliccando su tutta la zona sinistra
+// dell'intestazione (freccia + titolo) il pannello SI ESPANDE sempre; per
+// COMPRIMERLO invece serve cliccare esattamente sulla freccia — così non
+// capita di richiuderlo per sbaglio toccando il titolo.
 let collapsedPanels = new Set();
 
 function applyPanelState(panelId){
@@ -2406,10 +2422,24 @@ function applyPanelState(panelId){
 document.querySelectorAll('.panel-collapse-btn').forEach(btn => {
   btn.innerHTML = CHEVRON_SVG;
   btn.classList.add('expanded'); // stato iniziale: tutti espansi
-  btn.addEventListener('click', () => {
-    const panelId = btn.dataset.panel;
-    if(collapsedPanels.has(panelId)) collapsedPanels.delete(panelId); else collapsedPanels.add(panelId);
-    applyPanelState(panelId);
+});
+
+document.querySelectorAll('.panel-head-left').forEach(left => {
+  const btn = left.querySelector('.panel-collapse-btn');
+  if(!btn) return;
+  const panelId = btn.dataset.panel;
+  left.addEventListener('click', (e) => {
+    const collapsed = collapsedPanels.has(panelId);
+    const clickedArrow = !!e.target.closest('.panel-collapse-btn');
+    if(collapsed){
+      // qualunque punto della zona titolo riapre il pannello
+      collapsedPanels.delete(panelId);
+      applyPanelState(panelId);
+    }else if(clickedArrow){
+      // da aperto, solo la freccia lo richiude
+      collapsedPanels.add(panelId);
+      applyPanelState(panelId);
+    }
   });
 });
 
