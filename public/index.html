@@ -140,6 +140,16 @@
 
   .wrap{ max-width: 980px; margin: 0 auto; padding: 0 28px; }
 
+  .today-bar{
+    background: var(--bg); border:1px solid var(--border); border-radius: var(--r-md);
+    padding: 13px 16px; margin-bottom: 18px;
+  }
+  .today-bar-top{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
+  .today-bar-date{ font-family:'Fraunces', serif; font-weight:600; font-size:15.5px; color: var(--ink); text-transform:capitalize; }
+  .today-bar-fraction{ font-family:'Inter', sans-serif; font-size:12px; font-weight:600; color: var(--ink-faint); white-space:nowrap; }
+  .today-bar-track{ height:8px; background: var(--bg); border-radius: var(--r-pill); overflow:hidden; }
+  .today-bar-fill{ height:100%; background: var(--accent); border-radius: var(--r-pill); transition: width .4s ease; }
+
   .panel{
     background: var(--surface);
     border: 1px solid var(--border);
@@ -331,13 +341,35 @@
   /* ===== REGISTRO SPESE: righe comprimibili con voci multiple ===== */
   .entry-list{ display:flex; flex-direction:column; gap:8px; }
   .entry-row{ border:1px solid var(--border); border-radius: var(--r-md); overflow:hidden; }
+  .entry-row.sunday{ border-color: var(--betting); }
+  .entry-row.monthend{ border-color: var(--trading); }
   .entry-row.today{ border-color: var(--amber); }
   .entry-row-header{
     display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer;
     background: var(--surface); transition: background .12s;
   }
   .entry-row-header:hover{ background: var(--bg); }
+  .entry-row.past .entry-row-header{ background: var(--bg); }
+  .entry-row.sunday .entry-row-header{ background: color-mix(in srgb, var(--betting) 8%, var(--surface)); }
+  .entry-row.monthend .entry-row-header{ background: color-mix(in srgb, var(--trading) 8%, var(--surface)); }
+  .entry-row.past.sunday .entry-row-header{ background: color-mix(in srgb, var(--betting) 10%, var(--bg)); }
+  .entry-row.past.monthend .entry-row-header{ background: color-mix(in srgb, var(--trading) 10%, var(--bg)); }
   .entry-row.today .entry-row-header{ background: var(--amber-bg); }
+  .entry-row.locked{ opacity: .62; }
+  .entry-row.locked .entry-row-header{ cursor: default; }
+  .entry-row.locked .entry-row-header:hover{ background: var(--bg); }
+  .entry-row.locked .entry-label{ color: var(--ink-soft); }
+  .entry-row.locked .entry-chevron{ color: var(--ink-faint); }
+
+  .past-editor-btn{
+    width:32px; height:32px; flex:0 0 auto; border:1px solid var(--border); border-radius:50%;
+    background: var(--bg); color: var(--ink-soft); cursor:pointer; font-size:14px;
+    display:flex; align-items:center; justify-content:center; transition: background .15s, color .15s;
+    margin-left:10px;
+  }
+  .past-editor-btn:hover{ background: var(--border); color: var(--ink); }
+  .past-editor-card{ max-width: 620px; }
+  #past-editor-list{ margin-top:4px; }
   .entry-chevron{
     width:16px; height:16px; flex:0 0 auto; color: var(--ink-faint);
     transition: transform .15s; display:flex; align-items:center; justify-content:center;
@@ -422,9 +454,32 @@
   .expense-saved-sep{ flex:0 0 auto; color: var(--ink-faint); font-size:13px; }
   .expense-saved-nota{ flex:1; min-width:80px; font-size:13px; color: var(--ink-soft); font-weight:400; }
   .expense-saved-nota.empty{ font-style:italic; color: var(--ink-faint); }
+  .costi-saved-label{
+    flex:0 0 auto; font-family:'Fraunces', serif; font-weight:600; font-size:13.5px; color: var(--ink);
+    max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .costi-saved-label.empty{ font-family:'Inter', sans-serif; font-weight:400; font-style:italic; color: var(--ink-faint); }
   .expense-saved-avg{
     flex:0 0 auto; font-size:11px; color: var(--accent); font-weight:600;
     background: var(--accent-bg); padding:2px 8px; border-radius: var(--r-pill);
+  }
+  .expense-saved-category{
+    flex:0 0 auto; font-size:11px; font-weight:600; color: var(--cat-color, var(--ink-soft));
+    background: color-mix(in srgb, var(--cat-color, var(--ink-soft)) 16%, transparent);
+    padding:3px 9px; border-radius: var(--r-pill); white-space:nowrap;
+  }
+  .category-picker{
+    flex: 0 0 100%; display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;
+  }
+  .category-pill{
+    font-family:'Inter', sans-serif; font-size:11.5px; font-weight:600; white-space:nowrap;
+    color: var(--ink-soft); background: var(--bg); border:1px solid var(--border);
+    border-radius: var(--r-pill); padding:5px 10px; cursor:pointer; transition: all .12s;
+  }
+  .category-pill:hover{ border-color: var(--cat-color, var(--border)); }
+  .category-pill.active{
+    color: var(--cat-color); background: color-mix(in srgb, var(--cat-color) 16%, transparent);
+    border-color: var(--cat-color); font-weight:700;
   }
   .week-amort-note{
     font-size:12px; color: var(--ink-soft); background: var(--accent-bg); border-radius: var(--r-sm);
@@ -474,6 +529,35 @@
   .sum-card .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:5px; }
 
   .chart-wrap{ background: var(--surface); border:1px solid var(--border); border-radius: var(--r-md); padding: 18px 18px 10px; position:relative; }
+
+  .category-chart-row{ display:flex; align-items:center; gap:32px; flex-wrap:wrap; }
+  .category-chart-holder{ flex:0 0 auto; }
+  .category-chart-holder svg{ display:block; }
+  .category-chart-legend{ flex:1 1 240px; min-width:200px; display:flex; flex-direction:column; gap:9px; }
+  .category-legend-row{ display:flex; align-items:center; gap:8px; font-size:13px; }
+  .category-legend-dot{ width:10px; height:10px; border-radius:50%; flex:0 0 auto; }
+  .category-legend-label{ flex:1; color: var(--ink-soft); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .category-legend-pct{ flex:0 0 auto; font-weight:700; color: var(--ink); width:34px; text-align:right; }
+  .category-legend-value{ flex:0 0 auto; font-weight:600; color: var(--ink-soft); width:78px; text-align:right; font-size:12.5px; }
+  @media (max-width:560px){ .category-chart-row{ flex-direction:column; align-items:flex-start; } }
+
+  /* micro-conferma: piccolo messaggio quando un giorno/settimana/mese chiude in positivo */
+  .toast-celebrate{
+    position: fixed; left:50%; bottom:24px; z-index:500;
+    transform: translateX(-50%) translateY(16px) scale(0.96);
+    background: var(--ink); color: var(--surface);
+    font-family:'Inter', sans-serif; font-size:13.5px; font-weight:600;
+    padding:12px 20px; border-radius: var(--r-pill); box-shadow: var(--shadow-md);
+    opacity:0; pointer-events:none; display:flex; align-items:center; gap:8px;
+    transition: opacity .3s ease, transform .3s ease; max-width: calc(100vw - 32px);
+  }
+  .toast-celebrate.visible{ opacity:1; transform: translateX(-50%) translateY(0) scale(1); }
+  .toast-celebrate-emoji{ display:inline-block; animation: toast-pop .5s ease; }
+  @keyframes toast-pop{
+    0%{ transform: scale(0.5) rotate(-15deg); }
+    60%{ transform: scale(1.2) rotate(8deg); }
+    100%{ transform: scale(1) rotate(0); }
+  }
   .chart-tooltip{
     position:absolute; pointer-events:none; z-index:5;
     background: #1C1E22; color:#fff; font-family:'Inter', sans-serif;
@@ -629,6 +713,7 @@
     display:flex; align-items:center; justify-content:center; transition: background .15s, color .15s;
   }
   .theme-toggle-btn:hover{ background: var(--border); }
+  #general-info-btn{ font-family:'Fraunces', serif; font-style:italic; font-weight:600; font-size:14px; }
   .auth-top-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px; }
   .auth-top-row .auth-eyebrow{ margin-bottom:0; }
   .password-field-wrap{ position:relative; }
@@ -653,6 +738,56 @@
     transition: background .2s, transform .2s;
   }
   .onboarding-dot.active{ background: var(--accent); transform: scale(1.3); }
+
+  /* popup tutorial dopo l'onboarding */
+  .tutorial-overlay{
+    position: fixed; inset:0; z-index: 400;
+    background: rgba(10,10,12,0.55);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    animation: tutorial-fade-in .25s ease;
+  }
+  @keyframes tutorial-fade-in{ from{ opacity:0; } to{ opacity:1; } }
+  .tutorial-card{
+    width:100%; max-width: 560px; max-height: 88vh; overflow-y:auto;
+    background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow-md);
+    padding: 32px 30px; position: relative;
+  }
+  .tutorial-close-x{
+    position: absolute; top:16px; right:16px; width:30px; height:30px; border:none; border-radius:50%;
+    background: var(--bg); color: var(--ink-soft); cursor:pointer; font-size:20px; line-height:1;
+    display:flex; align-items:center; justify-content:center; transition: background .15s, color .15s;
+  }
+  .tutorial-close-x:hover{ background: var(--border); color: var(--ink); }
+  .tutorial-eyebrow{
+    display:inline-block; font-family:'Inter', sans-serif; font-size:12px; font-weight:600;
+    color: var(--ink-soft); background: var(--bg); padding:5px 12px; border-radius: var(--r-pill); margin-bottom:14px;
+  }
+  .tutorial-title{ font-family:'Fraunces', serif; font-weight:600; font-size:23px; margin:0 0 14px 0; }
+  .tutorial-mission{ font-size:14px; line-height:1.7; color: var(--ink-soft); margin:0 0 26px 0; }
+  .tutorial-mission strong{ color: var(--ink); }
+  .tutorial-sections-title{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color: var(--ink-faint); margin-bottom:12px; }
+  .tutorial-sections{ display:flex; flex-direction:column; gap:16px; margin-bottom:28px; }
+  .tutorial-section-item{ display:flex; align-items:flex-start; gap:13px; }
+  .tutorial-section-icon{ font-size:20px; flex:0 0 auto; line-height:1.4; }
+  .tutorial-section-name{ font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; color: var(--ink); margin-bottom:2px; }
+  .tutorial-section-desc{ font-size:12.5px; color: var(--ink-soft); line-height:1.5; }
+
+  /* tastino info dedicato di ogni sezione */
+  .panel-info-btn{
+    width:19px; height:19px; flex:0 0 auto; border:1px solid var(--border); border-radius:50%;
+    background: var(--bg); color: var(--ink-faint); cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-style:italic; font-weight:600; font-size:11px;
+    transition: background .15s, color .15s;
+  }
+  .panel-info-btn:hover{ background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+  .panel-info-tooltip{
+    position:fixed; z-index: 300; max-width: 280px;
+    background: var(--ink); color: var(--surface); border-radius: var(--r-md); box-shadow: var(--shadow-md);
+    padding: 12px 14px; animation: tutorial-fade-in .15s ease;
+  }
+  .panel-info-tooltip p{ margin:0; font-size:12.5px; line-height:1.55; }
+  @media (max-width:560px){ .tutorial-card{ padding:26px 20px; } }
 </style>
 </head>
 <body>
@@ -728,15 +863,86 @@
   </div>
 </div>
 
+<!-- POPUP TUTORIAL: compare una sola volta, appena finito l'onboarding -->
+<div id="tutorial-overlay" class="tutorial-overlay" style="display:none;">
+  <div class="tutorial-card">
+    <button class="tutorial-close-x" id="tutorial-close-x" type="button" title="Chiudi">&times;</button>
+    <div class="tutorial-eyebrow">Prima di iniziare</div>
+    <h2 class="tutorial-title">Ciao <span id="tutorial-name">tu</span>, benvenuto!</h2>
+
+    <p class="tutorial-mission">
+      L'idea è semplice: ogni giorno guadagni qualcosa e hai delle spese fisse da coprire.
+      Quello che resta è tuo, per vivere — ma se lo spendi tutto, giorno dopo giorno, alla fine del mese ti ritrovi con zero messo da parte.
+      Il senso di questa app è aiutarti a tenere un po' da parte ogni giorno, così quello che non spendi diventa <strong>margine</strong>: soldi veri, tuoi, che si accumulano.
+      Quando arriva una spesa in più, non peserà su quanto guadagni oggi, ma su quello che hai già messo via — ed è così che, con calma, costruisci qualcosa: prima un po' di sicurezza, poi magari anche un capitale da far crescere.
+    </p>
+
+    <div class="tutorial-sections-title">Le sezioni, una alla volta</div>
+    <div class="tutorial-sections">
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">🗓️</span>
+        <div><div class="tutorial-section-name">Impostazione del mese</div><div class="tutorial-section-desc">Qui inserisci stipendio e spese fisse: la base da cui parte tutto il resto.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">🎯</span>
+        <div><div class="tutorial-section-name">Quanto puoi spendere</div><div class="tutorial-section-desc">Il tuo limite sano per oggi o per questa settimana, calcolato al volo.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">📈</span>
+        <div><div class="tutorial-section-name">Come sta andando il mese</div><div class="tutorial-section-desc">Un colpo d'occhio su quanto stai mettendo da parte, giorno dopo giorno.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">🥧</span>
+        <div><div class="tutorial-section-name">Dove vanno i tuoi soldi</div><div class="tutorial-section-desc">Le tue spese divise per categoria, per capire subito cosa pesa di più.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">📝</span>
+        <div><div class="tutorial-section-name">Registro spese</div><div class="tutorial-section-desc">Qui annoti ogni spesa e ogni entrata, giorno per giorno o a settimane.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">💹</span>
+        <div><div class="tutorial-section-name">Investimenti</div><div class="tutorial-section-desc">Quando hai margine, qui tieni traccia di trading e scommesse.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">🛟</span>
+        <div><div class="tutorial-section-name">Altri Conti</div><div class="tutorial-section-desc">Il tuo fondo per le emergenze, tenuto separato dal resto.</div></div>
+      </div>
+    </div>
+
+    <button type="button" class="auth-submit" id="tutorial-close-btn">Ho capito, iniziamo!</button>
+  </div>
+</div>
+
+<!-- popup informativo condiviso, usato dal tastino "i" di ogni sezione -->
+<div id="panel-info-tooltip" class="panel-info-tooltip" style="display:none;">
+  <p id="panel-info-tooltip-text"></p>
+</div>
+
+<!-- SEZIONE SEPARATA: qui, e solo qui, si possono modificare i giorni/le
+     settimane precedenti a quella corrente. Nel Registro spese normale
+     restano oscurati e non cliccabili, apposta per tenere il focus su
+     "dove sei arrivato adesso" — ma restano comunque raggiungibili da qui. -->
+<div id="past-editor-overlay" class="tutorial-overlay" style="display:none;">
+  <div class="tutorial-card past-editor-card">
+    <button class="tutorial-close-x" id="past-editor-close-x" type="button" title="Chiudi">&times;</button>
+    <div class="tutorial-eyebrow">Sezione separata</div>
+    <h2 class="tutorial-title" id="past-editor-title">Modifica i giorni precedenti</h2>
+    <p class="tutorial-mission" style="margin-bottom:20px;">Qui puoi ancora correggere o completare quello che hai registrato nei giorni già trascorsi.</p>
+    <div id="past-editor-list" class="entry-list"></div>
+    <div id="past-editor-empty" class="entry-empty-note" style="display:none;">Non ci sono ancora giorni precedenti a oggi in questo mese.</div>
+  </div>
+</div>
+
 <!-- APP -->
 <div id="app-root" style="display:none;">
 
 <div class="topnav">
   <div class="topnav-inner">
     <div class="patrimonio-badge">
-      <span class="patrimonio-label">Patrimonio totale</span>
+      <span class="patrimonio-label">Quanto hai in totale</span>
       <span class="patrimonio-value" id="patrimonio-value">€ 0,00</span>
       <button class="eye-btn" id="eye-patrimonio" type="button" title="Mostra/nascondi importo" style="color:var(--ink-soft);"></button>
+      <button class="theme-toggle-btn" id="general-info-btn" type="button" title="Come funziona questa app">i</button>
       <button class="theme-toggle-btn" id="theme-toggle-btn" type="button" title="Cambia tema"></button>
       <button class="logout-btn" id="logout-btn" type="button" title="Esci"><span id="user-email-label"></span> · Esci</button>
     </div>
@@ -745,15 +951,8 @@
 
 <div class="cover" id="shared-cover">
   <div class="wrap">
-    <div class="cover-eyebrow-row">
-      <span class="cover-eyebrow" id="cover-eyebrow-text">Pianificazione &middot; Finanza personale</span>
-      <button class="cover-info-btn" id="cover-info-btn" type="button" title="Informazioni">i</button>
-    </div>
     <h1 id="cover-title">Gestione Portafoglio</h1>
   </div>
-</div>
-<div class="cover-info-popover" id="cover-info-popover" style="display:none;">
-  <p id="cover-info-text">Spalma costi fissi e stipendio sui giorni del mese, registra incasso e spesa quotidiani, e tieni il margine sotto controllo per chiudere il mese in risparmio.</p>
 </div>
 
 <div class="nav-tabs-bar">
@@ -776,15 +975,23 @@
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="setup" type="button"></button>
         <h2>Impostazione del mese</h2>
+        <button class="panel-info-btn" data-panel="setup" type="button">i</button>
       </div>
       <span class="tag" id="setup-tag">non salvato</span>
     </div>
     <div class="panel-body" id="panel-body-setup">
-      <div class="grid4">
-        <div class="field">
-          <label for="mese">Mese</label>
-          <input type="month" id="mese">
+      <!-- BARRA DI OGGI: il mese è riconosciuto in automatico dal calendario,
+           niente più da scegliere — mostra solo a che punto siamo arrivati -->
+      <div class="today-bar" id="today-bar">
+        <div class="today-bar-top">
+          <span class="today-bar-date" id="today-bar-date">—</span>
+          <span class="today-bar-fraction" id="today-bar-fraction">—</span>
         </div>
+        <div class="today-bar-track">
+          <div class="today-bar-fill" id="today-bar-fill" style="width:0%;"></div>
+        </div>
+      </div>
+      <div class="grid4">
         <div class="field">
           <label for="giorni">Giorni nel mese</label>
           <input type="number" id="giorni" min="1" max="31">
@@ -797,7 +1004,7 @@
 
       <div class="costi-section">
         <div class="costi-head">
-          <h3>Voci di costo fisso</h3>
+          <h3>Spese fisse del mese</h3>
           <span class="costi-total" id="costi-total">Totale: € 0,00</span>
         </div>
         <div id="costi-rows"></div>
@@ -811,7 +1018,8 @@
     <div class="panel-head" id="panel-head-soglie">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="soglie" type="button"></button>
-        <h2>Soglie di riferimento</h2>
+        <h2>Quanto puoi spendere</h2>
+        <button class="panel-info-btn" data-panel="soglie" type="button">i</button>
       </div>
     </div>
     <div class="panel-body" id="panel-body-soglie">
@@ -824,25 +1032,25 @@
       </div>
 
       <div class="thresholds">
-        <div class="threshold-card pareggio">
-          <div class="label" id="target-pareggio-label">Soglia di pareggio &middot; al giorno</div>
-          <div class="value" id="target-pareggio">€ 0,00</div>
-          <div class="sub" id="target-pareggio-sub">Costi fissi &divide; giorni nel mese &mdash; il minimo da incassare ogni giorno per coprire i costi fissi</div>
-        </div>
         <div class="threshold-card stipendio">
-          <div class="label" id="target-stipendio-label">Stipendio &middot; equivalente al giorno</div>
+          <div class="label" id="target-stipendio-label">Stipendio &middot; al giorno</div>
           <div class="value" id="target-stipendio">€ 0,00</div>
-          <div class="sub" id="target-stipendio-sub">Stipendio &divide; giorni nel mese &mdash; quanto vale una giornata del tuo stipendio</div>
+          <div class="sub" id="target-stipendio-sub">Quanto vale, in media, una giornata del tuo stipendio</div>
+        </div>
+        <div class="threshold-card pareggio">
+          <div class="label" id="target-pareggio-label">Spese fisse &middot; al giorno</div>
+          <div class="value" id="target-pareggio">€ 0,00</div>
+          <div class="sub" id="target-pareggio-sub">Quanto ti serve ogni giorno solo per coprire le spese fisse</div>
         </div>
         <div class="threshold-card disponibile">
-          <div class="label" id="target-disponibile-label">Margine giornaliero disponibile</div>
+          <div class="label" id="target-disponibile-label">Quanto puoi spendere al giorno</div>
           <div class="value" id="target-disponibile">€ 0,00</div>
-          <div class="sub" id="target-disponibile-sub">Stipendio al giorno &minus; soglia di pareggio &mdash; quanto puoi spendere al giorno senza andare in negativo</div>
+          <div class="sub" id="target-disponibile-sub">Quello che ti resta ogni giorno dopo le spese fisse, senza andare in rosso</div>
         </div>
         <div class="threshold-card live">
-          <div class="label" id="target-live-label">Margine giornaliero live &middot; spese</div>
+          <div class="label" id="target-live-label">Quanto ti resta oggi</div>
           <div class="value" id="target-live">€ 0,00</div>
-          <div class="sub" id="target-live-sub">Margine disponibile + scostamento accumulato dai giorni registrati &mdash; si aggiorna con le spese reali</div>
+          <div class="sub" id="target-live-sub">Si aggiorna in base a come sta andando davvero il mese</div>
         </div>
       </div>
     </div>
@@ -853,19 +1061,20 @@
     <div class="panel-head" id="panel-head-bilancio">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="bilancio" type="button"></button>
-        <h2>Bilancio del mese</h2>
+        <h2>Come sta andando il mese</h2>
+        <button class="panel-info-btn" data-panel="bilancio" type="button">i</button>
       </div>
-      <button class="reset-btn" id="reset-entries">Azzera giorni</button>
+      <button class="reset-btn" id="reset-entries">Ricomincia il mese</button>
     </div>
     <div class="panel-body" id="panel-body-bilancio">
       <div class="summary-grid">
         <div class="sum-card">
-          <div class="label">Margine cumulato</div>
+          <div class="label">Quanto hai risparmiato finora</div>
           <div class="value" id="sum-margine">€ 0,00</div>
           <div class="sub" id="sum-margine-sub">margine disponibile + extra &minus; spesa, giorni registrati</div>
         </div>
         <div class="sum-card">
-          <div class="label">Giorni entro il budget</div>
+          <div class="label">Giorni in cui sei stato nei tuoi limiti</div>
           <div class="value" id="sum-vs-pareggio">0 / 0</div>
           <div class="sub" id="sum-vs-pareggio-sub">giorni con margine non negativo, sui giorni registrati</div>
         </div>
@@ -875,9 +1084,26 @@
         <div id="chart-svg-holder" style="position:relative;"></div>
         <div id="chart-tooltip" class="chart-tooltip"></div>
         <div class="legend">
-          <span><span class="swatch" style="background:var(--red)"></span> linea di pareggio (zero)</span>
-          <span><span class="swatch" style="background:var(--ink)"></span> margine cumulato</span>
+          <span><span class="swatch" style="background:var(--red)"></span> linea dello zero</span>
+          <span><span class="swatch" style="background:var(--ink)"></span> il tuo risparmio</span>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOVE VANNO I TUOI SOLDI -->
+  <div class="panel">
+    <div class="panel-head" id="panel-head-categorie">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="categorie" type="button"></button>
+        <h2>Dove vanno i tuoi soldi</h2>
+        <button class="panel-info-btn" data-panel="categorie" type="button">i</button>
+      </div>
+    </div>
+    <div class="panel-body" id="panel-body-categorie">
+      <div class="category-chart-row">
+        <div id="category-chart-holder" class="category-chart-holder"></div>
+        <div id="category-chart-legend" class="category-chart-legend"></div>
       </div>
     </div>
   </div>
@@ -888,11 +1114,13 @@
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="registro" type="button"></button>
         <h2>Registro spese</h2>
+        <button class="panel-info-btn" data-panel="registro" type="button">i</button>
       </div>
       <div class="view-toggle">
         <button class="view-toggle-btn gran-toggle-btn active" data-mode="day" type="button">Giornaliera</button>
         <button class="view-toggle-btn gran-toggle-btn" data-mode="week" type="button">Settimanale</button>
       </div>
+      <button class="past-editor-btn" id="past-editor-btn" type="button" title="Modifica i giorni precedenti">&#9881;</button>
     </div>
     <div class="panel-body" id="panel-body-registro">
       <div id="daily-view" class="entry-list"></div>
@@ -919,24 +1147,25 @@
           <div class="panel-head-left">
             <button class="panel-collapse-btn" data-panel="trading" type="button"></button>
             <h2>Trading</h2>
+            <button class="panel-info-btn" data-panel="trading" type="button">i</button>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
-            <span class="tag trading-tag" id="trading-total-tag">P/L: € 0,00</span>
+            <span class="tag trading-tag" id="trading-total-tag">Risultato: € 0,00</span>
             <button class="eye-btn" id="eye-trading" type="button" title="Mostra/nascondi importi" style="color:var(--trading);"></button>
           </div>
         </div>
         <div class="panel-body" id="panel-body-trading">
           <div class="invest-totals" style="margin-top:0; padding-top:0; border-top:none;">
             <div class="invest-total-card">
-              <div class="label">Importo disponibile (broker/sito)</div>
+              <div class="label">Soldi disponibili (broker/sito)</div>
               <input type="number" step="0.01" id="trading-disponibile" class="box-input" placeholder="0,00">
             </div>
             <div class="invest-total-card">
-              <div class="label">Somma investita</div>
+              <div class="label">Quanto hai investito</div>
               <input type="number" step="0.01" id="trading-investito" class="box-input" placeholder="0,00">
             </div>
             <div class="invest-total-card">
-              <div class="label">% realizzata</div>
+              <div class="label">% guadagnata</div>
               <div class="value" id="trading-pct">—</div>
               <div class="sub" id="trading-pct-sub"></div>
             </div>
@@ -952,24 +1181,25 @@
           <div class="panel-head-left">
             <button class="panel-collapse-btn" data-panel="betting" type="button"></button>
             <h2>Betting</h2>
+            <button class="panel-info-btn" data-panel="betting" type="button">i</button>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
-            <span class="tag betting-tag" id="betting-total-tag">P/L: € 0,00</span>
+            <span class="tag betting-tag" id="betting-total-tag">Risultato: € 0,00</span>
             <button class="eye-btn" id="eye-betting" type="button" title="Mostra/nascondi importi" style="color:var(--betting);"></button>
           </div>
         </div>
         <div class="panel-body" id="panel-body-betting">
           <div class="invest-totals" style="margin-top:0; padding-top:0; border-top:none;">
             <div class="invest-total-card">
-              <div class="label">Importo disponibile (broker/sito)</div>
+              <div class="label">Soldi disponibili (broker/sito)</div>
               <input type="number" step="0.01" id="betting-disponibile" class="box-input" placeholder="0,00">
             </div>
             <div class="invest-total-card">
-              <div class="label">Somma investita</div>
+              <div class="label">Quanto hai investito</div>
               <input type="number" step="0.01" id="betting-investito" class="box-input" placeholder="0,00">
             </div>
             <div class="invest-total-card">
-              <div class="label">% realizzata</div>
+              <div class="label">% guadagnata</div>
               <div class="value" id="betting-pct">—</div>
               <div class="sub" id="betting-pct-sub"></div>
             </div>
@@ -988,9 +1218,10 @@
         <div class="panel-head-left">
           <button class="panel-collapse-btn" data-panel="altriconti" type="button"></button>
           <h2>Conto di emergenza</h2>
+          <button class="panel-info-btn" data-panel="altriconti" type="button">i</button>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
-          <span class="tag emergency-tag">fondo di riserva</span>
+          <span class="tag emergency-tag">per le emergenze</span>
           <button class="eye-btn" id="eye-altriconti" type="button" title="Mostra/nascondi importo" style="color:var(--emergency);"></button>
         </div>
       </div>
@@ -1101,16 +1332,40 @@ function dailySpese(day){ return dailyItems(day, 'spese'); }
 function dailySpesaTotal(day){ return dailyItemsTotal(day, 'spese'); }
 function dailyEntrate(day){ return dailyItems(day, 'entrate'); }
 function dailyEntrateTotal(day){ return dailyItemsTotal(day, 'entrate'); }
+// Le settimane seguono il calendario reale e finiscono sempre di domenica:
+// la prima settimana del mese dura da 1 a 7 giorni (fino alla prima
+// domenica), le settimane intermedie sono sempre lunedì-domenica, e
+// l'ultima settimana va dal lunedì successivo all'ultima domenica fino
+// all'ultimo giorno del mese, qualunque esso sia.
+function buildWeekBoundaries(giorni){
+  const g = Math.max(1, giorni || 1);
+  const boundaries = [];
+  const weekday1 = dateForDay(1).getDay(); // 0=Domenica, 1=Lunedì, ... 6=Sabato
+  const daysUntilSunday = (7 - weekday1) % 7;
+  const firstWeekEnd = Math.min(1 + daysUntilSunday, g);
+  boundaries.push({ start: 1, end: firstWeekEnd });
+  let cursor = firstWeekEnd + 1;
+  while(cursor <= g){
+    const end = Math.min(cursor + 6, g);
+    boundaries.push({ start: cursor, end });
+    cursor = end + 1;
+  }
+  return boundaries;
+}
 function weekIndexForDay(day){
-  return Math.ceil(day / 7);
+  const g = Math.max(1, state.giorni || 1);
+  const boundaries = buildWeekBoundaries(g);
+  for(let i = 0; i < boundaries.length; i++){
+    if(day >= boundaries[i].start && day <= boundaries[i].end) return i + 1;
+  }
+  return boundaries.length || 1;
 }
 function weekRange(weekIndex, giorni){
-  const start = (weekIndex - 1) * 7 + 1;
-  const end = Math.min(start + 6, giorni);
-  return { start, end };
+  const boundaries = buildWeekBoundaries(giorni);
+  return boundaries[weekIndex - 1] || { start: 1, end: Math.max(1, giorni || 1) };
 }
 function totalWeeks(giorni){
-  return Math.ceil(Math.max(1, giorni) / 7);
+  return buildWeekBoundaries(giorni).length;
 }
 
 // ===== VOCI A LIVELLO DI SETTIMANA (non legate a un giorno preciso) =====
@@ -1139,6 +1394,40 @@ function dayHasEffectiveData(day){
   const wIdx = weekIndexForDay(day);
   return dailySpese(day).length > 0 || dailyEntrate(day).length > 0 ||
     weekItemsList(wIdx, 'spese').length > 0 || weekItemsList(wIdx, 'entrate').length > 0;
+}
+
+// L'ultimo giorno con una voce SUA propria (spesa/entrata inserita
+// direttamente su quel giorno) — diverso da "l'ultimo giorno con QUALSIASI
+// dato", perché una spesa "tutta la settimana" ammortizzata tocca allo
+// stesso modo tutti i 7 giorni: se poi aggiungi anche una spesa specifica su
+// un giorno preciso, quel giorno deve avere la priorità su tutti gli altri
+// giorni della settimana che hanno solo la quota ammortizzata.
+function lastDayWithOwnData(g){
+  let last = 0;
+  for(let day = 1; day <= g; day++){
+    if(dailySpese(day).length > 0 || dailyEntrate(day).length > 0){ last = day; }
+  }
+  return last;
+}
+
+// Bilancio CUMULATIVO all'interno della settimana, dall'inizio della
+// settimana fino (e incluso) al giorno indicato. Se un giorno sfora,
+// il peso si porta dietro sui giorni successivi della STESSA settimana —
+// esattamente come "Come sta andando il mese" fa già a livello di mese —
+// invece di far ripartire ogni giorno da zero come se fosse isolato.
+// Si azzera all'inizio di ogni nuova settimana.
+function weekCumMargineAt(day, t){
+  t = t || targets();
+  const wIdx = weekIndexForDay(day);
+  const g = Math.max(1, state.giorni || 1);
+  const { start, end } = weekRange(wIdx, g);
+  let cum = 0;
+  let anyData = false;
+  for(let d = start; d <= Math.min(day, end); d++){
+    if(dayHasEffectiveData(d)) anyData = true;
+    cum += t.disponibile + dailyEntrateEffective(d) - dailySpesaEffective(d);
+  }
+  return { cum, anyData };
 }
 
 let saveTimer = null;
@@ -1222,6 +1511,61 @@ function currentMonthDefault(){
   return t.y + '-' + String(t.m).padStart(2,'0');
 }
 
+const GIORNI_SETTIMANA_IT = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+const MESI_IT = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+const GIORNI_SETTIMANA_ABBR = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+const MESI_ABBR = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+
+// Data reale corrispondente al giorno N del mese tracciato (es. il "Giorno 11"
+// del registro spese, nel mese di settembre 2026, è davvero venerdì 11/09).
+function dateForDay(day){
+  const mese = state.mese || currentMonthDefault();
+  const [y, m] = mese.split('-').map(Number);
+  return new Date(y, m - 1, day);
+}
+// Etichetta "giorno della settimana, numero, mese" per l'intestazione di ogni
+// riga del registro spese giornaliero — es. "Ven 11 Set" — al posto del
+// generico "Giorno 11".
+function dayHeaderLabel(day){
+  const d = dateForDay(day);
+  return GIORNI_SETTIMANA_ABBR[d.getDay()] + ' ' + day + ' ' + MESI_ABBR[d.getMonth()];
+}
+// Un giorno è "passato" se è prima di oggi nel mese che si sta tracciando
+// (che ormai coincide sempre col mese reale). Resta comunque modificabile:
+// serve solo a farlo risaltare un po' meno nella vista iniziale.
+function isPastDay(day){
+  const tt = today();
+  return state.mese === currentMonthDefault() && day < tt.day;
+}
+
+// Barra sempre visibile con la data di oggi e l'avanzamento nel mese
+// tracciato: la piattaforma sa sempre a che giorno del calendario reale
+// siamo arrivati, e la mostra rispetto al mese che si sta seguendo.
+function renderTodayBar(){
+  const bar = document.getElementById('today-bar');
+  if(!bar) return;
+  const now = new Date();
+  const dayName = GIORNI_SETTIMANA_IT[now.getDay()];
+  const monthName = MESI_IT[now.getMonth()];
+
+  const isCurrentMonth = state.mese === currentMonthDefault();
+  const g = Math.max(1, state.giorni || 1);
+  const tt = today();
+  const fractionEl = document.getElementById('today-bar-fraction');
+  const fillEl = document.getElementById('today-bar-fill');
+
+  if(isCurrentMonth && tt.day >= 1 && tt.day <= g){
+    const wIdx = weekIndexForDay(tt.day);
+    document.getElementById('today-bar-date').textContent = dayName + ' ' + now.getDate() + ' ' + monthName + ' — Settimana ' + wIdx;
+    fractionEl.textContent = 'Giorno ' + tt.day + ' di ' + g;
+    fillEl.style.width = Math.min(100, Math.round((tt.day / g) * 100)) + '%';
+  }else{
+    document.getElementById('today-bar-date').textContent = dayName + ' ' + now.getDate() + ' ' + monthName;
+    fractionEl.textContent = 'Stai seguendo un mese diverso da quello attuale';
+    fillEl.style.width = '0%';
+  }
+}
+
 function daysInMonth(meseStr){
   if(!meseStr) return 30;
   const [y,m] = meseStr.split('-').map(Number);
@@ -1244,20 +1588,25 @@ async function load(){
   }catch(e){
     // nessun dato salvato ancora
   }
-  if(!state.mese){ state.mese = currentMonthDefault(); }
+  // il mese non si sceglie più a mano: si allinea sempre al calendario reale
+  const rilevatoMese = currentMonthDefault();
+  if(state.mese !== rilevatoMese){
+    state.mese = rilevatoMese;
+    state.giorni = daysInMonth(state.mese);
+  }
   if(!state.giorni || state.giorni < 1){ state.giorni = daysInMonth(state.mese); }
 
   // migrazione da versione precedente con costo fisso singolo
   if((!state.costiItems || state.costiItems.length === 0) && state.costiFissi){
-    state.costiItems = [{ id: nextCostiId(), label: 'Costi fissi', amount: state.costiFissi }];
+    state.costiItems = [{ id: nextCostiId(), label: 'Spese fisse', amount: state.costiFissi }];
     delete state.costiFissi;
   }
   if(!state.costiItems){ state.costiItems = []; }
-  if(state.costiItems.length === 0){
-    state.costiItems = [{ id: nextCostiId(), label: '', amount: null }];
-  }
-  // assicura id univoci
-  state.costiItems.forEach(it => { if(!it.id) it.id = nextCostiId(); });
+  // assicura id univoci e categoria normalizzata
+  state.costiItems.forEach(it => {
+    if(!it.id) it.id = nextCostiId();
+    if(it.categoria === undefined) it.categoria = null;
+  });
 
   // normalizza i dati degli investimenti (con migrazione dal vecchio formato a lista di posizioni)
   function normalizeInvestSection(sec){
@@ -1359,23 +1708,31 @@ async function load(){
   renderAll();
 }
 
+async function performSave(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+    document.getElementById('setup-tag').textContent = 'salvato';
+    const note = document.getElementById('save-note');
+    if(note) note.textContent = 'Ultimo salvataggio: ' + new Date().toLocaleTimeString('it-IT');
+  }catch(e){
+    document.getElementById('setup-tag').textContent = 'errore salvataggio';
+  }
+}
 function scheduleSave(){
   document.getElementById('setup-tag').textContent = 'salvataggio...';
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(async () => {
-    try{
-      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
-      document.getElementById('setup-tag').textContent = 'salvato';
-      const note = document.getElementById('save-note');
-      note.textContent = 'Ultimo salvataggio: ' + new Date().toLocaleTimeString('it-IT');
-    }catch(e){
-      document.getElementById('setup-tag').textContent = 'errore salvataggio';
-    }
-  }, 400);
+  saveTimer = setTimeout(performSave, 400);
+}
+// salvataggio immediato, senza attesa: usato nei momenti in cui NON possiamo
+// permetterci di perdere il dato se l'utente chiude subito il browser
+// (es. appena completato l'onboarding).
+async function saveNow(){
+  clearTimeout(saveTimer);
+  document.getElementById('setup-tag').textContent = 'salvataggio...';
+  await performSave();
 }
 
 function hydrateInputs(){
-  document.getElementById('mese').value = state.mese;
   document.getElementById('giorni').value = state.giorni;
   document.getElementById('stipendio').value = state.stipendio || '';
   renderCostiItems();
@@ -1387,72 +1744,151 @@ function hydrateInputs(){
 
 function makeCostiRow(item){
   const row = document.createElement('div');
-  row.className = 'costi-row';
   row.dataset.id = item.id;
+  const editing = editingItems.has(item.id);
 
-  const labelInput = document.createElement('input');
-  labelInput.type = 'text';
-  labelInput.dataset.field = 'label';
-  labelInput.placeholder = 'es. Affitto, Bollette, Software...';
-  labelInput.value = item.label || '';
-
-  const amountInput = document.createElement('input');
-  amountInput.type = 'number';
-  amountInput.step = '0.01';
-  amountInput.dataset.field = 'amount';
-  amountInput.placeholder = '0,00';
-  amountInput.value = (item.amount !== null && item.amount !== undefined) ? item.amount : '';
-
-  const delBtn = document.createElement('button');
-  delBtn.className = 'del-row';
-  delBtn.title = 'Rimuovi voce';
-  delBtn.innerHTML = '&times;';
-
-  [labelInput, amountInput].forEach(inp => {
-    inp.addEventListener('input', () => {
-      const field = inp.dataset.field;
-      item[field] = field === 'amount' ? (inp.value === '' ? null : parseFloat(inp.value)) : inp.value;
-      updateCostiTotal();
-      renderAll();
-      scheduleSave();
-    });
-  });
-
-  delBtn.addEventListener('click', () => {
-    if(state.costiItems.length <= 1) return;
+  function afterChange(){
+    updateCostiTotal();
+    renderAll();
+    renderCategoryChart();
+    scheduleSave();
+  }
+  function removeItem(){
     const idx = state.costiItems.findIndex(it => it.id === item.id);
     if(idx === -1) return;
     state.costiItems.splice(idx, 1);
-    row.remove();
-    refreshDeleteButtonsState();
-    updateCostiTotal();
-    renderAll();
-    scheduleSave();
-  });
+    editingItems.delete(item.id);
+    renderCostiItems();
+    afterChange();
+  }
+  function rerenderThisRow(){
+    const fresh = makeCostiRow(item);
+    row.replaceWith(fresh);
+  }
 
-  row.appendChild(labelInput);
-  row.appendChild(amountInput);
-  row.appendChild(delBtn);
+  if(editing){
+    row.className = 'expense-item';
+
+    const amountInput = document.createElement('input');
+    amountInput.type = 'number';
+    amountInput.step = '0.01';
+    amountInput.className = 'expense-importo';
+    amountInput.placeholder = '0,00';
+    amountInput.value = (item.amount !== null && item.amount !== undefined) ? item.amount : '';
+
+    // stessa scelta di categorie delle spese: la categoria fa già da
+    // "descrizione" interattiva, niente bisogno di un nome scritto a mano.
+    let selectedCategoria = item.categoria || null;
+    const categoryPicker = document.createElement('div');
+    categoryPicker.className = 'category-picker';
+    function renderPills(){
+      categoryPicker.innerHTML = '';
+      SPESA_CATEGORIES.forEach(cat => {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'category-pill' + (selectedCategoria === cat.id ? ' active' : '');
+        pill.style.setProperty('--cat-color', cat.color);
+        pill.innerHTML = cat.emoji + ' ' + cat.label;
+        pill.addEventListener('click', () => {
+          selectedCategoria = (selectedCategoria === cat.id) ? null : cat.id;
+          renderPills();
+        });
+        categoryPicker.appendChild(pill);
+      });
+    }
+    renderPills();
+
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'expense-save';
+    saveBtn.textContent = 'Salva';
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'expense-del';
+    delBtn.innerHTML = '&times;';
+    delBtn.title = 'Rimuovi voce';
+
+    saveBtn.addEventListener('click', () => {
+      item.amount = amountInput.value === '' ? null : parseFloat(amountInput.value);
+      item.categoria = selectedCategoria;
+      editingItems.delete(item.id);
+      rerenderThisRow();
+      afterChange();
+    });
+    delBtn.addEventListener('click', removeItem);
+
+    row.appendChild(amountInput);
+    row.appendChild(categoryPicker);
+    row.appendChild(saveBtn);
+    row.appendChild(delBtn);
+
+  }else{
+    row.className = 'expense-item saved';
+
+    const importoSpan = document.createElement('span');
+    importoSpan.className = 'expense-saved-importo';
+    importoSpan.textContent = fmt(parseFloat(item.amount) || 0);
+    row.appendChild(importoSpan);
+
+    if(item.categoria){
+      const cat = categoryById(item.categoria);
+      if(cat){
+        const catTag = document.createElement('span');
+        catTag.className = 'expense-saved-category';
+        catTag.style.setProperty('--cat-color', cat.color);
+        catTag.innerHTML = cat.emoji + ' ' + cat.label;
+        row.appendChild(catTag);
+      }
+    }else{
+      const noCatSpan = document.createElement('span');
+      noCatSpan.className = 'expense-saved-nota empty';
+      noCatSpan.textContent = 'Nessuna categoria';
+      row.appendChild(noCatSpan);
+    }
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'expense-edit';
+    editBtn.title = 'Modifica voce';
+    editBtn.innerHTML = PENCIL_SVG;
+    editBtn.addEventListener('click', () => {
+      editingItems.add(item.id);
+      rerenderThisRow();
+      if(typeof requestAnimationFrame === 'function'){
+        requestAnimationFrame(() => {
+          const el = document.querySelector(`.costi-section [data-id="${item.id}"] .expense-importo`);
+          if(el) el.focus();
+        });
+      }
+    });
+    row.appendChild(editBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'expense-del';
+    delBtn.innerHTML = '&times;';
+    delBtn.title = 'Rimuovi voce';
+    delBtn.addEventListener('click', removeItem);
+    row.appendChild(delBtn);
+  }
+
   return row;
-}
-
-function refreshDeleteButtonsState(){
-  const wrap = document.getElementById('costi-rows');
-  const onlyOne = state.costiItems.length <= 1;
-  wrap.querySelectorAll('.del-row').forEach(btn => {
-    btn.disabled = onlyOne;
-    btn.style.opacity = onlyOne ? '.35' : '';
-    btn.style.cursor = onlyOne ? 'default' : '';
-  });
 }
 
 function renderCostiItems(){
   const wrap = document.getElementById('costi-rows');
   wrap.innerHTML = '';
-  state.costiItems.forEach(item => {
-    wrap.appendChild(makeCostiRow(item));
-  });
-  refreshDeleteButtonsState();
+  if(state.costiItems.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'entry-empty-note';
+    empty.textContent = 'Nessuna spesa fissa registrata: aggiungine una quando vuoi con il pulsante qui sotto.';
+    wrap.appendChild(empty);
+  }else{
+    state.costiItems.forEach(item => {
+      wrap.appendChild(makeCostiRow(item));
+    });
+  }
   updateCostiTotal();
 }
 
@@ -1491,20 +1927,20 @@ function updateInvestComputed(section){
     pctEl.textContent = MASK;
     pctEl.className = 'value masked';
     subEl.textContent = '';
-    tagEl.textContent = 'P/L: ' + MASK;
+    tagEl.textContent = 'Risultato: ' + MASK;
     return;
   }
 
   if(v.hasAny && v.pct !== null){
     pctEl.textContent = (v.pct >= 0 ? '+' : '') + v.pct.toLocaleString('it-IT', {minimumFractionDigits:1, maximumFractionDigits:1}) + '%';
     pctEl.className = 'value ' + (v.pct >= 0 ? 'pos' : 'neg');
-    subEl.textContent = 'P/L: ' + (v.pl >= 0 ? '+' : '') + fmt(v.pl);
+    subEl.textContent = 'Risultato: ' + (v.pl >= 0 ? '+' : '') + fmt(v.pl);
   }else{
     pctEl.textContent = '—';
     pctEl.className = 'value';
     subEl.textContent = '';
   }
-  tagEl.textContent = 'P/L: ' + (v.hasAny ? (v.pl >= 0 ? '+' : '') + fmt(v.pl) : '€ 0,00');
+  tagEl.textContent = 'Risultato: ' + (v.hasAny ? (v.pl >= 0 ? '+' : '') + fmt(v.pl) : '€ 0,00');
 }
 
 ['trading', 'betting'].forEach(section => {
@@ -1573,49 +2009,162 @@ function renderThresholds(){
   const mult = granularity === 'week' ? 7 : 1;
   const periodo = granularity === 'week' ? 'a settimana' : 'al giorno';
   const ogni = granularity === 'week' ? 'ogni settimana' : 'ogni giorno';
-  const divisore = granularity === 'week' ? 'giorni nel mese &divide; 7' : 'giorni nel mese';
 
-  document.getElementById('target-pareggio-label').innerHTML = 'Soglia di pareggio &middot; ' + periodo;
+  document.getElementById('target-pareggio-label').innerHTML = 'Spese fisse &middot; ' + periodo;
   document.getElementById('target-pareggio').textContent = fmt(t.pareggio * mult);
-  document.getElementById('target-pareggio-sub').innerHTML = 'Costi fissi &divide; ' + divisore + ' &mdash; il minimo da incassare ' + ogni + ' per coprire i costi fissi';
+  document.getElementById('target-pareggio-sub').textContent = 'Quanto ti serve ' + ogni + ' solo per coprire le spese fisse';
 
-  document.getElementById('target-stipendio-label').innerHTML = 'Stipendio &middot; equivalente ' + periodo;
+  document.getElementById('target-stipendio-label').innerHTML = 'Stipendio &middot; ' + periodo;
   document.getElementById('target-stipendio').textContent = fmt(t.stipendioGiorno * mult);
-  document.getElementById('target-stipendio-sub').innerHTML = 'Stipendio &divide; ' + divisore + ' &mdash; quanto vale ' + (granularity === 'week' ? 'una settimana' : 'una giornata') + ' del tuo stipendio';
+  document.getElementById('target-stipendio-sub').textContent = 'Quanto vale, in media, ' + (granularity === 'week' ? 'una settimana' : 'una giornata') + ' del tuo stipendio';
 
-  document.getElementById('target-disponibile-label').textContent = granularity === 'week' ? 'Margine settimanale disponibile' : 'Margine giornaliero disponibile';
+  document.getElementById('target-disponibile-label').textContent = granularity === 'week' ? 'Quanto puoi spendere a settimana' : 'Quanto puoi spendere al giorno';
   const dispEl = document.getElementById('target-disponibile');
   dispEl.textContent = fmt(t.disponibile * mult);
   dispEl.className = 'value' + (t.disponibile < 0 ? ' neg' : '');
-  document.getElementById('target-disponibile-sub').textContent = 'Stipendio ' + periodo + ' − soglia di pareggio — quanto puoi spendere ' + ogni.replace('ogni','a') + ' senza andare in negativo';
+  document.getElementById('target-disponibile-sub').textContent = 'Quello che ti resta ' + ogni + ' dopo le spese fisse, senza andare in rosso';
 
-  // Margine giornaliero live: parte dal margine disponibile e lo aggiusta
-  // "rateizzando" lo scostamento reale accumulato (spese fuori budget o
-  // risparmi) su TUTTI i giorni del mese — con lo stesso ragionamento con
-  // cui un costo fisso viene diviso per i giorni nel mese. Così un paio di
-  // giornate fuori budget abbassano leggermente il margine di ogni giorno,
-  // invece di scaricare tutto il colpo su un solo giorno.
+  // Quanto ti resta oggi/questa settimana: SEMPRE e solo il bilancio reale
+  // dell'ULTIMO giorno (o settimana) per cui hai davvero inserito qualcosa
+  // — comprese le quote di eventuali spese/entrate "tutta la settimana" che
+  // vi ricadono. Non usiamo la data reale del calendario: se quel giorno
+  // preciso non ha ancora nulla di suo, ma i giorni vicini sì (es. una spesa
+  // settimanale spalmata sui giorni 1-7), la cifra deve comunque riflettere
+  // quello che è già stato pianificato, non saltare a un tetto massimo che
+  // ignora tutto — altrimenti due punti dell'app raccontano due storie
+  // diverse per la stessa situazione. Stesso ragionamento già usato per
+  // "Come sta andando il mese". Priorità: un giorno con una voce SUA propria
+  // (es. una spesa aggiunta apposta su quel giorno) conta più di un giorno
+  // che ha solo la quota ammortizzata di una spesa "tutta la settimana" —
+  // altrimenti l'ultimo giorno della settimana (toccato solo dalla media)
+  // vincerebbe sempre su un giorno con dati reali propri più significativi.
   const g = Math.max(1, state.giorni || 1);
-  const { daysWithData, points } = computeSeries();
-  const cumMargine = daysWithData > 0 ? points[daysWithData - 1].cumMargine : 0;
-  const liveMargin = (t.disponibile + (cumMargine / g)) * mult;
-  document.getElementById('target-live-label').textContent = granularity === 'week' ? 'Margine settimanale live · spese' : 'Margine giornaliero live · spese';
+  const { daysWithData } = computeSeries();
+  // Il giorno di riferimento per "quanto ti resta oggi": se esiste un
+  // giorno con una voce SUA propria (spesa/entrata inserita apposta su quel
+  // giorno), usiamo quello — riflette qualcosa che è davvero già successo.
+  // Se invece c'è SOLO l'ammortamento di una spesa "tutta la settimana"
+  // (nessun giorno toccato singolarmente), partiamo dal PRIMO giorno di
+  // quella settimana, non dall'ultimo: altrimenti sembrerebbe che l'intera
+  // settimana sia già trascorsa, mentre in realtà è solo una previsione di
+  // spesa che deve ancora ripartirsi giorno per giorno.
+  const ownDay = lastDayWithOwnData(g);
+  let referenceDay;
+  if(ownDay > 0){
+    referenceDay = ownDay;
+  }else if(daysWithData > 0){
+    const wIdx = weekIndexForDay(daysWithData);
+    const { start } = weekRange(wIdx, g);
+    referenceDay = start;
+  }else{
+    referenceDay = 0;
+  }
+
+  let liveMargin, liveSubText;
+  if(granularity === 'week'){
+    if(referenceDay > 0){
+      const wIdx = weekIndexForDay(referenceDay);
+      const weekAgg = weekAggregates(wIdx, t);
+      liveMargin = weekAgg.margineTot;
+      liveSubText = 'È il bilancio reale dell\'ultima settimana con dati registrati (Sett. ' + wIdx + ')';
+    }else{
+      liveMargin = t.disponibile * mult;
+      liveSubText = 'Nessun dato ancora registrato: per ora coincide con quanto puoi spendere';
+    }
+  }else{
+    if(referenceDay > 0){
+      liveMargin = weekCumMargineAt(referenceDay, t).cum;
+      liveSubText = 'È il bilancio reale dell\'ultimo giorno registrato (Giorno ' + String(referenceDay).padStart(2, '0') + ')';
+    }else{
+      liveMargin = t.disponibile;
+      liveSubText = 'Nessun dato ancora registrato: per ora coincide con quanto puoi spendere';
+    }
+  }
+  document.getElementById('target-live-label').textContent = granularity === 'week' ? 'Quanto ti resta questa settimana' : 'Quanto ti resta oggi';
   const liveEl = document.getElementById('target-live');
   const liveSubEl = document.getElementById('target-live-sub');
   liveEl.textContent = fmt(liveMargin);
   liveEl.className = 'value' + (liveMargin >= 0 ? ' pos' : ' neg');
-  if(daysWithData === 0){
-    liveSubEl.textContent = 'Nessun giorno ancora registrato: coincide con il margine disponibile';
-  }else{
-    liveSubEl.textContent = (cumMargine >= 0 ? '+' : '') + fmt(cumMargine) + ' di scostamento sui giorni registrati, ripartiti su ' + g + ' giorni';
-  }
+  liveSubEl.textContent = liveSubText;
 }
 
 const CHEVRON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
+const LOCK_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
 const PENCIL_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+
+// Categorie facoltative per le spese, usate anche nel grafico "Dove vanno i tuoi soldi"
+const SPESA_CATEGORIES = [
+  { id: 'casa',          label: 'Casa',          emoji: '🏠', color: '#8E6C4B' },
+  { id: 'abbonamenti',   label: 'Abbonamenti',   emoji: '📱', color: '#6B7FD7' },
+  { id: 'veicolo',       label: 'Veicolo',       emoji: '🚗', color: '#D77A6B' },
+  { id: 'cibo',          label: 'Cibo',          emoji: '🍽️', color: '#D9A44E' },
+  { id: 'bar',           label: 'Bar/Ristoranti',emoji: '☕', color: '#B8722E' },
+  { id: 'market',        label: 'Market',        emoji: '🛒', color: '#5FA08A' },
+  { id: 'investimenti',  label: 'Investimenti',  emoji: '📈', color: '#3D5A80' },
+  { id: 'risparmi',      label: 'Risparmi',      emoji: '💰', color: '#9C4F72' },
+  { id: 'altro',         label: 'Altro',         emoji: '📦', color: '#8489A0' },
+];
+function categoryById(id){ return SPESA_CATEGORIES.find(c => c.id === id) || null; }
+
+// ===== MICRO-CONFERME: un piccolo messaggio quando le cose vanno bene =====
+let celebrateTimer = null;
+function showCelebration(message){
+  let toast = document.getElementById('celebrate-toast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'celebrate-toast';
+    toast.className = 'toast-celebrate';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = '<span class="toast-celebrate-emoji">🎉</span><span>' + message + '</span>';
+  toast.classList.remove('visible');
+  void toast.offsetWidth; // forza il reflow così l'animazione riparte anche se già visibile
+  requestAnimationFrame(() => toast.classList.add('visible'));
+  clearTimeout(celebrateTimer);
+  celebrateTimer = setTimeout(() => { toast.classList.remove('visible'); }, 2800);
+}
+
+function greetingName(){
+  return (state.profilo && state.profilo.nome) ? state.profilo.nome : '';
+}
+
+// Da chiamare dopo aver salvato una voce: se il giorno/la settimana/il mese
+// coinvolti risultano in positivo, mostra un piccolo messaggio di incoraggiamento.
+// Un solo messaggio per volta, con priorità al traguardo più significativo.
+function maybeCelebrateAfterSave(day, opts){
+  const t = targets();
+  const g = Math.max(1, state.giorni || 1);
+  const { daysWithData, points } = computeSeries();
+  const monthMargine = daysWithData > 0 ? points[daysWithData - 1].cumMargine : 0;
+  const name = greetingName();
+  const hail = name ? ('Bravo ' + name + '!') : 'Ottimo lavoro!';
+
+  if(daysWithData === g && g > 0 && monthMargine >= 0){
+    showCelebration(hail + ' Hai chiuso il mese in positivo.');
+    return;
+  }
+  if(opts && opts.showDaySelector){
+    const a = weekAggregates(opts.weekIndex, t);
+    if(a.haQualcosa && a.margineTot >= 0){
+      showCelebration(hail + ' Questa settimana sei in budget.');
+      return;
+    }
+  }else if(typeof day === 'number'){
+    if(dayHasEffectiveData(day)){
+      const dayMargine = t.disponibile + dailyEntrateEffective(day) - dailySpesaEffective(day);
+      if(dayMargine >= 0){
+        showCelebration(hail + ' Oggi sei in budget.');
+        return;
+      }
+    }
+  }
+}
+
 
 let expandedDays = new Set();
 let expandedWeeks = new Set();
+let expandedPastDays = new Set();
+let expandedPastWeeks = new Set();
 let editingItems = new Set(); // id delle voci (spesa/entrata) attualmente in modifica, non ancora salvate
 let collapsedSections = new Set(); // chiavi tipo "day-5-spese" o "week-1-entrate": sezioni compresse
 
@@ -1679,7 +2228,8 @@ function buildItemSection(sectionKey, title, pairs, kind, ctx){
       state.entries[targetDay][kind].push(newItem);
       if(ctx.isWeek){ rerenderWeekRow(ctx.weekIndex); rerenderDayRow(targetDay); }
       else{ rerenderDayRow(ctx.day); renderWeeklyTable(); }
-      renderThresholds(); renderSummary(); renderChart(); updatePatrimonio();
+      renderThresholds(); renderSummary(); renderChart(); renderCategoryChart(); updatePatrimonio();
+      if(document.getElementById('past-editor-overlay').style.display !== 'none'){ renderPastEditorList(); renderTable(); renderWeeklyTable(); }
       scheduleSave();
       if(typeof requestAnimationFrame === 'function'){
         requestAnimationFrame(() => {
@@ -1698,6 +2248,52 @@ function buildItemSection(sectionKey, title, pairs, kind, ctx){
 
 // ===== VISTA GIORNALIERA =====
 
+// ===== SEZIONE SEPARATA: modifica dei giorni/settimane precedenti =====
+function renderPastEditorList(){
+  const list = document.getElementById('past-editor-list');
+  const emptyNote = document.getElementById('past-editor-empty');
+  const titleEl = document.getElementById('past-editor-title');
+  if(!list) return;
+  list.innerHTML = '';
+
+  const t = targets();
+  const g = Math.max(1, state.giorni || 1);
+  const isCurrentMonth = state.mese === currentMonthDefault();
+  const tt = today();
+  let any = false;
+
+  if(granularity === 'week'){
+    titleEl.textContent = 'Modifica le settimane precedenti';
+    if(isCurrentMonth){
+      const currentWeekIdx = weekIndexForDay(Math.min(tt.day, g));
+      for(let w = 1; w < currentWeekIdx; w++){
+        list.appendChild(makeWeekRow(w, t, true));
+        any = true;
+      }
+    }
+  }else{
+    titleEl.textContent = 'Modifica i giorni precedenti';
+    if(isCurrentMonth){
+      const lastPast = Math.min(tt.day - 1, g);
+      for(let d = 1; d <= lastPast; d++){
+        list.appendChild(makeDayRow(d, t, false, true));
+        any = true;
+      }
+    }
+  }
+
+  list.style.display = any ? '' : 'none';
+  emptyNote.style.display = any ? 'none' : '';
+}
+function openPastEditor(){
+  renderPastEditorList();
+  document.getElementById('past-editor-overlay').style.display = 'flex';
+}
+document.getElementById('past-editor-btn').addEventListener('click', openPastEditor);
+document.getElementById('past-editor-close-x').addEventListener('click', () => {
+  document.getElementById('past-editor-overlay').style.display = 'none';
+});
+
 function renderTable(){
   const container = document.getElementById('daily-view');
   container.innerHTML = '';
@@ -1711,36 +2307,43 @@ function renderTable(){
   }
 }
 
-function makeDayRow(day, t, isToday){
+function makeDayRow(day, t, isToday, forceEditable){
   t = t || targets();
   const spese = dailySpese(day);
   const entrate = dailyEntrate(day);
-  const hasData = dayHasEffectiveData(day);
-  const margine = t.disponibile + dailyEntrateEffective(day) - dailySpesaEffective(day);
-  const expanded = expandedDays.has(day);
+  const { cum: margine, anyData: hasData } = weekCumMargineAt(day, t);
+  const trackingSet = forceEditable ? expandedPastDays : expandedDays;
+  const expanded = trackingSet.has(day);
   const voci = spese.length + entrate.length;
+  const isSunday = dateForDay(day).getDay() === 0;
+  const isMonthEnd = day === Math.max(1, state.giorni || 1);
+  const isPast = !forceEditable && isPastDay(day);
 
   const row = document.createElement('div');
-  row.className = 'entry-row' + (isToday ? ' today' : '') + (expanded ? ' expanded' : '');
+  row.className = 'entry-row' + (isToday ? ' today' : '') + (isSunday ? ' sunday' : '') + (isMonthEnd ? ' monthend' : '') + (isPast ? ' past locked' : '') + (expanded && !isPast ? ' expanded' : '');
   row.dataset.day = day;
 
   const header = document.createElement('div');
   header.className = 'entry-row-header';
   header.innerHTML = `
-    <span class="entry-chevron">${CHEVRON_SVG}</span>
-    <span class="entry-label">Giorno ${String(day).padStart(2,'0')}</span>
+    <span class="entry-chevron">${isPast ? LOCK_SVG : CHEVRON_SVG}</span>
+    <span class="entry-label">${dayHeaderLabel(day)}</span>
     <span class="entry-summary">
       ${voci > 0 ? `<span class="entry-summary-note">${voci} ${voci === 1 ? 'voce' : 'voci'}</span>` : ''}
       <span class="entry-summary-margine ${hasData ? (margine >= 0 ? 'pos' : 'neg') : ''}">${hasData ? fmt(margine) : '—'}</span>
     </span>
   `;
-  header.addEventListener('click', () => {
-    if(expandedDays.has(day)) expandedDays.delete(day); else expandedDays.add(day);
-    renderTable();
-  });
+  if(isPast){
+    header.title = 'Giorno passato: modificabile solo dalla sezione dedicata (ingranaggio qui sopra)';
+  }else{
+    header.addEventListener('click', () => {
+      if(trackingSet.has(day)) trackingSet.delete(day); else trackingSet.add(day);
+      if(forceEditable){ renderPastEditorList(); }else{ renderTable(); }
+    });
+  }
   row.appendChild(header);
 
-  if(expanded){
+  if(expanded && !isPast){
     row.appendChild(makeDayRowBody(day, t));
   }
   return row;
@@ -1749,8 +2352,7 @@ function makeDayRow(day, t, isToday){
 function makeDayRowBody(day, t){
   const spese = dailySpese(day);
   const entrate = dailyEntrate(day);
-  const hasData = dayHasEffectiveData(day);
-  const margine = t.disponibile + dailyEntrateEffective(day) - dailySpesaEffective(day);
+  const { cum: margine, anyData: hasData } = weekCumMargineAt(day, t);
   const amortSpesa = dailyAmortizedTotal(day, 'spese');
   const amortEntrata = dailyAmortizedTotal(day, 'entrate');
   // margine disponibile "aggiustato": la soglia base del giorno, già al netto
@@ -1763,15 +2365,15 @@ function makeDayRowBody(day, t){
   body.className = 'entry-row-body';
   body.innerHTML = `
     <div class="entry-fields entry-fields-2col">
-      <div class="entry-field"><label>Incasso &euro;</label><span class="readonly-cell">${fmt(t.stipendioGiorno)}</span></div>
+      <div class="entry-field"><label>Guadagno &euro;</label><span class="readonly-cell">${fmt(t.stipendioGiorno)}</span></div>
       <div class="entry-field">
-        <label>Margine disp. &euro;${isAdjusted ? ' <span class="field-adjusted-tag">aggiornato</span>' : ''}</label>
+        <label>Ti resta &euro;${isAdjusted ? ' <span class="field-adjusted-tag">aggiornato</span>' : ''}</label>
         <span class="readonly-cell${isAdjusted ? ' adjusted' : ''}">${fmt(dispAdjusted)}</span>
       </div>
     </div>
-    ${isAdjusted ? `<div class="week-amort-note">Margine di base ${fmt(t.disponibile)} &mdash; quota media da voci "tutta la settimana": ${amortEntrata > 0 ? '+' + fmt(amortEntrata) : ''}${(amortEntrata > 0 && amortSpesa > 0) ? ' &middot; ' : ''}${amortSpesa > 0 ? '−' + fmt(amortSpesa) : ''}</div>` : ''}
+    ${isAdjusted ? `<div class="week-amort-note">Di base avresti ${fmt(t.disponibile)} al giorno &mdash; qui include anche una parte delle voci "tutta la settimana": ${amortEntrata > 0 ? '+' + fmt(amortEntrata) : ''}${(amortEntrata > 0 && amortSpesa > 0) ? ' &middot; ' : ''}${amortSpesa > 0 ? '−' + fmt(amortSpesa) : ''}</div>` : ''}
     <div class="entry-final">
-      <span class="label">Margine del giorno</span>
+      <span class="label">Bilancio della settimana, a oggi</span>
       <span class="value ${hasData ? (margine >= 0 ? 'pos' : 'neg') : ''}">${hasData ? fmt(margine) : '—'}</span>
     </div>
   `;
@@ -1801,8 +2403,7 @@ function refreshDayRow(day){
   const t = targets();
   const spese = dailySpese(day);
   const entrate = dailyEntrate(day);
-  const hasData = dayHasEffectiveData(day);
-  const margine = t.disponibile + dailyEntrateEffective(day) - dailySpesaEffective(day);
+  const { cum: margine, anyData: hasData } = weekCumMargineAt(day, t);
   const voci = spese.length + entrate.length;
 
   const row = document.querySelector(`.entry-row[data-day="${day}"]`);
@@ -1896,7 +2497,8 @@ function makeItemRow(day, item, kind, opts){
   function fullRefresh(affectedDays){
     affectedDays.forEach(d => rerenderDayRow(d));
     if(opts.showDaySelector) rerenderWeekRow(opts.weekIndex); else renderWeeklyTable();
-    renderThresholds(); renderSummary(); renderChart(); updatePatrimonio();
+    renderThresholds(); renderSummary(); renderChart(); renderCategoryChart(); updatePatrimonio();
+    if(document.getElementById('past-editor-overlay').style.display !== 'none'){ renderPastEditorList(); renderTable(); renderWeeklyTable(); }
     scheduleSave();
   }
   function removeItem(){
@@ -1942,12 +2544,41 @@ function makeItemRow(day, item, kind, opts){
     importoInput.dataset.item = item.id;
     importoInput.value = (item.importo !== null && item.importo !== undefined) ? item.importo : '';
 
-    const notaInput = document.createElement('input');
-    notaInput.type = 'text';
-    notaInput.className = notaClass;
-    notaInput.placeholder = notaPlaceholder;
-    notaInput.dataset.item = item.id;
-    notaInput.value = item.nota || '';
+    // la nota libera resta solo per le entrate: per le spese la categoria
+    // (qui sotto) fa già da "destinazione" dei soldi, in modo interattivo.
+    let notaInput = null;
+    if(isIncome){
+      notaInput = document.createElement('input');
+      notaInput.type = 'text';
+      notaInput.className = notaClass;
+      notaInput.placeholder = notaPlaceholder;
+      notaInput.dataset.item = item.id;
+      notaInput.value = item.nota || '';
+    }
+
+    // categoria (solo per le spese): un giro di etichette cliccabili, facoltativo
+    let categoryPicker = null;
+    let selectedCategoria = item.categoria || null;
+    if(!isIncome){
+      categoryPicker = document.createElement('div');
+      categoryPicker.className = 'category-picker';
+      function renderCategoryPills(){
+        categoryPicker.innerHTML = '';
+        SPESA_CATEGORIES.forEach(cat => {
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          pill.className = 'category-pill' + (selectedCategoria === cat.id ? ' active' : '');
+          pill.style.setProperty('--cat-color', cat.color);
+          pill.innerHTML = cat.emoji + ' ' + cat.label;
+          pill.addEventListener('click', () => {
+            selectedCategoria = (selectedCategoria === cat.id) ? null : cat.id;
+            renderCategoryPills();
+          });
+          categoryPicker.appendChild(pill);
+        });
+      }
+      renderCategoryPills();
+    }
 
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
@@ -1964,7 +2595,7 @@ function makeItemRow(day, item, kind, opts){
       const rawValue = daySelect ? daySelect.value : String(day);
       const targetDay = rawValue === 'week' ? 'week' : parseInt(rawValue, 10);
       const newImporto = importoInput.value === '' ? null : parseFloat(importoInput.value);
-      const newNota = notaInput.value;
+      const newNota = notaInput ? notaInput.value : item.nota;
 
       if(targetDay !== day){
         const oldList = storeFor(day, kind, opts.weekIndex);
@@ -1972,21 +2603,28 @@ function makeItemRow(day, item, kind, opts){
         if(idx !== -1) oldList.splice(idx, 1);
         item.importo = newImporto;
         item.nota = newNota;
+        if(!isIncome) item.categoria = selectedCategoria;
         pushToStore(targetDay, kind, opts.weekIndex, item);
         editingItems.delete(item.id);
         fullRefresh([...affectedDaysFor(day), ...affectedDaysFor(targetDay)]);
+        maybeCelebrateAfterSave(targetDay, opts);
       }else{
         item.importo = newImporto;
         item.nota = newNota;
+        if(!isIncome) item.categoria = selectedCategoria;
         editingItems.delete(item.id);
         fullRefresh(affectedDaysFor(day));
+        maybeCelebrateAfterSave(targetDay, opts);
       }
     });
     delBtn.addEventListener('click', removeItem);
 
+    // ordine pensato per leggersi in un colpo d'occhio: prima cosa/quando e
+    // quanto, poi (per le spese) dove va a finire, infine le azioni.
     if(daySelect) row.appendChild(daySelect);
     row.appendChild(importoInput);
-    row.appendChild(notaInput);
+    if(notaInput) row.appendChild(notaInput);
+    if(categoryPicker) row.appendChild(categoryPicker);
     row.appendChild(saveBtn);
     row.appendChild(delBtn);
 
@@ -2005,15 +2643,26 @@ function makeItemRow(day, item, kind, opts){
     importoSpan.textContent = fmt(parseFloat(item.importo) || 0);
     row.appendChild(importoSpan);
 
-    const sepSpan = document.createElement('span');
-    sepSpan.className = 'expense-saved-sep';
-    sepSpan.textContent = '·';
-    row.appendChild(sepSpan);
+    if(isIncome){
+      const sepSpan = document.createElement('span');
+      sepSpan.className = 'expense-saved-sep';
+      sepSpan.textContent = '·';
+      row.appendChild(sepSpan);
 
-    const notaSpan = document.createElement('span');
-    notaSpan.className = 'expense-saved-nota' + (item.nota ? '' : ' empty');
-    notaSpan.textContent = item.nota ? item.nota : 'Nessuna nota';
-    row.appendChild(notaSpan);
+      const notaSpan = document.createElement('span');
+      notaSpan.className = 'expense-saved-nota' + (item.nota ? '' : ' empty');
+      notaSpan.textContent = item.nota ? item.nota : 'Nessuna nota';
+      row.appendChild(notaSpan);
+    }else if(item.categoria){
+      const cat = categoryById(item.categoria);
+      if(cat){
+        const catTag = document.createElement('span');
+        catTag.className = 'expense-saved-category';
+        catTag.style.setProperty('--cat-color', cat.color);
+        catTag.innerHTML = cat.emoji + ' ' + cat.label;
+        row.appendChild(catTag);
+      }
+    }
 
     if(day === 'week'){
       const g = Math.max(1, state.giorni || 1);
@@ -2105,32 +2754,41 @@ function weekAggregates(weekIndex, t){
   return { start, end, numDays, extraTot, spesaTot, incassoTot, dispTot, margineTot, registrati, haQualcosa, speseItems, entrateItems };
 }
 
-function makeWeekRow(weekIndex, t){
+function makeWeekRow(weekIndex, t, forceEditable){
   t = t || targets();
   const a = weekAggregates(weekIndex, t);
-  const expanded = expandedWeeks.has(weekIndex);
+  const trackingSet = forceEditable ? expandedPastWeeks : expandedWeeks;
+  const expanded = trackingSet.has(weekIndex);
+  // una settimana è "passata" se è finita prima di oggi: nel Registro
+  // normale resta oscurata e non cliccabile, modificabile solo dalla
+  // sezione separata (ingranaggio).
+  const isPastWeek = !forceEditable && state.mese === currentMonthDefault() && a.end < today().day;
 
   const row = document.createElement('div');
-  row.className = 'entry-row' + (expanded ? ' expanded' : '');
+  row.className = 'entry-row' + (expanded && !isPastWeek ? ' expanded' : '') + (isPastWeek ? ' past locked' : '');
   row.dataset.week = weekIndex;
 
   const header = document.createElement('div');
   header.className = 'entry-row-header';
   header.innerHTML = `
-    <span class="entry-chevron">${CHEVRON_SVG}</span>
+    <span class="entry-chevron">${isPastWeek ? LOCK_SVG : CHEVRON_SVG}</span>
     <span class="entry-label">Sett. ${weekIndex}</span>
     <span class="entry-summary">
       <span class="entry-summary-note">giorni ${String(a.start).padStart(2,'0')}&ndash;${String(a.end).padStart(2,'0')} &middot; ${a.registrati}/${a.numDays} registrati</span>
       <span class="entry-summary-margine ${a.haQualcosa ? (a.margineTot >= 0 ? 'pos' : 'neg') : ''}">${a.haQualcosa ? fmt(a.margineTot) : '—'}</span>
     </span>
   `;
-  header.addEventListener('click', () => {
-    if(expandedWeeks.has(weekIndex)) expandedWeeks.delete(weekIndex); else expandedWeeks.add(weekIndex);
-    renderWeeklyTable();
-  });
+  if(isPastWeek){
+    header.title = 'Settimana passata: modificabile solo dalla sezione dedicata (ingranaggio qui sopra)';
+  }else{
+    header.addEventListener('click', () => {
+      if(trackingSet.has(weekIndex)) trackingSet.delete(weekIndex); else trackingSet.add(weekIndex);
+      if(forceEditable){ renderPastEditorList(); }else{ renderWeeklyTable(); }
+    });
+  }
   row.appendChild(header);
 
-  if(expanded){
+  if(expanded && !isPastWeek){
     row.appendChild(makeWeekRowBody(weekIndex, t));
   }
   return row;
@@ -2143,11 +2801,11 @@ function makeWeekRowBody(weekIndex, t){
   body.className = 'entry-row-body';
   body.innerHTML = `
     <div class="entry-fields entry-fields-2col">
-      <div class="entry-field"><label>Incasso &euro;</label><span class="readonly-cell">${fmt(a.incassoTot)}</span></div>
-      <div class="entry-field"><label>Margine disp. &euro;</label><span class="readonly-cell">${fmt(a.dispTot)}</span></div>
+      <div class="entry-field"><label>Guadagno &euro;</label><span class="readonly-cell">${fmt(a.incassoTot)}</span></div>
+      <div class="entry-field"><label>Ti resta &euro;</label><span class="readonly-cell">${fmt(a.dispTot)}</span></div>
     </div>
     <div class="entry-final">
-      <span class="label">Margine della settimana</span>
+      <span class="label">Bilancio della settimana</span>
       <span class="value ${a.haQualcosa ? (a.margineTot >= 0 ? 'pos' : 'neg') : ''}">${a.haQualcosa ? fmt(a.margineTot) : '—'}</span>
     </div>
   `;
@@ -2341,35 +2999,115 @@ function renderChart(){
   capture.addEventListener('touchend', hideHover);
 }
 
+// ===== DOVE VANNO I TUOI SOLDI: totali per categoria di spesa =====
+function computeCategoryTotals(){
+  const totals = {};
+  let uncategorized = 0;
+  const g = Math.max(1, state.giorni || 1);
+  for(let day = 1; day <= g; day++){
+    dailySpese(day).forEach(item => {
+      const amt = parseFloat(item.importo) || 0;
+      if(amt <= 0) return;
+      if(item.categoria){ totals[item.categoria] = (totals[item.categoria] || 0) + amt; }
+      else{ uncategorized += amt; }
+    });
+  }
+  for(let w = 1; w <= totalWeeks(g); w++){
+    weekItemsList(w, 'spese').forEach(item => {
+      const amt = parseFloat(item.importo) || 0;
+      if(amt <= 0) return;
+      if(item.categoria){ totals[item.categoria] = (totals[item.categoria] || 0) + amt; }
+      else{ uncategorized += amt; }
+    });
+  }
+  // le spese fisse del mese (affitto, bollette, abbonamenti...) sono spesa
+  // reale tanto quanto le altre: contano per l'intero mese, non per giorno.
+  (state.costiItems || []).forEach(item => {
+    const amt = parseFloat(item.amount) || 0;
+    if(amt <= 0) return;
+    if(item.categoria){ totals[item.categoria] = (totals[item.categoria] || 0) + amt; }
+    else{ uncategorized += amt; }
+  });
+  const entries = SPESA_CATEGORIES
+    .map(cat => ({ id: cat.id, label: cat.label, emoji: cat.emoji, color: cat.color, total: totals[cat.id] || 0 }))
+    .filter(c => c.total > 0);
+  if(uncategorized > 0){
+    entries.push({ id: 'nessuna', label: 'Senza categoria', emoji: '❔', color: '#B5B9C4', total: uncategorized });
+  }
+  const grandTotal = entries.reduce((sum, e) => sum + e.total, 0);
+  return { entries, grandTotal };
+}
+
+function renderCategoryChart(){
+  const holder = document.getElementById('category-chart-holder');
+  const legendHolder = document.getElementById('category-chart-legend');
+  if(!holder || !legendHolder) return;
+
+  const { entries, grandTotal } = computeCategoryTotals();
+
+  if(grandTotal <= 0 || entries.length === 0){
+    holder.innerHTML = '';
+    legendHolder.innerHTML = '<div class="entry-empty-note">Aggiungi una categoria alle tue spese (casa, cibo, market...) per vedere qui dove vanno i tuoi soldi.</div>';
+    return;
+  }
+
+  const size = 160, cx = size / 2, cy = size / 2, r = 58, strokeW = 26;
+  const circumference = 2 * Math.PI * r;
+  let offsetAcc = 0;
+  let arcs = '';
+  entries.forEach(e => {
+    const frac = e.total / grandTotal;
+    const dash = frac * circumference;
+    const gap = circumference - dash;
+    arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${e.color}" stroke-width="${strokeW}"
+      stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}" stroke-dashoffset="${(-offsetAcc).toFixed(2)}"
+      transform="rotate(-90 ${cx} ${cy})"/>`;
+    offsetAcc += dash;
+  });
+
+  holder.innerHTML = `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    ${arcs}
+    <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-family="Fraunces, serif" font-weight="600" font-size="16" fill="var(--ink)">${fmt(grandTotal)}</text>
+    <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="var(--ink-faint)">spesi questo mese</text>
+  </svg>`;
+
+  legendHolder.innerHTML = '';
+  entries.slice().sort((a, b) => b.total - a.total).forEach(e => {
+    const pct = Math.round((e.total / grandTotal) * 100);
+    const row = document.createElement('div');
+    row.className = 'category-legend-row';
+    row.innerHTML = `
+      <span class="category-legend-dot" style="background:${e.color}"></span>
+      <span class="category-legend-label">${e.emoji} ${e.label}</span>
+      <span class="category-legend-pct">${pct}%</span>
+      <span class="category-legend-value">${fmt(e.total)}</span>
+    `;
+    legendHolder.appendChild(row);
+  });
+}
+
 function renderAll(){
+  renderTodayBar();
   renderThresholds();
   renderTable();
   renderWeeklyTable();
   renderSummary();
   renderChart();
+  renderCategoryChart();
   updatePatrimonio();
 }
 
 // SETUP LISTENERS
-document.getElementById('mese').addEventListener('change', e => {
-  state.mese = e.target.value;
-  state.giorni = daysInMonth(state.mese);
-  document.getElementById('giorni').value = state.giorni;
-  renderAll();
-  scheduleSave();
-});
 document.getElementById('giorni').addEventListener('input', e => {
   state.giorni = parseInt(e.target.value) || 1;
   renderAll();
   scheduleSave();
 });
 document.getElementById('add-costo').addEventListener('click', () => {
-  const item = { id: nextCostiId(), label: '', amount: null };
+  const item = { id: nextCostiId(), label: '', amount: null, categoria: null };
   state.costiItems.push(item);
-  const wrap = document.getElementById('costi-rows');
-  wrap.appendChild(makeCostiRow(item));
-  refreshDeleteButtonsState();
-  updateCostiTotal();
+  editingItems.add(item.id);
+  renderCostiItems();
   renderAll();
   scheduleSave();
 });
@@ -2379,7 +3117,7 @@ document.getElementById('stipendio').addEventListener('input', e => {
   scheduleSave();
 });
 document.getElementById('reset-entries').addEventListener('click', () => {
-  if(confirm('Azzerare tutti i valori giornalieri inseriti per questo mese?')){
+  if(confirm('Vuoi ricominciare il mese da capo? Tutti i valori giornalieri inseriti verranno azzerati.')){
     state.entries = {};
     renderAll();
     scheduleSave();
@@ -2406,9 +3144,9 @@ const SCREEN_META = {
     info: 'Spalma costi fissi e stipendio sui giorni del mese, registra incasso e spesa quotidiani, e tieni il margine sotto controllo per chiudere il mese in risparmio.'
   },
   investimenti: {
-    eyebrow: 'Patrimonio &middot; Posizioni a rischio',
+    eyebrow: 'Patrimonio &middot; Trading e scommesse',
     title: 'Investimenti',
-    info: 'Trading e betting separati: importo disponibile sul broker/sito, somma investita e percentuale realizzata. L\'importo disponibile si somma sempre al patrimonio totale in alto.'
+    info: 'Trading e scommesse separati: quanto hai disponibile, quanto hai investito e quanto hai guadagnato. Quello disponibile si somma sempre al totale in alto.'
   },
   altriconti: {
     eyebrow: 'Fondo di riserva',
@@ -2420,9 +3158,7 @@ const SCREEN_META = {
 function updateSharedCover(screen){
   const meta = SCREEN_META[screen];
   if(!meta) return;
-  document.getElementById('cover-eyebrow-text').innerHTML = meta.eyebrow;
   document.getElementById('cover-title').textContent = meta.title;
-  document.getElementById('cover-info-text').textContent = meta.info;
 }
 
 document.querySelectorAll('.nav-tab').forEach(btn => {
@@ -2433,20 +3169,8 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
       document.getElementById('screen-' + s).style.display = (s === screen) ? '' : 'none';
     });
     updateSharedCover(screen);
-    // chiudo il popover informazioni quando si cambia schermata
-    document.getElementById('cover-info-popover').style.display = 'none';
-    document.getElementById('cover-info-btn').classList.remove('active');
     updatePatrimonio();
   });
-});
-
-// ICONA INFORMAZIONI: mostra/nasconde la breve descrizione della schermata attuale
-document.getElementById('cover-info-btn').addEventListener('click', () => {
-  const popover = document.getElementById('cover-info-popover');
-  const btn = document.getElementById('cover-info-btn');
-  const showing = popover.style.display !== 'none';
-  popover.style.display = showing ? 'none' : '';
-  btn.classList.toggle('active', !showing);
 });
 
 // SOTTO-NAVIGAZIONE TRADING / BETTING
@@ -2498,6 +3222,67 @@ function showOnboarding(email){
   renderOnboardingStep();
 }
 
+// Popup che spiega la missione dell'app e le sezioni, una sola volta,
+// subito dopo che l'onboarding è stato completato.
+function showTutorial(){
+  const nome = greetingName();
+  document.getElementById('tutorial-name').textContent = nome || 'amico';
+  document.getElementById('onboarding-screen').style.display = 'none';
+  document.getElementById('tutorial-overlay').style.display = 'flex';
+}
+
+// spiegazione dedicata di ogni singola sezione, mostrata dal suo tastino "i"
+const PANEL_INFO = {
+  setup: 'Qui inserisci stipendio e spese fisse: la base da cui parte tutto il resto.',
+  soglie: 'Il tuo limite sano per oggi o per questa settimana, calcolato al volo.',
+  bilancio: 'Un colpo d\'occhio su quanto stai mettendo da parte, giorno dopo giorno.',
+  categorie: 'Le tue spese (comprese quelle fisse) divise per categoria, per capire subito cosa pesa di più.',
+  registro: 'Qui annoti ogni spesa e ogni entrata, giorno per giorno o a settimane.',
+  trading: 'Quanto hai disponibile, quanto hai investito e quanto stai guadagnando con il trading.',
+  betting: 'Quanto hai disponibile, quanto hai investito e quanto stai guadagnando con le scommesse.',
+  altriconti: 'Il tuo fondo per le emergenze, tenuto separato dal resto del patrimonio.',
+};
+
+function togglePanelInfo(btn, panelId){
+  const tooltip = document.getElementById('panel-info-tooltip');
+  const alreadyOpenForThis = tooltip.dataset.for === panelId && tooltip.style.display !== 'none';
+  if(alreadyOpenForThis){
+    tooltip.style.display = 'none';
+    return;
+  }
+  document.getElementById('panel-info-tooltip-text').textContent = PANEL_INFO[panelId] || '';
+  tooltip.dataset.for = panelId;
+  tooltip.style.display = 'block';
+  const rect = btn.getBoundingClientRect();
+  const maxLeft = window.innerWidth - 292;
+  tooltip.style.top = (rect.bottom + 8) + 'px';
+  tooltip.style.left = Math.max(12, Math.min(rect.left, maxLeft)) + 'px';
+}
+document.querySelectorAll('.panel-info-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePanelInfo(btn, btn.dataset.panel);
+  });
+});
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.panel-info-btn') && !e.target.closest('#panel-info-tooltip')){
+    document.getElementById('panel-info-tooltip').style.display = 'none';
+  }
+});
+window.addEventListener('resize', () => { document.getElementById('panel-info-tooltip').style.display = 'none'; });
+
+document.getElementById('tutorial-close-btn').addEventListener('click', () => {
+  document.getElementById('tutorial-overlay').style.display = 'none';
+});
+document.getElementById('tutorial-close-x').addEventListener('click', () => {
+  document.getElementById('tutorial-overlay').style.display = 'none';
+});
+// il pulsante "i" in alto riapre la stessa spiegazione in qualsiasi momento
+document.getElementById('general-info-btn').addEventListener('click', () => {
+  document.getElementById('tutorial-name').textContent = greetingName() || 'amico';
+  document.getElementById('tutorial-overlay').style.display = 'flex';
+});
+
 function renderOnboardingStep(){
   document.querySelectorAll('.onboarding-slide').forEach(s => {
     s.style.display = (parseInt(s.dataset.slide, 10) === onboardingStep) ? '' : 'none';
@@ -2531,8 +3316,15 @@ document.getElementById('onboarding-next-btn').addEventListener('click', async (
     errEl.style.display = 'none';
     const nome = document.getElementById('onboarding-nome').value.trim();
     state.profilo = { nome, persone };
+    const nextBtn = document.getElementById('onboarding-next-btn');
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Un attimo...';
+    // salvataggio immediato (non ritardato): se l'utente chiude subito il
+    // browser dopo l'onboarding, il nome e il profilo non devono andare persi.
+    await saveNow();
     showApp(onboardingEmail);
-    scheduleSave();
+    collapseAllPanels(); // si parte con le sezioni chiuse, un passo alla volta
+    showTutorial();
     return;
   }
   onboardingStep++;
@@ -2682,14 +3474,25 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 });
 
 async function bootstrap(){
-  // Per scelta esplicita, l'accesso non viene mai ricordato tra un'apertura
-  // e l'altra: ogni volta che si apre il sito va sempre mostrata la
-  // schermata di accesso/registrazione, anche se una sessione precedente
-  // era ancora valida. Invalidiamo subito l'eventuale cookie rimasto, così
-  // non c'è modo di rientrare in automatico nell'ultimo account usato.
+  // Aggiornare la pagina non deve richiedere di rifare l'accesso: se il
+  // browser ha ancora una sessione valida (es. hai solo ricaricato la
+  // pagina) si rientra direttamente nell'app. Se invece il browser è stato
+  // chiuso del tutto, il cookie di sessione scade da solo e si torna alla
+  // schermata di accesso.
   try{
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
-  }catch(e){ /* nessun problema se il server non risponde qui: mostriamo comunque l'accesso */ }
+    const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
+    if(res.ok){
+      const json = await res.json();
+      await load();
+      if(!state.profilo || !state.profilo.nome){
+        // caso raro: registrazione avvenuta ma onboarding mai completato
+        showOnboarding(json.email);
+      }else{
+        showApp(json.email);
+      }
+      return;
+    }
+  }catch(e){ /* server irraggiungibile: mostra comunque la schermata di accesso */ }
   showAuthScreen();
 }
 
@@ -2710,13 +3513,15 @@ document.querySelectorAll('.gran-toggle-btn').forEach(btn => {
 });
 
 // ===== PANNELLI COMPRIMIBILI =====
-// Ogni sezione principale (Impostazione del mese, Soglie, Bilancio, Registro
-// spese, Trading, Betting, Conto di emergenza) può essere compressa per
-// alleggerire la pagina. Stato solo di sessione: riparte sempre espanso al
-// ricaricamento. Comportamento voluto: cliccando su tutta la zona sinistra
-// dell'intestazione (freccia + titolo) il pannello SI ESPANDE sempre; per
-// COMPRIMERLO invece serve cliccare esattamente sulla freccia — così non
-// capita di richiuderlo per sbaglio toccando il titolo.
+// Ogni sezione principale (Impostazione del mese, Soglie, Bilancio, Categorie,
+// Registro spese, Trading, Betting, Conto di emergenza) può essere compressa
+// per alleggerire la pagina. Quando l'app si apre, partono TUTTE compresse:
+// un approccio più morbido, che lascia scoprire le sezioni una alla volta
+// invece di travolgere subito con tutto aperto. Stato solo di sessione:
+// riparte sempre compresso al ricaricamento. Comportamento voluto: cliccando
+// su tutta la zona sinistra dell'intestazione (freccia + titolo) il pannello
+// SI ESPANDE sempre; per COMPRIMERLO invece serve cliccare esattamente sulla
+// freccia — così non capita di richiuderlo per sbaglio toccando il titolo.
 let collapsedPanels = new Set();
 
 function applyPanelState(panelId){
@@ -2729,16 +3534,25 @@ function applyPanelState(panelId){
   if(btn) btn.classList.toggle('expanded', !collapsed);
 }
 
+// Comprime tutte le sezioni esistenti in pagina (usata all'avvio dell'app).
+function collapseAllPanels(){
+  document.querySelectorAll('.panel-collapse-btn').forEach(btn => {
+    const panelId = btn.dataset.panel;
+    if(panelId){ collapsedPanels.add(panelId); applyPanelState(panelId); }
+  });
+}
+
 document.querySelectorAll('.panel-collapse-btn').forEach(btn => {
   btn.innerHTML = CHEVRON_SVG;
-  btn.classList.add('expanded'); // stato iniziale: tutti espansi
 });
+collapseAllPanels(); // stato iniziale: tutto compresso
 
 document.querySelectorAll('.panel-head-left').forEach(left => {
   const btn = left.querySelector('.panel-collapse-btn');
   if(!btn) return;
   const panelId = btn.dataset.panel;
   left.addEventListener('click', (e) => {
+    if(e.target.closest('.panel-info-btn')) return; // il tastino info non deve aprire/chiudere il pannello
     const collapsed = collapsedPanels.has(panelId);
     const clickedArrow = !!e.target.closest('.panel-collapse-btn');
     if(collapsed){
@@ -2754,6 +3568,10 @@ document.querySelectorAll('.panel-head-left').forEach(left => {
 });
 
 bootstrap();
+
+// tiene la barra di oggi aggiornata anche se l'app resta aperta a cavallo
+// di mezzanotte, senza bisogno di ricaricare la pagina
+setInterval(renderTodayBar, 60000);
 </script>
 </body>
 </html>
