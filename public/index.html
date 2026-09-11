@@ -13,7 +13,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gestione Portafoglio</title>
+<title id="page-title">Gestione Portafoglio</title>
 <meta name="theme-color" content="#15171B">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap');
@@ -34,6 +34,9 @@
     --red-bg: #FBEAEA;
     --amber: #B8862E;
     --amber-bg: #FBF3E2;
+    --piggy-outline: #C98BA0;
+    --piggy-empty: #FBF1F5;
+    --piggy-fill-color: #CD7F32;
 
     --trading: #3D5A80;
     --betting: #9C4F72;
@@ -67,6 +70,9 @@
     --green-bg: #113228;
     --red: #E5837C;
     --red-bg: #351E1D;
+    --piggy-outline: #D99CB0;
+    --piggy-empty: #3A2A32;
+    --piggy-fill-color: #CD7F32;
     --amber: #D9AA5F;
     --amber-bg: #332810;
 
@@ -204,6 +210,14 @@
   tbody tr.week-row td:first-child{ color: var(--ink); font-family:'Fraunces', serif; font-size:14px; }
   .week-progress{ font-size:11px; font-weight:500; color: var(--ink-faint); display:block; margin-top:2px; }
 
+  .cycle-type-row{ display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+  .cycle-type-label{ font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color: var(--ink-soft); }
+  .close-cycle-now-btn{
+    margin-left:auto; font-family:'Inter', sans-serif; font-size:12px; font-weight:600; color: var(--ink-soft);
+    background: var(--bg); border:1px solid var(--border); border-radius: var(--r-pill); padding:8px 14px; cursor:pointer;
+    transition: background .15s, color .15s;
+  }
+  .close-cycle-now-btn:hover{ background: var(--red-bg); color: var(--red); border-color: var(--red); }
   .grid4{
     display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;
   }
@@ -217,13 +231,18 @@
     display:block; font-size:13px; color: var(--ink-soft); margin-bottom:7px;
     font-weight:600;
   }
-  .field input{
+  .field input, .field select{
     width:100%; padding:11px 13px; border:1px solid var(--border); border-radius: var(--r-sm);
     background: var(--bg); font-family:'Inter', sans-serif; font-size:14.5px; color: var(--ink);
     transition: border-color .15s, box-shadow .15s;
   }
-  .field input:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background: var(--surface); }
+  .field input:focus, .field select:focus{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); background: var(--surface); }
   .field input[readonly]{ color: var(--ink-soft); cursor: default; }
+  .date-select-row{ display:flex; gap:8px; }
+  .date-select-row .date-select{ width:auto; }
+  .date-select-day{ flex: 0 0 76px; }
+  .date-select-month{ flex: 1 1 auto; min-width:0; }
+  .date-select-year{ flex: 0 0 92px; }
   .field input[readonly]:focus{ box-shadow:none; border-color: var(--border); }
 
   .costi-section{ margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
@@ -381,6 +400,19 @@
     margin-left:10px;
   }
   .registro-clear-btn:hover{ background: var(--red-bg); color: var(--red); border-color: var(--red); }
+  .archivio-delete-btn{
+    width:28px; height:28px; flex:0 0 auto; border:1px solid var(--border); border-radius:50%;
+    background: var(--surface); color: var(--ink-faint); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition: background .15s, color .15s;
+  }
+  .archivio-delete-btn:hover{ background: var(--red-bg); color: var(--red); border-color: var(--red); }
+  .traguardo-delete-btn{
+    flex:0 0 auto; width:28px; height:28px; border:1px solid var(--border); border-radius:50%;
+    background: var(--surface); color: var(--ink-faint); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition: background .15s, color .15s;
+    margin-left:auto;
+  }
+  .traguardo-delete-btn:hover{ background: var(--red-bg); color: var(--red); border-color: var(--red); }
   .view-toggle-with-clear{ display:flex; align-items:center; }
   .past-editor-card{ max-width: 620px; }
   .confirm-card{ max-width: 380px; text-align:center; }
@@ -447,7 +479,13 @@
     font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; color: var(--ink);
     min-width:70px;
   }
-  .archivio-label{ min-width:auto; font-size:13.5px; white-space:nowrap; }
+  .archivio-label{ min-width:auto; font-size:13.5px; white-space:nowrap; display:flex; align-items:center; gap:8px; }
+  .archivio-type-badge{
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px; padding:3px 8px; border-radius: var(--r-pill);
+    flex:0 0 auto;
+  }
+  .archivio-type-badge.monthly{ background: var(--accent-bg); color: var(--accent); }
+  .archivio-type-badge.weekly{ background: var(--green-bg); color: var(--green); }
   .entry-summary{ flex:1; display:flex; align-items:center; gap:10px; justify-content:flex-end; }
   .entry-summary-note{ font-size:12px; color: var(--ink-faint); }
   .entry-summary-margine{ font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px; }
@@ -617,7 +655,22 @@
   .chart-wrap{ background: var(--surface); border:1px solid var(--border); border-radius: var(--r-md); padding: 18px 18px 10px; position:relative; }
 
   .category-chart-row{ display:flex; align-items:center; gap:32px; flex-wrap:wrap; }
-  .category-chart-holder{ flex:0 0 auto; }
+  .category-chart-holder{ flex:0 0 auto; cursor:pointer; }
+  .category-chart-holder svg{ transition: transform .15s ease; }
+  @keyframes chart-jelly{
+    0%, 100%{ transform: scale(1,1) rotate(0deg); }
+    20%{ transform: scale(1.1, 0.9) rotate(-4deg); }
+    40%{ transform: scale(0.92, 1.08) rotate(3deg); }
+    60%{ transform: scale(1.05, 0.95) rotate(-2deg); }
+    80%{ transform: scale(0.98, 1.02) rotate(1deg); }
+  }
+  .category-chart-holder.wobbling svg{ animation: chart-jelly 0.6s ease; transform-origin: 50% 50%; }
+  @keyframes chart-sparkle-out{
+    0%{ opacity:0; transform: translate(0,0) scale(0.4); }
+    25%{ opacity:1; transform: translate(0,0) scale(1.15); }
+    100%{ opacity:0; transform: translate(var(--sp-x), var(--sp-y)) scale(0.7); }
+  }
+  .category-chart-sparkle{ animation: chart-sparkle-out 0.7s ease-out forwards; pointer-events:none; }
   .category-chart-holder svg{ display:block; }
   .category-chart-legend{ flex:1 1 240px; min-width:200px; display:flex; flex-direction:column; gap:9px; }
   .category-legend-row{ display:flex; align-items:center; gap:8px; font-size:13px; }
@@ -665,6 +718,40 @@
     text-align:right; margin-top:10px;
   }
 
+  .panel-body-action-row{ display:flex; justify-content:flex-end; margin-bottom:16px; }
+  .goal-target-anim-overlay{
+    display:flex; align-items:center; justify-content:center; padding:20px 0; margin-bottom:8px;
+  }
+  /* Traiettoria leggermente arcuata (non una linea retta), con un
+     rallentamento naturale in avvicinamento — così il volo si legge come
+     un gesto fluido invece che un semplice scatto da un punto all'altro. */
+  @keyframes goal-arrow-fly{
+    0%{ transform: translate(-96px, -68px) rotate(-14deg) scale(0.8); opacity: 0; }
+    10%{ opacity: 1; }
+    45%{ transform: translate(-38px, -32px) rotate(-6deg) scale(0.92); opacity: 1; }
+    72%{ transform: translate(-9px, -7px) rotate(-1deg) scale(0.99); }
+    100%{ transform: translate(0px, 0px) rotate(0deg) scale(1); }
+  }
+  .goal-arrow-inner{ animation: goal-arrow-fly 0.85s cubic-bezier(.22,.61,.28,1) both; }
+  /* Tremolio d'impatto: più piccoli passaggi ravvicinati, che si smorzano
+     progressivamente — imita l'effetto di un vero rimbalzo elastico
+     invece di 2-3 scatti isolati. */
+  @keyframes goal-target-shake{
+    0%, 70%{ transform: scale(1) rotate(0deg); }
+    76%{ transform: scale(1.09) rotate(-2.5deg); }
+    81%{ transform: scale(0.96) rotate(2deg); }
+    86%{ transform: scale(1.05) rotate(-1.2deg); }
+    91%{ transform: scale(0.98) rotate(0.6deg); }
+    95%{ transform: scale(1.02) rotate(-0.2deg); }
+    100%{ transform: scale(1) rotate(0deg); }
+  }
+  .goal-target-group{ animation: goal-target-shake 0.85s cubic-bezier(.36,.07,.19,.97); transform-origin: 60px 60px; }
+  @keyframes goal-impact-burst{
+    0%, 68%{ opacity:0; transform: scale(0.3); }
+    76%{ opacity:1; transform: scale(1.05); }
+    100%{ opacity:0; transform: scale(1.9); }
+  }
+  .goal-impact-lines{ animation: goal-impact-burst 0.85s ease-out; transform-origin: 60px 60px; }
   .reset-btn{
     font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color: var(--red);
     background: var(--red-bg); border:1px solid transparent; border-radius: var(--r-pill); padding:8px 14px;
@@ -720,6 +807,33 @@
     font-family:'Fraunces', serif; font-weight:600; font-size:19px; color: var(--ink);
   }
   .patrimonio-value.neg{ color: var(--red); }
+  .streak-badge{
+    display:flex; align-items:center; gap:4px; padding:4px 10px; border-radius: var(--r-pill);
+    background: var(--bg); border:1px solid var(--border); transition: background .2s, border-color .2s;
+    cursor: pointer;
+  }
+  .streak-icon{ font-size:14px; filter: grayscale(1) opacity(0.45); transition: filter .2s; display:inline-block; }
+  @keyframes flame-flicker{
+    0%, 100%{ transform: scale(1) rotate(0deg); }
+    15%{ transform: scale(1.2, 0.85) rotate(-10deg); }
+    30%{ transform: scale(0.85, 1.2) rotate(8deg); }
+    45%{ transform: scale(1.15, 0.9) rotate(-7deg); }
+    60%{ transform: scale(0.9, 1.15) rotate(6deg); }
+    75%{ transform: scale(1.1, 0.95) rotate(-4deg); }
+  }
+  .streak-icon.flickering{
+    animation: flame-flicker 0.5s ease; transform-origin: 50% 90%;
+    filter: none !important; /* mentre brucia, si vede bene anche se la serie è ancora a zero */
+  }
+  .streak-count{ font-family:'Inter', sans-serif; font-weight:700; font-size:13px; color: var(--ink-faint); transition: color .2s; }
+  .streak-badge.lvl-warm .streak-icon{ filter: grayscale(0.35) opacity(0.85); }
+  .streak-badge.lvl-warm .streak-count{ color: var(--ink-soft); }
+  .streak-badge.lvl-hot{ background: var(--amber-bg); border-color: var(--amber); }
+  .streak-badge.lvl-hot .streak-icon{ filter: none; }
+  .streak-badge.lvl-hot .streak-count{ color: var(--amber); }
+  .streak-badge.lvl-blaze{ background: var(--red-bg); border-color: var(--red); }
+  .streak-badge.lvl-blaze .streak-icon{ filter: none; }
+  .streak-badge.lvl-blaze .streak-count{ color: var(--red); font-weight:800; }
 
   /* SOTTO-NAVIGAZIONE INVESTIMENTI */
   .invest-subnav{ display:flex; gap:8px; margin-top:24px; }
@@ -791,6 +905,14 @@
   }
   .auth-submit:hover{ filter: brightness(1.15); }
   .auth-submit:disabled{ opacity:0.6; cursor:default; }
+  .onboarding-nav-row{ display:flex; gap:10px; margin-top:6px; }
+  .onboarding-nav-row .auth-submit{ margin-top:0; flex:1; }
+  .onboarding-back-btn{
+    flex:0 0 auto; padding:13px 20px; background: var(--bg); color: var(--ink-soft);
+    font-family:'Inter', sans-serif; font-size:14.5px; font-weight:600;
+    border:1px solid var(--border); border-radius: var(--r-pill); cursor:pointer; transition: background .15s, color .15s;
+  }
+  .onboarding-back-btn:hover{ background: var(--border); color: var(--ink); }
   .auth-switch{
     margin-top: 20px; text-align:center; font-size:13.5px; color: var(--ink-soft);
   }
@@ -858,6 +980,166 @@
   .deficit-banner-title{ font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; color: var(--ink); margin-bottom:5px; }
   .deficit-banner-text{ font-size:12.5px; line-height:1.6; color: var(--ink-soft); }
   .deficit-banner-text strong{ color: var(--red); }
+
+  .savings-goal-box{
+    margin-bottom:18px; background: var(--bg); border:1px solid var(--border); border-radius: var(--r-lg);
+    padding:16px 18px;
+  }
+  .savings-goal-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .savings-goal-title{ font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; color: var(--ink); }
+  .savings-goal-edit-btn{
+    font-family:'Inter', sans-serif; font-size:12px; font-weight:600; color: var(--accent);
+    background:none; border:none; cursor:pointer; text-decoration:underline; padding:0; flex:0 0 auto;
+  }
+  .savings-goal-progress-row{ display:flex; align-items:baseline; justify-content:space-between; margin-top:12px; margin-bottom:8px; }
+  #savings-goal-progress-text{ font-family:'Fraunces', serif; font-weight:600; font-size:16px; color: var(--ink); }
+  #savings-goal-percent{ font-family:'Inter', sans-serif; font-weight:700; font-size:13px; color: var(--accent); }
+  .savings-goal-bar-track{ width:100%; height:10px; border-radius: var(--r-pill); background: var(--border); overflow:hidden; }
+  .savings-goal-bar-fill{
+    height:100%; border-radius: var(--r-pill); background: var(--accent); width:0%;
+    transition: width .4s ease;
+  }
+  .savings-goal-bar-fill.reached{ background: var(--green); }
+  .savings-goal-sub{ margin-top:8px; font-size:12px; line-height:1.5; color: var(--ink-faint); }
+  #savings-goal-form .field label{
+    display:block; font-family:'Inter', sans-serif; font-size:12px; font-weight:600; color: var(--ink-soft); margin-bottom:6px;
+  }
+  #savings-goal-form .field input{
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius: var(--r-md);
+    background: var(--surface); color: var(--ink); font-family:'Inter', sans-serif; font-size:13.5px;
+  }
+  .savings-goal-form-actions{ display:flex; gap:8px; justify-content:flex-end; }
+  .savings-goal-clear-btn, .savings-goal-cancel-btn, .savings-goal-save-btn{
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; border-radius: var(--r-pill);
+    padding:9px 15px; cursor:pointer; border:1px solid transparent; transition: filter .15s;
+  }
+  .savings-goal-clear-btn{ background: var(--red-bg); color: var(--red); border-color: var(--red); margin-right:auto; }
+  .savings-goal-clear-btn:hover{ filter: brightness(0.95); }
+  .savings-goal-cancel-btn{ background: var(--bg); color: var(--ink-soft); border-color: var(--border); }
+  .savings-goal-cancel-btn:hover{ filter: brightness(0.96); }
+  .savings-goal-save-btn{ background: var(--accent); color:#fff; }
+  .savings-goal-save-btn:hover{ filter: brightness(0.92); }
+
+  .piggy-box{
+    margin-bottom:18px; background: var(--bg); border:1px solid var(--border); border-radius: var(--r-lg);
+    padding:16px 18px;
+  }
+  .piggy-title{ font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; color: var(--ink); margin-bottom:12px; }
+  .piggy-content{ display:flex; align-items:center; gap:18px; }
+  .piggy-visual{ flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+  #piggy-fill{ transition: y 0.7s cubic-bezier(.34,1.56,.64,1), height 0.7s cubic-bezier(.34,1.56,.64,1), fill 0.4s ease; }
+  .piggy-info{ flex:1; min-width:0; }
+  .piggy-level-row{ display:flex; align-items:center; gap:7px; margin-bottom:8px; }
+  .piggy-level-badge{ font-size:17px; line-height:1; }
+  .piggy-level-name{ font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; color: var(--ink); }
+  .piggy-bar-track{ width:100%; height:10px; border-radius: var(--r-pill); background: var(--border); overflow:hidden; }
+  .piggy-bar-fill{
+    height:100%; border-radius: var(--r-pill); background: var(--piggy-fill-color); width:0%;
+    transition: width .5s ease, background .4s ease;
+  }
+  .piggy-sub{ margin-top:8px; font-size:12px; line-height:1.5; color: var(--ink-faint); }
+
+  /* animazione di sblocco livello: un piccolo "salto" di gioia + un lampo
+     dorato attorno al salvadanaio, giusto un paio di secondi */
+  @keyframes piggy-bounce{
+    0%{ transform: scale(1) rotate(0deg); }
+    25%{ transform: scale(1.12, 0.9) rotate(-4deg); }
+    50%{ transform: scale(0.95, 1.08) rotate(3deg); }
+    75%{ transform: scale(1.06, 0.96) rotate(-2deg); }
+    100%{ transform: scale(1) rotate(0deg); }
+  }
+  @keyframes piggy-glow{
+    0%{ box-shadow: 0 0 0 0 rgba(216, 168, 74, 0); }
+    30%{ box-shadow: 0 0 0 10px rgba(216, 168, 74, 0.35); }
+    100%{ box-shadow: 0 0 0 22px rgba(216, 168, 74, 0); }
+  }
+  .piggy-box.level-up .piggy-visual svg{ animation: piggy-bounce 0.8s ease; }
+  .piggy-box.level-up{ animation: piggy-glow 1.2s ease; }
+
+  /* si agita al click, e qualche moneta cade dentro dalla fessura */
+  .piggy-visual{ cursor: pointer; }
+  @keyframes piggy-shake{
+    0%, 100%{ transform: scale(var(--piggy-scale, 1)) rotate(0deg); }
+    20%{ transform: scale(var(--piggy-scale, 1)) rotate(-6deg); }
+    40%{ transform: scale(var(--piggy-scale, 1)) rotate(5deg); }
+    60%{ transform: scale(var(--piggy-scale, 1)) rotate(-4deg); }
+    80%{ transform: scale(var(--piggy-scale, 1)) rotate(3deg); }
+  }
+  .piggy-visual.shaking svg{ animation: piggy-shake 0.5s ease; transform-origin: 50% 85%; }
+  @keyframes piggy-coin-drop{
+    0%{ opacity: 0; transform: translateY(-6px) scale(0.7); }
+    15%{ opacity: 1; transform: translateY(0) scale(1); }
+    75%{ opacity: 1; }
+    100%{ opacity: 0; transform: translateY(46px) scale(0.6); }
+  }
+  .piggy-coin{ animation: piggy-coin-drop 0.6s ease-in forwards; pointer-events: none; }
+
+  /* cresce un po' ad ogni tap ravvicinato, come per "farla notare" */
+  .piggy-visual svg{ transition: transform .35s cubic-bezier(.34,1.56,.64,1); transform: scale(var(--piggy-scale, 1)); }
+  .piggy-visual.grown-1{ --piggy-scale: 1.18; }
+  .piggy-visual.grown-2{ --piggy-scale: 1.38; }
+
+  /* al quarto tap le monete escono fuori invece di cadere dentro */
+  @keyframes piggy-coin-burst{
+    0%{ opacity:1; transform: translate(0,0) scale(1); }
+    100%{ opacity:0; transform: translate(var(--burst-x), var(--burst-y)) scale(0.5); }
+  }
+  .piggy-coin-burst{ animation: piggy-coin-burst 0.7s ease-out forwards; pointer-events: none; }
+
+  .piggy-stats-total-card{
+    text-align:center; background: var(--amber-bg); border:1px solid var(--amber); border-radius: var(--r-lg);
+    padding:18px; margin:18px 0;
+  }
+  .piggy-stats-total-label{ font-size:12.5px; color: var(--ink-soft); margin-bottom:6px; }
+  .piggy-stats-total-value{ font-family:'Fraunces', serif; font-weight:700; font-size:28px; color: var(--amber); }
+  .piggy-stats-section-title{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color: var(--ink-faint); margin: 20px 0 10px 0; }
+  .piggy-stats-days-list{ max-height:180px; overflow-y:auto; border:1px solid var(--border); border-radius: var(--r-md); }
+  .piggy-stats-day-row{
+    display:flex; align-items:center; justify-content:space-between; padding:9px 14px;
+    font-size:13px; border-bottom:1px solid var(--border);
+  }
+  .piggy-stats-day-row:last-child{ border-bottom:none; }
+  .piggy-stats-day-date{ color: var(--ink); }
+  .piggy-stats-day-amount{ color: var(--green); font-weight:600; }
+  .piggy-stats-day-amount.neg{ color: var(--red); }
+  .cycle-notif-more-btn{
+    display:inline-block; margin-top:8px; background:none; border:none; padding:0; cursor:pointer;
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:700; color: var(--green); text-decoration:underline;
+  }
+  .piggy-stats-total-value.neg{ color: var(--red); }
+  .piggy-stats-days-empty{ font-size:12.5px; color: var(--ink-faint); padding:10px 2px; }
+  .piggy-stats-encourage{
+    margin-top:20px; background: var(--bg); border:1px solid var(--border); border-radius: var(--r-lg); padding:16px 18px;
+  }
+  .piggy-stats-encourage-row{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .piggy-stats-encourage-badge{ font-size:18px; }
+  .piggy-stats-encourage-name{ font-family:'Fraunces', serif; font-weight:600; font-size:14px; color: var(--ink); }
+  .piggy-stats-encourage-bar-track{ width:100%; height:9px; border-radius: var(--r-pill); background: var(--border); overflow:hidden; margin-bottom:8px; }
+  .piggy-stats-encourage-bar-fill{ height:100%; border-radius: var(--r-pill); transition: width .5s ease; }
+  .piggy-stats-encourage-text{ font-size:12.5px; line-height:1.5; color: var(--ink-soft); }
+
+  .piggy-stats-roadmap{ display:flex; flex-direction:column; gap:8px; }
+  .piggy-stats-roadmap-item{
+    display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: var(--r-md);
+    border:1px solid var(--border); background: var(--bg);
+  }
+  .piggy-stats-roadmap-item.achieved{ background: var(--green-bg); border-color: var(--green); }
+  .piggy-stats-roadmap-item.current{ border-color: var(--amber); background: var(--amber-bg); }
+  .piggy-stats-roadmap-badge{ font-size:17px; flex:0 0 auto; }
+  .piggy-stats-roadmap-name{ font-family:'Fraunces', serif; font-weight:600; font-size:13px; color: var(--ink); flex:1; }
+  .piggy-stats-roadmap-amount{ font-size:12px; color: var(--ink-faint); flex:0 0 auto; }
+  .piggy-stats-roadmap-check{ font-size:13px; color: var(--green); flex:0 0 auto; font-weight:700; }
+
+  .traguardo-item{
+    display:flex; align-items:center; gap:14px; background: var(--bg); border:1px solid var(--border);
+    border-radius: var(--r-lg); padding:14px 18px; margin-bottom:10px;
+  }
+  .traguardo-icon{ font-size:22px; flex:0 0 auto; }
+  .traguardo-amount{ font-family:'Fraunces', serif; font-weight:600; font-size:16px; color: var(--ink); }
+  .traguardo-detail{ font-size:12px; color: var(--ink-faint); margin-top:2px; }
+
+  .notif-item.notif-success{ background: var(--green-bg); border-color: var(--green); }
+  .notif-item.notif-success strong{ color: var(--green); }
   .auth-top-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px; }
   .auth-top-row .auth-eyebrow{ margin-bottom:0; }
   .password-field-wrap{ position:relative; }
@@ -896,6 +1178,10 @@
     background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow-md);
     padding: 32px 30px; position: relative;
   }
+  /* la X resta sempre visibile anche scorrendo un contenuto lungo: sta in
+     un contenitore "sticky" alto zero, che si aggancia in cima alla parte
+     visibile dello scorrimento invece di scorrere via col resto */
+  .tutorial-close-wrap{ position: sticky; top: 0; height: 0; overflow: visible; z-index: 20; }
   .tutorial-close-x{
     position: absolute; top:16px; right:16px; width:30px; height:30px; border:none; border-radius:50%;
     background: var(--bg); color: var(--ink-soft); cursor:pointer; font-size:20px; line-height:1;
@@ -940,7 +1226,7 @@
 <div id="auth-screen" class="auth-screen">
   <div class="auth-card">
     <div class="auth-top-row">
-      <div class="auth-eyebrow">Gestione Portafoglio</div>
+      <div class="auth-eyebrow" data-i18n="auth_eyebrow">Gestione Portafoglio</div>
       <div class="auth-top-buttons">
         <div class="notif-wrap">
           <button class="theme-toggle-btn lang-btn" id="lang-btn-auth" type="button" title="Lingua / Language">IT</button>
@@ -982,7 +1268,7 @@
 <div id="onboarding-screen" class="auth-screen" style="display:none;">
   <div class="auth-card">
     <div class="auth-top-row">
-      <div class="auth-eyebrow">Gestione Portafoglio</div>
+      <div class="auth-eyebrow" data-i18n="auth_eyebrow">Gestione Portafoglio</div>
       <div class="auth-top-buttons">
         <div class="notif-wrap">
           <button class="theme-toggle-btn lang-btn" id="lang-btn-onboarding" type="button" title="Lingua / Language">IT</button>
@@ -1039,14 +1325,17 @@
       <span class="onboarding-dot" data-dot="5"></span>
     </div>
 
-    <button type="button" class="auth-submit" id="onboarding-next-btn">Continua</button>
+    <div class="onboarding-nav-row">
+      <button type="button" class="onboarding-back-btn" id="onboarding-back-btn" data-i18n="onboarding_back" style="display:none;">Indietro</button>
+      <button type="button" class="auth-submit" id="onboarding-next-btn">Continua</button>
+    </div>
   </div>
 </div>
 
 <!-- POPUP TUTORIAL: compare una sola volta, appena finito l'onboarding -->
 <div id="tutorial-overlay" class="tutorial-overlay" style="display:none;">
   <div class="tutorial-card">
-    <button class="tutorial-close-x" id="tutorial-close-x" type="button" title="Chiudi">&times;</button>
+    <div class="tutorial-close-wrap"><button class="tutorial-close-x" id="tutorial-close-x" type="button" title="Chiudi">&times;</button></div>
     <div class="tutorial-eyebrow" data-i18n="tut_eyebrow">Prima di iniziare</div>
     <h2 class="tutorial-title" id="tutorial-greeting">Ciao <span id="tutorial-name">tu</span>, benvenuto!</h2>
 
@@ -1081,6 +1370,22 @@
       <div class="tutorial-section-item">
         <span class="tutorial-section-icon">🛟</span>
         <div><div class="tutorial-section-name" data-i18n="nav_altriconti">Altri Conti</div><div class="tutorial-section-desc" data-i18n="tut_desc_altriconti">Il tuo fondo per le emergenze, tenuto separato dal resto.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">🔥</span>
+        <div><div class="tutorial-section-name" data-i18n="guide_step_streak_title">La tua serie di giorni</div><div class="tutorial-section-desc" data-i18n="tut_desc_streak">Ogni giorno chiuso in budget allunga la fiamma — un giorno dimenticato la interrompe, quindi conviene non perderne l'abitudine.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">🐷</span>
+        <div><div class="tutorial-section-name" data-i18n="guide_step_piggy_title">Il tuo salvadanaio</div><div class="tutorial-section-desc" data-i18n="tut_desc_piggy">Il margine che risparmi si vede riempire qui, livello dopo livello: Bronzo, Argento, Oro, Platino.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">🌟</span>
+        <div><div class="tutorial-section-name" data-i18n="guide_step_goal_title">I tuoi obiettivi</div><div class="tutorial-section-desc" data-i18n="tut_desc_goals">Imposta un traguardo di risparmio, con o senza scadenza, e segui i progressi con una barra dedicata.</div></div>
+      </div>
+      <div class="tutorial-section-item">
+        <span class="tutorial-section-icon">🏆</span>
+        <div><div class="tutorial-section-name" data-i18n="guide_step_traguardi_title">I tuoi traguardi</div><div class="tutorial-section-desc" data-i18n="tut_desc_traguardi_list">Ogni obiettivo raggiunto resta archiviato per sempre, con quanto hai risparmiato e in quanti giorni.</div></div>
       </div>
     </div>
 
@@ -1123,6 +1428,48 @@
   </div>
 </div>
 
+<!-- STATISTICHE DI RISPARMIO: si apre al quarto tap sul maialino, con un
+     riepilogo completo di quanto e quando hai risparmiato, più un
+     incoraggiamento verso il prossimo livello. -->
+<!-- DETTAGLIO DI UN CICLO CONCLUSO: si apre dalla notifica in campanella
+     ("Vedi di più") o dall'Archivio, con il riepilogo giorno per giorno. -->
+<div id="cycle-detail-overlay" class="tutorial-overlay" style="display:none;">
+  <div class="tutorial-card">
+    <div class="tutorial-close-wrap"><button class="tutorial-close-x" id="cycle-detail-close-x" type="button" title="Chiudi">&times;</button></div>
+    <h2 class="tutorial-title" id="cycle-detail-title">Ciclo concluso</h2>
+
+    <div class="piggy-stats-total-card">
+      <div class="piggy-stats-total-label" data-i18n="cycle_detail_result_label">Risultato del ciclo</div>
+      <div class="piggy-stats-total-value" id="cycle-detail-result-value">€ 0,00</div>
+    </div>
+
+    <div class="piggy-stats-section-title" data-i18n="cycle_detail_days_title">Giorno per giorno</div>
+    <div class="piggy-stats-days-list" id="cycle-detail-days-list" style="max-height:320px;"></div>
+    <div class="piggy-stats-days-empty" id="cycle-detail-days-empty" style="display:none;" data-i18n="cycle_detail_days_empty">Nessun giorno registrato in questo ciclo.</div>
+  </div>
+</div>
+
+<div id="piggy-stats-overlay" class="tutorial-overlay" style="display:none;">
+  <div class="tutorial-card">
+    <div class="tutorial-close-wrap"><button class="tutorial-close-x" id="piggy-stats-close-x" type="button" title="Chiudi">&times;</button></div>
+    <h2 class="tutorial-title" data-i18n="piggy_stats_title">🐷💰 Le tue statistiche di risparmio</h2>
+
+    <div class="piggy-stats-total-card">
+      <div class="piggy-stats-total-label" data-i18n="piggy_stats_total_label">Totale risparmiato finora</div>
+      <div class="piggy-stats-total-value" id="piggy-stats-total-value">€ 0,00</div>
+    </div>
+
+    <div class="piggy-stats-section-title" data-i18n="piggy_stats_days_title">I giorni in cui hai risparmiato</div>
+    <div class="piggy-stats-days-list" id="piggy-stats-days-list"></div>
+    <div class="piggy-stats-days-empty" id="piggy-stats-days-empty" style="display:none;" data-i18n="piggy_stats_days_empty">Non hai ancora giorni in positivo registrati — ricomincia da un piccolo passo oggi stesso!</div>
+
+    <div class="piggy-stats-encourage" id="piggy-stats-encourage"></div>
+
+    <div class="piggy-stats-section-title" data-i18n="piggy_stats_roadmap_title">I livelli del salvadanaio</div>
+    <div class="piggy-stats-roadmap" id="piggy-stats-roadmap"></div>
+  </div>
+</div>
+
 <div id="confirm-overlay" class="tutorial-overlay" style="display:none;">
   <div class="tutorial-card confirm-card">
     <p id="confirm-message" class="confirm-message"></p>
@@ -1135,7 +1482,7 @@
 
 <div id="past-editor-overlay" class="tutorial-overlay" style="display:none;">
   <div class="tutorial-card past-editor-card">
-    <button class="tutorial-close-x" id="past-editor-close-x" type="button" title="Chiudi">&times;</button>
+    <div class="tutorial-close-wrap"><button class="tutorial-close-x" id="past-editor-close-x" type="button" title="Chiudi">&times;</button></div>
     <div class="tutorial-eyebrow">Sezione separata</div>
     <h2 class="tutorial-title" id="past-editor-title">Modifica i giorni precedenti</h2>
     <p class="tutorial-mission" style="margin-bottom:20px;">Qui puoi ancora correggere o completare quello che hai registrato nei giorni già trascorsi.</p>
@@ -1150,8 +1497,12 @@
 <div class="topnav">
   <div class="topnav-inner">
     <div class="patrimonio-badge">
-      <span class="patrimonio-label">Quanto hai in totale</span>
+      <span class="patrimonio-label" data-i18n="patrimonio_label">Quanto hai in totale</span>
       <span class="patrimonio-value" id="patrimonio-value">€ 0,00</span>
+      <div class="streak-badge" id="streak-badge" title="">
+        <span class="streak-icon" id="streak-icon">🔥</span>
+        <span class="streak-count" id="streak-count">0</span>
+      </div>
       <button class="eye-btn" id="eye-patrimonio" type="button" title="Mostra/nascondi importo" style="color:var(--ink-soft);"></button>
       <div class="notif-wrap notif-wrap-bell">
         <button class="theme-toggle-btn notif-bell-btn" id="notif-bell-btn" type="button" title="Avvisi">
@@ -1172,7 +1523,7 @@
       </div>
       <button class="theme-toggle-btn" id="general-info-btn" type="button" title="Come funziona questa app">i</button>
       <button class="theme-toggle-btn" id="theme-toggle-btn" type="button" title="Cambia tema"></button>
-      <button class="logout-btn" id="logout-btn" type="button" title="Esci"><span id="user-email-label"></span><span class="logout-sep"> &middot; </span>Esci</button>
+      <button class="logout-btn" id="logout-btn" type="button" title="Esci"><span id="user-email-label"></span><span class="logout-sep"> &middot; </span><span data-i18n="btn_logout">Esci</span></button>
     </div>
   </div>
 </div>
@@ -1198,7 +1549,7 @@
 <div class="wrap">
 
   <!-- SETUP -->
-  <div class="panel">
+<div class="panel">
     <div class="panel-head" id="panel-head-setup">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="setup" type="button"></button>
@@ -1220,6 +1571,9 @@
           <div class="today-bar-fill" id="today-bar-fill" style="width:0%;"></div>
         </div>
       </div>
+      <div class="cycle-type-row">
+        <button type="button" id="close-cycle-now-btn" class="close-cycle-now-btn" data-i18n="btn_close_cycle_now">Chiudi il ciclo adesso</button>
+      </div>
       <div class="grid4">
         <div class="field">
           <label for="giorno-stipendio" data-i18n="field_giorno_pagamento">Giorno di pagamento</label>
@@ -1238,7 +1592,7 @@
       <div class="costi-section">
         <div class="costi-head">
           <h3 data-i18n="field_spese_fisse">Spese fisse del mese</h3>
-          <span class="costi-total" id="costi-total">Totale: € 0,00</span>
+          <span class="costi-total" id="costi-total">€ 0,00</span>
         </div>
         <div id="costi-rows"></div>
         <button class="add-row-btn" id="add-costo" data-i18n="btn_add_row">+ aggiungi voce</button>
@@ -1257,7 +1611,7 @@
     </div>
     <div class="panel-body" id="panel-body-soglie">
       <div class="granularity-row" style="margin-top:0; padding-top:0; border-top:none;">
-        <span class="granularity-label">Vista:</span>
+        <span class="granularity-label" data-i18n="granularity_label">Vista:</span>
         <div class="view-toggle" id="granularity-toggle">
           <button class="view-toggle-btn gran-toggle-btn active" data-mode="day" type="button" data-i18n="view_day">Giornaliera</button>
           <button class="view-toggle-btn gran-toggle-btn" data-mode="week" type="button" data-i18n="view_week">Settimanale</button>
@@ -1297,58 +1651,6 @@
 
   <!-- SUMMARY -->
   <div class="panel">
-    <div class="panel-head" id="panel-head-bilancio">
-      <div class="panel-head-left">
-        <button class="panel-collapse-btn" data-panel="bilancio" type="button"></button>
-        <h2 data-i18n="panel_bilancio">Come sta andando il mese</h2>
-        <button class="panel-info-btn" data-panel="bilancio" type="button">i</button>
-      </div>
-      <button class="reset-btn" id="reset-entries" data-i18n="btn_restart_month">Ricomincia il mese</button>
-    </div>
-    <div class="panel-body" id="panel-body-bilancio">
-      <div class="summary-grid">
-        <div class="sum-card">
-          <div class="label">Quanto hai risparmiato finora</div>
-          <div class="value" id="sum-margine">€ 0,00</div>
-          <div class="sub" id="sum-margine-sub">margine disponibile + extra &minus; spesa, giorni registrati</div>
-        </div>
-        <div class="sum-card">
-          <div class="label">Giorni in cui sei stato nei tuoi limiti</div>
-          <div class="value" id="sum-vs-pareggio">0 / 0</div>
-          <div class="sub" id="sum-vs-pareggio-sub">giorni con margine non negativo, sui giorni registrati</div>
-        </div>
-      </div>
-
-      <div class="chart-wrap" id="chart-wrap">
-        <div id="chart-svg-holder" style="position:relative;"></div>
-        <div id="chart-tooltip" class="chart-tooltip"></div>
-        <div class="legend">
-          <span><span class="swatch" style="background:var(--red)"></span> linea dello zero</span>
-          <span><span class="swatch" style="background:var(--ink)"></span> il tuo risparmio</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DOVE VANNO I TUOI SOLDI -->
-  <div class="panel">
-    <div class="panel-head" id="panel-head-categorie">
-      <div class="panel-head-left">
-        <button class="panel-collapse-btn" data-panel="categorie" type="button"></button>
-        <h2 data-i18n="panel_categorie">Dove vanno i tuoi soldi</h2>
-        <button class="panel-info-btn" data-panel="categorie" type="button">i</button>
-      </div>
-    </div>
-    <div class="panel-body" id="panel-body-categorie">
-      <div class="category-chart-row">
-        <div id="category-chart-holder" class="category-chart-holder"></div>
-        <div id="category-chart-legend" class="category-chart-legend"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DAILY / WEEKLY REGISTER -->
-  <div class="panel">
     <div class="panel-head" id="panel-head-registro">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="registro" type="button"></button>
@@ -1374,16 +1676,208 @@
 
   <!-- ARCHIVIO CONTABILE: cicli conclusi, in sola lettura -->
   <div class="panel">
+    <div class="panel-head" id="panel-head-categorie">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="categorie" type="button"></button>
+        <h2 data-i18n="panel_categorie">Dove vanno i tuoi soldi</h2>
+        <button class="panel-info-btn" data-panel="categorie" type="button">i</button>
+      </div>
+    </div>
+    <div class="panel-body" id="panel-body-categorie">
+      <div class="category-chart-row">
+        <div id="category-chart-holder" class="category-chart-holder"></div>
+        <div id="category-chart-legend" class="category-chart-legend"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COME STA ANDANDO IL MESE -->
+  <div class="panel">
+    <div class="panel-head" id="panel-head-salvadanaio">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="salvadanaio" type="button"></button>
+        <h2 data-i18n="panel_salvadanaio">🐷 Il tuo salvadanaio</h2>
+        <button class="panel-info-btn" data-panel="salvadanaio" type="button">i</button>
+      </div>
+    </div>
+    <div class="panel-body" id="panel-body-salvadanaio">
+      <div class="piggy-box" id="piggy-box">
+        <div class="piggy-content">
+          <div class="piggy-visual" id="piggy-visual" title="Clicca per una sorpresa">
+            <svg id="piggy-svg" viewBox="0 0 200 170" width="120" height="102">
+              <defs>
+                <clipPath id="piggy-body-clip">
+                  <ellipse cx="100" cy="92" rx="72" ry="52"/>
+                </clipPath>
+              </defs>
+              <!-- gambe -->
+              <rect x="52" y="128" width="14" height="22" rx="6" fill="var(--piggy-outline)"/>
+              <rect x="134" y="128" width="14" height="22" rx="6" fill="var(--piggy-outline)"/>
+              <!-- coda -->
+              <path d="M172,80 q14,-4 10,10 q-4,10 -14,6" stroke="var(--piggy-outline)" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <!-- corpo: contorno vuoto sempre visibile -->
+              <ellipse cx="100" cy="92" rx="72" ry="52" fill="var(--piggy-empty)" stroke="var(--piggy-outline)" stroke-width="4"/>
+              <!-- riempimento animato, ritagliato sulla sagoma del corpo -->
+              <rect id="piggy-fill" x="24" y="144" width="152" height="0" fill="var(--piggy-fill-color)" clip-path="url(#piggy-body-clip)"/>
+              <ellipse cx="100" cy="92" rx="72" ry="52" fill="none" stroke="var(--piggy-outline)" stroke-width="4"/>
+              <!-- orecchie -->
+              <path d="M55,48 q-8,-20 14,-16 q6,14 -4,24 Z" fill="var(--piggy-outline)"/>
+              <path d="M145,48 q8,-20 -14,-16 q-6,14 4,24 Z" fill="var(--piggy-outline)"/>
+              <!-- muso -->
+              <ellipse cx="152" cy="94" rx="20" ry="16" fill="var(--piggy-empty)" stroke="var(--piggy-outline)" stroke-width="4"/>
+              <circle cx="146" cy="94" r="3" fill="var(--piggy-outline)"/>
+              <circle cx="158" cy="94" r="3" fill="var(--piggy-outline)"/>
+              <!-- occhio -->
+              <circle cx="118" cy="72" r="4.5" fill="var(--piggy-outline)"/>
+              <!-- fessura per le monete -->
+              <rect x="88" y="42" width="24" height="6" rx="3" fill="var(--piggy-outline)"/>
+            </svg>
+          </div>
+          <div class="piggy-info">
+            <div class="piggy-level-row">
+              <span class="piggy-level-badge" id="piggy-level-badge">🥉</span>
+              <span class="piggy-level-name" id="piggy-level-name">Bronzo</span>
+            </div>
+            <div class="piggy-bar-track"><div class="piggy-bar-fill" id="piggy-bar-fill"></div></div>
+            <div class="piggy-sub" id="piggy-sub"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBIETTIVO DI RISPARMIO -->
+  <div class="panel">
+    <div class="panel-head" id="panel-head-obiettivo">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="obiettivo" type="button"></button>
+        <h2 data-i18n="panel_obiettivo">🎯 Obiettivo di risparmio</h2>
+        <button class="panel-info-btn" data-panel="obiettivo" type="button">i</button>
+      </div>
+    </div>
+    <div class="panel-body" id="panel-body-obiettivo">
+      <div class="panel-body-action-row">
+        <button type="button" class="savings-goal-edit-btn savings-goal-edit-btn-inline" id="savings-goal-edit-btn" data-i18n="goal_edit_btn">Imposta un obiettivo</button>
+      </div>
+
+      <div id="goal-target-anim-overlay" class="goal-target-anim-overlay" style="display:none;">
+        <svg viewBox="0 0 120 120" width="100" height="100">
+          <g class="goal-target-group">
+            <circle cx="60" cy="60" r="42" fill="#D14B4B"/>
+            <circle cx="60" cy="60" r="32" fill="#FBEAEA"/>
+            <circle cx="60" cy="60" r="22" fill="#D14B4B"/>
+            <circle cx="60" cy="60" r="11" fill="#FBEAEA"/>
+            <circle cx="60" cy="60" r="4" fill="#B8862E"/>
+          </g>
+          <g class="goal-impact-lines">
+            <line x1="60" y1="10" x2="60" y2="24" stroke="#B8862E" stroke-width="3" stroke-linecap="round"/>
+            <line x1="60" y1="96" x2="60" y2="110" stroke="#B8862E" stroke-width="3" stroke-linecap="round"/>
+            <line x1="10" y1="60" x2="24" y2="60" stroke="#B8862E" stroke-width="3" stroke-linecap="round"/>
+            <line x1="96" y1="60" x2="110" y2="60" stroke="#B8862E" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <g class="goal-arrow" transform="translate(60,60)">
+            <g class="goal-arrow-inner">
+              <line x1="0" y1="0" x2="-34" y2="-34" stroke="#5B4636" stroke-width="4.5" stroke-linecap="round"/>
+              <path d="M -34,-34 l 10,-2 l -2,10 Z" fill="#5B4636"/>
+              <polygon points="0,0 -7,-1 -1,-7" fill="#3D5A80"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="savings-goal-box" id="savings-goal-box">
+        <div id="savings-goal-display" style="display:none;">
+          <div class="savings-goal-progress-row">
+            <span id="savings-goal-progress-text"></span>
+            <span id="savings-goal-percent"></span>
+          </div>
+          <div class="savings-goal-bar-track">
+            <div class="savings-goal-bar-fill" id="savings-goal-bar-fill"></div>
+          </div>
+          <div class="savings-goal-sub" id="savings-goal-sub"></div>
+        </div>
+        <div id="savings-goal-form" style="display:none;">
+          <div class="field" style="margin-bottom:12px;">
+            <label data-i18n="goal_amount_label">Obiettivo (€)</label>
+            <input type="number" id="savings-goal-amount" min="1" step="1" placeholder="Es. 500">
+          </div>
+          <div class="field" style="margin-bottom:14px;">
+            <label data-i18n="goal_deadline_label">Entro quando (opzionale)</label>
+            <div class="date-select-row">
+              <select id="savings-goal-day" class="date-select date-select-day"></select>
+              <select id="savings-goal-month" class="date-select date-select-month"></select>
+              <select id="savings-goal-year" class="date-select date-select-year"></select>
+            </div>
+          </div>
+          <div id="savings-goal-error" class="auth-error" style="display:none; margin-bottom:12px;"></div>
+          <div class="savings-goal-form-actions">
+            <button type="button" id="savings-goal-clear-btn" class="savings-goal-clear-btn" data-i18n="goal_clear_btn" style="display:none;">Rimuovi</button>
+            <button type="button" id="savings-goal-cancel-btn" class="savings-goal-cancel-btn" data-i18n="btn_cancel">Annulla</button>
+            <button type="button" id="savings-goal-save-btn" class="savings-goal-save-btn" data-i18n="btn_save">Salva</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOVE VANNO I TUOI SOLDI -->
+  <div class="panel">
+    <div class="panel-head" id="panel-head-bilancio">
+      <div class="panel-head-left">
+        <button class="panel-collapse-btn" data-panel="bilancio" type="button"></button>
+        <h2 data-i18n="panel_bilancio">Come sta andando il mese</h2>
+        <button class="panel-info-btn" data-panel="bilancio" type="button">i</button>
+      </div>
+    </div>
+    <div class="panel-body" id="panel-body-bilancio">
+      <div class="panel-body-action-row">
+        <button class="reset-btn" id="reset-entries" data-i18n="btn_restart_month">Ricomincia il mese</button>
+      </div>
+      <div class="summary-grid">
+        <div class="sum-card">
+          <div class="label" data-i18n="sum_margine_label">Quanto hai risparmiato finora</div>
+          <div class="value" id="sum-margine">€ 0,00</div>
+          <div class="sub" id="sum-margine-sub">margine disponibile + extra &minus; spesa, giorni registrati</div>
+        </div>
+        <div class="sum-card">
+          <div class="label" data-i18n="sum_vs_pareggio_label">Giorni in cui sei stato nei tuoi limiti</div>
+          <div class="value" id="sum-vs-pareggio">0 / 0</div>
+          <div class="sub" id="sum-vs-pareggio-sub">giorni con margine non negativo, sui giorni registrati</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap" id="chart-wrap">
+        <div id="chart-svg-holder" style="position:relative;"></div>
+        <div id="chart-tooltip" class="chart-tooltip"></div>
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--red)"></span> <span data-i18n="chart_legend_zero">linea dello zero</span></span>
+          <span><span class="swatch" style="background:var(--ink)"></span> <span data-i18n="chart_legend_savings">il tuo risparmio</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IL TUO SALVADANAIO -->
+  <div class="panel">
     <div class="panel-head" id="panel-head-archivio">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="archivio" type="button"></button>
-        <h2 data-i18n="panel_archivio">Archivio contabile</h2>
+        <h2 data-i18n="panel_archivio">Archivio</h2>
         <button class="panel-info-btn" data-panel="archivio" type="button">i</button>
       </div>
     </div>
     <div class="panel-body" id="panel-body-archivio">
-      <div id="archivio-list" class="entry-list"></div>
-      <div id="archivio-empty" class="entry-empty-note" style="display:none;" data-i18n="archivio_empty">Non hai ancora cicli conclusi: qui troverai lo storico dei mesi passati man mano che si chiudono.</div>
+      <div class="view-toggle" style="margin-bottom:18px;">
+        <button class="view-toggle-btn archivio-tab-btn active" data-tab="cicli" type="button" data-i18n="archivio_tab_cicli">Cicli</button>
+        <button class="view-toggle-btn archivio-tab-btn" data-tab="traguardi" type="button" data-i18n="archivio_tab_traguardi">Traguardi</button>
+      </div>
+      <div id="archivio-cicli-view">
+        <div id="archivio-list" class="entry-list"></div>
+        <div id="archivio-empty" class="entry-empty-note" style="display:none;" data-i18n="archivio_empty">Non hai ancora cicli conclusi: qui troverai lo storico dei mesi passati man mano che si chiudono.</div>
+      </div>
+      <div id="archivio-traguardi-view" style="display:none;">
+        <div id="traguardi-list" class="entry-list"></div>
+        <div id="traguardi-empty" class="entry-empty-note" style="display:none;" data-i18n="traguardi_empty">Non hai ancora raggiunto nessun obiettivo: quando ci riesci, lo ritroverai qui per sempre.</div>
+      </div>
     </div>
   </div>
 
@@ -1415,15 +1909,15 @@
         <div class="panel-body" id="panel-body-trading">
           <div class="invest-totals" style="margin-top:0; padding-top:0; border-top:none;">
             <div class="invest-total-card">
-              <div class="label">Soldi disponibili (broker/sito)</div>
+              <div class="label" data-i18n="label_soldi_disponibili">Soldi disponibili (broker/sito)</div>
               <input type="number" step="0.01" id="trading-disponibile" class="box-input" placeholder="0,00">
             </div>
             <div class="invest-total-card">
-              <div class="label">Quanto hai investito</div>
+              <div class="label" data-i18n="label_quanto_investito">Quanto hai investito</div>
               <input type="number" step="0.01" id="trading-investito" class="box-input" placeholder="0,00">
             </div>
             <div class="invest-total-card">
-              <div class="label">% guadagnata</div>
+              <div class="label" data-i18n="label_pct_guadagnata">% guadagnata</div>
               <div class="value" id="trading-pct">—</div>
               <div class="sub" id="trading-pct-sub"></div>
             </div>
@@ -1449,15 +1943,15 @@
         <div class="panel-body" id="panel-body-betting">
           <div class="invest-totals" style="margin-top:0; padding-top:0; border-top:none;">
             <div class="invest-total-card">
-              <div class="label">Soldi disponibili (broker/sito)</div>
+              <div class="label" data-i18n="label_soldi_disponibili">Soldi disponibili (broker/sito)</div>
               <input type="number" step="0.01" id="betting-disponibile" class="box-input" placeholder="0,00">
             </div>
             <div class="invest-total-card">
-              <div class="label">Quanto hai investito</div>
+              <div class="label" data-i18n="label_quanto_investito">Quanto hai investito</div>
               <input type="number" step="0.01" id="betting-investito" class="box-input" placeholder="0,00">
             </div>
             <div class="invest-total-card">
-              <div class="label">% guadagnata</div>
+              <div class="label" data-i18n="label_pct_guadagnata">% guadagnata</div>
               <div class="value" id="betting-pct">—</div>
               <div class="sub" id="betting-pct-sub"></div>
             </div>
@@ -1479,18 +1973,18 @@
           <button class="panel-info-btn" data-panel="altriconti" type="button">i</button>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
-          <span class="tag emergency-tag">per le emergenze</span>
+          <span class="tag emergency-tag" data-i18n="tag_per_emergenze">per le emergenze</span>
           <button class="eye-btn" id="eye-altriconti" type="button" title="Mostra/nascondi importo" style="color:var(--emergency);"></button>
         </div>
       </div>
       <div class="panel-body" id="panel-body-altriconti">
         <div class="grid4 grid-emergenza">
           <div class="field">
-            <label for="emergenza-nome">Nome del conto (opzionale)</label>
-            <input type="text" id="emergenza-nome" placeholder="es. Conto deposito, libretto di risparmio...">
+            <label for="emergenza-nome" data-i18n="label_nome_conto">Nome del conto (opzionale)</label>
+            <input type="text" id="emergenza-nome" placeholder="es. Conto deposito, libretto di risparmio..." data-i18n-placeholder="placeholder_nome_conto">
           </div>
           <div class="field">
-            <label for="emergenza-importo">Importo disponibile (€)</label>
+            <label for="emergenza-importo" data-i18n="label_importo_disponibile">Importo disponibile (€)</label>
             <input type="number" step="0.01" id="emergenza-importo" placeholder="0,00">
           </div>
         </div>
@@ -1554,6 +2048,8 @@ function defaultState(){
     mese: '',
     giorni: 30,
     giornoStipendio: 1, // giorno del mese in cui arriva lo stipendio: definisce l'inizio del ciclo contabile
+    cycleType: 'monthly', // 'monthly' | 'weekly' — il ciclo può essere mensile (legato allo stipendio) o settimanale
+    weeklyStartDow: 1, // giorno della settimana in cui riparte il ciclo settimanale (0=domenica ... 6=sabato, default lunedì)
     costiItems: [], // [{id, label, amount}, ...]
     stipendio: 0,
     entries: {}, // { "1": {spese: [{id, importo, nota}, ...], entrate: [...]}, ... }
@@ -1564,7 +2060,13 @@ function defaultState(){
     },
     altriConti: { nome: '', importo: null },
     profilo: { nome: '', persone: null }, // raccolto durante le slide di onboarding dopo la registrazione
-    archivio: [] // cicli contabili conclusi, con il riepilogo dei risultati raggiunti
+    archivio: [], // cicli contabili conclusi, con il riepilogo dei risultati raggiunti
+    savingsGoal: null, // { amount, deadline, createdAt, achieved } — obiettivo di risparmio libero impostato dall'utente, opzionale
+    achievedGoals: [], // bacheca permanente di tutti gli obiettivi raggiunti nel tempo
+    piggyMilestones: [], // bacheca permanente dei livelli del salvadanaio sbloccati nel tempo (Bronzo, Argento, Oro, Platino)
+    cycleEndNotifPending: false, cycleEndNotifIndex: null, // notifica del ciclo (mensile o settimanale) appena concluso
+    archivedWeeklySubcycles: [], // indici delle settimane già archiviate DENTRO il ciclo mensile corrente (si azzera ad ogni nuovo mese)
+    goalCongratsPending: false // true finché l'utente non ha ancora visto la notifica dell'ultimo traguardo raggiunto
   };
 }
 let state = defaultState();
@@ -1651,7 +2153,15 @@ function dailySpesaEffective(day){ return dailySpesaTotal(day) + dailyAmortizedT
 // vuoto/non registrato. Solo così quel giorno conta nel margine — un giorno
 // mai toccato resta "non registrato" e non deve incidere sul totale.
 function isDayClosedEmpty(day){
-  return !!(state.entries[day] && state.entries[day].chiuso);
+  if(state.entries[day] && state.entries[day].chiuso) return true;
+  // un giorno può risultare "deciso" anche se non è stato chiuso lui
+  // stesso, ma è l'intera SETTIMANA che lo contiene ad essere stata
+  // chiusa come "Nessuna spesa" — altrimenti nessuno dei suoi giorni
+  // risulterebbe mai registrato, bloccando per sempre sia la fiammella
+  // sia la chiusura automatica della settimana.
+  const wIdx = weekIndexForDay(day);
+  if(state.weekItems[wIdx] && state.weekItems[wIdx].chiuso) return true;
+  return false;
 }
 function dayHasEffectiveData(day){
   const wIdx = weekIndexForDay(day);
@@ -1809,11 +2319,15 @@ function clampPayday(giornoStipendio, year, month){ // month: 1-12
   return Math.min(Math.max(1, giornoStipendio || 1), dim);
 }
 
-// La data (oggetto Date) in cui inizia il ciclo contabile CORRENTE: non il
-// 1° del mese di calendario, ma il giorno di stipendio impostato. Se oggi è
-// prima del giorno di stipendio di questo mese, il ciclo è iniziato il
-// mese scorso (es. stipendio il 27: l'11 settembre appartiene ancora al
-// ciclo partito il 27 agosto).
+// La data (oggetto Date) in cui inizia il ciclo contabile CORRENTE: nel
+// caso mensile è il giorno di stipendio (non il 1° del mese di calendario);
+// nel caso settimanale è l'ultima occorrenza del giorno della settimana
+// scelto come inizio.
+// La data (oggetto Date) in cui inizia il ciclo contabile MENSILE
+// CORRENTE: non il 1° del mese di calendario, ma il giorno di stipendio
+// impostato. Se oggi è prima del giorno di stipendio di questo mese, il
+// ciclo è iniziato il mese scorso (es. stipendio il 27: l'11 settembre
+// appartiene ancora al ciclo partito il 27 agosto).
 function currentCycleStartDate(){
   const giornoStipendio = state.giornoStipendio || 1;
   const now = new Date();
@@ -1856,10 +2370,35 @@ function todayDayInCycle(){
   return Math.round(diffMs / 86400000) + 1;
 }
 
-const GIORNI_SETTIMANA_IT = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-const MESI_IT = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-const GIORNI_SETTIMANA_ABBR = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
-const MESI_ABBR = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+const DAY_MONTH_NAMES = {
+  it: {
+    giorni: ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'],
+    mesi: ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'],
+    giorniAbbr: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
+    mesiAbbr: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+  },
+  en: {
+    giorni: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    mesi: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    giorniAbbr: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    mesiAbbr: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  },
+};
+// "proxy": si comportano come i normali array di prima (accesso per indice),
+// ma scelgono da soli la lingua corrente ad ogni lettura — così tutto il
+// resto del codice che li usa non deve cambiare di una virgola.
+function makeLangArrayProxy(key){
+  return new Proxy([], {
+    get(target, prop){
+      const lang = (typeof currentLang !== 'undefined' && DAY_MONTH_NAMES[currentLang]) ? currentLang : 'it';
+      return DAY_MONTH_NAMES[lang][key][prop];
+    }
+  });
+}
+const GIORNI_SETTIMANA_IT = makeLangArrayProxy('giorni');
+const MESI_IT = makeLangArrayProxy('mesi');
+const GIORNI_SETTIMANA_ABBR = makeLangArrayProxy('giorniAbbr');
+const MESI_ABBR = makeLangArrayProxy('mesiAbbr');
 
 // Data reale corrispondente al giorno N del mese tracciato (es. il "Giorno 11"
 // del registro spese, nel mese di settembre 2026, è davvero venerdì 11/09).
@@ -1875,6 +2414,20 @@ function dateForDay(day){
 function dayHeaderLabel(day){
   const d = dateForDay(day);
   return GIORNI_SETTIMANA_ABBR[d.getDay()] + ' ' + d.getDate() + ' ' + MESI_ABBR[d.getMonth()];
+}
+// Intervallo di date REALI per una settimana (es. "7–13 set"), non la
+// posizione nel ciclo (che sarebbe confusa con quella nella vista
+// giornaliera, dove i giorni mostrano già la data vera di calendario).
+function weekDateRangeLabel(start, end){
+  const startDate = dateForDay(start);
+  const endDate = dateForDay(end);
+  const sameMonth = startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear();
+  const endStr = endDate.getDate() + ' ' + MESI_ABBR[endDate.getMonth()].toLowerCase();
+  if(sameMonth){
+    return startDate.getDate() + '\u2013' + endStr;
+  }
+  const startStr = startDate.getDate() + ' ' + MESI_ABBR[startDate.getMonth()].toLowerCase();
+  return startStr + ' \u2013 ' + endStr;
 }
 // Un giorno è "passato" se è prima di oggi nel mese che si sta tracciando
 // (che ormai coincide sempre col mese reale). Resta comunque modificabile:
@@ -1911,19 +2464,20 @@ function renderTodayBar(){
 
   if(isCurrentCycle && dayInCycle >= 1 && dayInCycle <= g){
     const wIdx = weekIndexForDay(dayInCycle);
-    document.getElementById('today-bar-date').textContent = dayName + ' ' + now.getDate() + ' ' + monthName + ' — Settimana ' + wIdx;
-    fractionEl.textContent = 'Giorno ' + dayInCycle + ' di ' + g;
+    document.getElementById('today-bar-date').textContent = dayName + ' ' + now.getDate() + ' ' + monthName + tr('today_bar_week_suffix').replace('{n}', wIdx);
+    fractionEl.textContent = tr('today_bar_fraction').replace('{day}', dayInCycle).replace('{tot}', g);
     fillEl.style.width = Math.min(100, Math.round((dayInCycle / g) * 100)) + '%';
   }else{
     document.getElementById('today-bar-date').textContent = dayName + ' ' + now.getDate() + ' ' + monthName;
-    fractionEl.textContent = 'Stai seguendo un ciclo diverso da quello attuale';
+    fractionEl.textContent = tr('today_bar_other_cycle');
     fillEl.style.width = '0%';
   }
 }
 
-// Quanti giorni dura il ciclo contabile che inizia in questa data: dal
-// giorno di stipendio fino al giorno prima del prossimo accredito. Si
-// adatta da solo se i due mesi coinvolti hanno lunghezze diverse.
+// Quanti giorni dura il ciclo contabile che inizia in questa data: 7 giorni
+// fissi per il ciclo settimanale; dal giorno di stipendio fino al giorno
+// prima del prossimo accredito per quello mensile (si adatta da solo se i
+// due mesi coinvolti hanno lunghezze diverse).
 function daysInMonth(meseStr){
   const start = meseStr ? parseCycleStart(meseStr) : currentCycleStartDate();
   const giornoStipendio = state.giornoStipendio || 1;
@@ -1954,7 +2508,10 @@ async function load(){
   // il ciclo contabile non si sceglie più a mano: si allinea sempre in
   // automatico al giorno di stipendio impostato + alla data reale di oggi.
   // Se il ciclo tracciato non è più quello giusto, vuol dire che è finito:
-  // lo archiviamo con il suo risultato finale prima di ripartire da zero.
+  // lo archiviamo con il suo risultato finale prima di ripartire da zero
+  // (e con lui riparte anche il conteggio delle settimane già archiviate,
+  // dato che i loro indici valgono solo dentro il ciclo mensile appena
+  // concluso).
   if(state.giornoStipendio === undefined){ state.giornoStipendio = 1; }
   const rilevatoMese = currentCycleDefault();
   if(state.mese !== rilevatoMese){
@@ -1963,6 +2520,7 @@ async function load(){
     state.giorni = daysInMonth(state.mese);
     state.entries = {};
     state.weekItems = {};
+    state.archivedWeeklySubcycles = [];
   }
   if(!state.giorni || state.giorni < 1){ state.giorni = daysInMonth(state.mese); }
 
@@ -2081,15 +2639,15 @@ async function load(){
 async function performSave(){
   try{
     await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
-    document.getElementById('setup-tag').textContent = 'salvato';
+    document.getElementById('setup-tag').textContent = tr('setup_tag_saved');
     const note = document.getElementById('save-note');
-    if(note) note.textContent = 'Ultimo salvataggio: ' + new Date().toLocaleTimeString('it-IT');
+    if(note) note.textContent = tr('last_save_prefix') + new Date().toLocaleTimeString(currentLang === 'en' ? 'en-US' : 'it-IT');
   }catch(e){
-    document.getElementById('setup-tag').textContent = 'errore salvataggio';
+    document.getElementById('setup-tag').textContent = tr('setup_tag_error');
   }
 }
 function scheduleSave(){
-  document.getElementById('setup-tag').textContent = 'salvataggio...';
+  document.getElementById('setup-tag').textContent = tr('setup_tag_saving');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(performSave, 400);
 }
@@ -2098,7 +2656,7 @@ function scheduleSave(){
 // (es. appena completato l'onboarding).
 async function saveNow(){
   clearTimeout(saveTimer);
-  document.getElementById('setup-tag').textContent = 'salvataggio...';
+  document.getElementById('setup-tag').textContent = tr('setup_tag_saving');
   await performSave();
 }
 
@@ -2112,6 +2670,23 @@ function hydrateInputs(){
   document.getElementById('emergenza-nome').value = state.altriConti.nome || '';
   document.getElementById('emergenza-importo').value = (state.altriConti.importo !== null && state.altriConti.importo !== undefined) ? state.altriConti.importo : '';
 }
+
+// chiude subito il ciclo MENSILE attuale, senza aspettare il confine
+// naturale — utile per provare la chiusura senza dover aspettare giorni
+// veri, o per chi vuole ripartire prima del previsto. Non tocco le date
+// del ciclo (state.mese/state.giorni): archivio quello che c'è così com'è,
+// e svuoto solo il registro per ripartire da zero, dato che il "vero"
+// confine del ciclo arriverà comunque a tempo debito.
+document.getElementById('close-cycle-now-btn').addEventListener('click', () => {
+  showConfirm(tr('confirm_close_cycle_now'), () => {
+    archiveCurrentCycle();
+    state.entries = {};
+    state.weekItems = {};
+    state.archivedWeeklySubcycles = [];
+    renderAll();
+    scheduleSave();
+  });
+});
 
 function makeCostiRow(item){
   const row = document.createElement('div');
@@ -2172,13 +2747,13 @@ function makeCostiRow(item){
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
     saveBtn.className = 'expense-save';
-    saveBtn.textContent = 'Salva';
+    saveBtn.textContent = tr('btn_save');
 
     const delBtn = document.createElement('button');
     delBtn.type = 'button';
     delBtn.className = 'expense-del';
     delBtn.innerHTML = '&times;';
-    delBtn.title = 'Rimuovi voce';
+    delBtn.title = tr('title_rimuovi_voce');
 
     saveBtn.addEventListener('click', () => {
       item.amount = amountInput.value === '' ? null : parseFloat(amountInput.value);
@@ -2214,14 +2789,14 @@ function makeCostiRow(item){
     }else{
       const noCatSpan = document.createElement('span');
       noCatSpan.className = 'expense-saved-nota empty';
-      noCatSpan.textContent = 'Nessuna categoria';
+      noCatSpan.textContent = tr('empty_categoria');
       row.appendChild(noCatSpan);
     }
 
     const editBtn = document.createElement('button');
     editBtn.type = 'button';
     editBtn.className = 'expense-edit';
-    editBtn.title = 'Modifica voce';
+    editBtn.title = tr('title_modifica_voce');
     editBtn.innerHTML = PENCIL_SVG;
     editBtn.addEventListener('click', () => {
       editingItems.add(item.id);
@@ -2239,7 +2814,7 @@ function makeCostiRow(item){
     delBtn.type = 'button';
     delBtn.className = 'expense-del';
     delBtn.innerHTML = '&times;';
-    delBtn.title = 'Rimuovi voce';
+    delBtn.title = tr('title_rimuovi_voce');
     delBtn.addEventListener('click', removeItem);
     row.appendChild(delBtn);
   }
@@ -2253,7 +2828,7 @@ function renderCostiItems(){
   if(state.costiItems.length === 0){
     const empty = document.createElement('div');
     empty.className = 'entry-empty-note';
-    empty.textContent = 'Nessuna spesa fissa registrata: aggiungine una quando vuoi con il pulsante qui sotto.';
+    empty.textContent = tr('empty_costi_fissi');
     wrap.appendChild(empty);
   }else{
     state.costiItems.forEach(item => {
@@ -2264,7 +2839,7 @@ function renderCostiItems(){
 }
 
 function updateCostiTotal(){
-  document.getElementById('costi-total').textContent = 'Totale: ' + fmt(totaleCostiFissi());
+  document.getElementById('costi-total').textContent = tr('total_prefix') + fmt(totaleCostiFissi());
 }
 
 // ===== INVESTIMENTI (Trading / Betting) =====
@@ -2298,20 +2873,20 @@ function updateInvestComputed(section){
     pctEl.textContent = MASK;
     pctEl.className = 'value masked';
     subEl.textContent = '';
-    tagEl.textContent = 'Risultato: ' + MASK;
+    tagEl.textContent = tr('trading_result_prefix') + MASK;
     return;
   }
 
   if(v.hasAny && v.pct !== null){
     pctEl.textContent = (v.pct >= 0 ? '+' : '') + v.pct.toLocaleString('it-IT', {minimumFractionDigits:1, maximumFractionDigits:1}) + '%';
     pctEl.className = 'value ' + (v.pct >= 0 ? 'pos' : 'neg');
-    subEl.textContent = 'Risultato: ' + (v.pl >= 0 ? '+' : '') + fmt(v.pl);
+    subEl.textContent = tr('trading_result_prefix') + (v.pl >= 0 ? '+' : '') + fmt(v.pl);
   }else{
     pctEl.textContent = '—';
     pctEl.className = 'value';
     subEl.textContent = '';
   }
-  tagEl.textContent = 'Risultato: ' + (v.hasAny ? (v.pl >= 0 ? '+' : '') + fmt(v.pl) : '€ 0,00');
+  tagEl.textContent = tr('trading_result_prefix') + (v.hasAny ? (v.pl >= 0 ? '+' : '') + fmt(v.pl) : '€ 0,00');
 }
 
 ['trading', 'betting'].forEach(section => {
@@ -2429,19 +3004,165 @@ function deficitBannerHTML(plan){
   `;
 }
 
+// ===== SERIE DI GIORNI IN BUDGET (streak) =====
+// Un giorno "vince" la serie se, isolatamente, non è andato in rosso (o è
+// stato chiuso esplicitamente senza spese). Un giorno passato mai
+// registrato interrompe subito la serie. Oggi non conta né a favore né
+// contro finché non viene "deciso" in un modo o nell'altro: semplicemente
+// non è ancora successo.
+// La serie è un'unica sequenza cronologica, giorno dopo giorno (dal
+// giorno 1 fino all'ultimo del ciclo): ogni giorno chiuso in positivo fa
+// salire il contatore di 1, ogni giorno chiuso in negativo lo azzera di
+// colpo. Un giorno passato mai registrato interrompe la sequenza (torna a
+// 0) esattamente come un giorno negativo; un giorno FUTURO ancora vuoto,
+// invece, semplicemente non è ancora successo e viene ignorato senza
+// alterare nulla. L'unica eccezione è oggi stesso: se non è ancora stato
+// deciso, si salta senza contare né interrompere, perché la giornata è
+// ancora in corso.
+// La fiammella guarda all'ULTIMO giorno (cronologicamente) che ha già un
+// verdetto — positivo o negativo — non necessariamente "oggi": così anche
+// compilando i giorni passati fuori ordine da "Giorni precedenti" (magari
+// iniziando da uno più vecchio), o pre-compilando giorni futuri, il
+// risultato è sempre coerente con l'ultima cosa decisa, in qualsiasi
+// ordine sia stata inserita. Da quel giorno si risale all'indietro,
+// sommando 1 per ogni giorno positivo consecutivo, fermandosi al primo
+// giorno negativo o mai registrato.
+function computeStreak(){
+  const g = Math.max(1, state.giorni || 1);
+  const isCurrentCycle = state.mese === currentCycleDefault();
+  if(!isCurrentCycle) return { streak: 0 };
+
+  let lastDecided = null;
+  for(let day = g; day >= 1; day--){
+    if(dayHasEffectiveData(day)){ lastDecided = day; break; }
+  }
+  if(lastDecided === null) return { streak: 0 };
+
+  let streak = 0;
+  let day = lastDecided;
+  while(day >= 1){
+    if(!dayHasEffectiveData(day)) break; // giorno mai registrato: la sequenza si interrompe qui
+    const { margine } = dayOwnMargine(day);
+    if(margine < 0) break; // giorno negativo: la sequenza si interrompe qui (se è l'ultimo, streak resta 0)
+    streak++;
+    day--;
+  }
+  return { streak };
+}
+
+function renderStreak(){
+  const { streak } = computeStreak();
+  const badge = document.getElementById('streak-badge');
+  const countEl = document.getElementById('streak-count');
+  countEl.textContent = streak;
+
+  badge.classList.remove('lvl-warm', 'lvl-hot', 'lvl-blaze');
+  if(streak >= 14){ badge.classList.add('lvl-blaze'); }
+  else if(streak >= 7){ badge.classList.add('lvl-hot'); }
+  else if(streak >= 1){ badge.classList.add('lvl-warm'); }
+}
+
+// Il popup informativo della fiamma riusa lo stesso pannello "i" già usato
+// per spiegare le altre sezioni — così è coerente, e funziona sia al
+// passaggio del mouse sia al click (utile su mobile).
+function streakInfoText(){
+  const { streak } = computeStreak();
+  let text = tr('streak_info');
+  if(streak === 1){ text += tr('streak_info_current_one'); }
+  else if(streak > 1){ text += tr('streak_info_current_many').replace('{n}', streak); }
+  return text;
+}
+function showStreakInfo(){
+  const badge = document.getElementById('streak-badge');
+  const tooltip = document.getElementById('panel-info-tooltip');
+  document.getElementById('panel-info-tooltip-text').textContent = streakInfoText();
+  tooltip.dataset.for = 'streak';
+  tooltip.style.display = 'block';
+  const rect = badge.getBoundingClientRect();
+  const maxLeft = window.innerWidth - 292;
+  tooltip.style.top = (rect.bottom + 8) + 'px';
+  tooltip.style.left = Math.max(12, Math.min(rect.left, maxLeft)) + 'px';
+}
+function hideStreakInfo(){
+  const tooltip = document.getElementById('panel-info-tooltip');
+  if(tooltip.dataset.for === 'streak'){ tooltip.style.display = 'none'; }
+}
+(function(){
+  const badge = document.getElementById('streak-badge');
+  badge.addEventListener('mouseenter', showStreakInfo);
+  badge.addEventListener('mouseleave', hideStreakInfo);
+  badge.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showStreakInfo();
+    // la fiamma trema e brucia un po' più forte ad ogni click, giusto per
+    // gioco — non cambia nessun dato
+    const icon = document.getElementById('streak-icon');
+    icon.classList.remove('flickering');
+    void icon.offsetWidth; // forza il reflow, per poter ripartire anche se cliccata di recente
+    icon.classList.add('flickering');
+    setTimeout(() => icon.classList.remove('flickering'), 500);
+  });
+})();
+
+function goalCongratsHTML(){
+  const last = state.achievedGoals[state.achievedGoals.length - 1];
+  if(!last) return '';
+  return `
+    <span class="deficit-banner-icon">&#127881;</span>
+    <div>
+      <div class="deficit-banner-title">${tr('goal_congrats_title')}</div>
+      <div class="deficit-banner-text">${tr(last.daysToReach === 1 ? 'goal_congrats_text_one' : 'goal_congrats_text_many').replace('{amount}', fmt(last.amount)).replace('{days}', last.daysToReach)}</div>
+    </div>
+  `;
+}
+
+// Contenuto della notifica di "ciclo concluso" (mensile o settimanale),
+// con un riepilogo veloce e il link per aprire il dettaglio giorno per
+// giorno.
+function cycleEndNotifHTML(){
+  const idx = state.cycleEndNotifIndex;
+  const cycle = state.archivio && state.archivio[idx];
+  if(!cycle) return '';
+  const typeLabel = cycle.cycleType === 'weekly' ? tr('cycle_notif_type_weekly') : tr('cycle_notif_type_monthly');
+  const range = formatDateIt(cycle.cicloInizio) + ' → ' + formatDateIt(cycle.cicloFine);
+  return `
+    <span class="deficit-banner-icon">&#128203;</span>
+    <div>
+      <div class="deficit-banner-title">${tr('cycle_notif_title').replace('{type}', typeLabel)}</div>
+      <div class="deficit-banner-text">
+        ${tr('cycle_notif_body').replace('{range}', range).replace('{result}', fmt(cycle.margineFinale))}<br>
+        <button type="button" class="cycle-notif-more-btn" onclick="openCycleDetail(${idx})">${tr('cycle_notif_more')}</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderDeficitAlert(){
   const plan = computeDeficitPlan();
   const banner = document.getElementById('deficit-banner');
   const dot = document.getElementById('notif-dot');
   const dropdownBody = document.getElementById('notif-dropdown-body');
 
+  // il banner rosso dentro "Quanto puoi spendere" resta solo per il
+  // deficit (lì serve un'azione concreta e immediata); le altre notifiche
+  // vivono solo nella campanella, per non intromettersi mentre l'utente
+  // sta lavorando sui suoi numeri.
   if(plan){
     banner.style.display = 'flex';
     banner.innerHTML = deficitBannerHTML(plan);
-    dot.style.display = '';
-    dropdownBody.innerHTML = `<div class="notif-item">${deficitBannerHTML(plan)}</div>`;
   }else{
     banner.style.display = 'none';
+  }
+
+  const items = [];
+  if(plan){ items.push(`<div class="notif-item">${deficitBannerHTML(plan)}</div>`); }
+  if(state.cycleEndNotifPending){ items.push(`<div class="notif-item notif-success">${cycleEndNotifHTML()}</div>`); }
+  if(state.goalCongratsPending){ items.push(`<div class="notif-item notif-success">${goalCongratsHTML()}</div>`); }
+
+  if(items.length > 0){
+    dot.style.display = '';
+    dropdownBody.innerHTML = items.join('');
+  }else{
     dot.style.display = 'none';
     dropdownBody.innerHTML = '<div class="notif-empty">' + tr('notif_empty') + '</div>';
   }
@@ -2450,7 +3171,28 @@ function renderDeficitAlert(){
 document.getElementById('notif-bell-btn').addEventListener('click', (e) => {
   e.stopPropagation();
   const dropdown = document.getElementById('notif-dropdown');
-  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+  const opening = dropdown.style.display === 'none';
+  if(opening){
+    // ricostruisco il contenuto con lo stato ATTUALE prima di segnare le
+    // notifiche come "viste" — altrimenti sparirebbero subito invece di
+    // essere mostrate almeno questa prima volta.
+    renderDeficitAlert();
+  }
+  dropdown.style.display = opening ? 'block' : 'none';
+  if(opening){
+    let changed = false;
+    if(state.goalCongratsPending){ state.goalCongratsPending = false; changed = true; }
+    if(state.cycleEndNotifPending){ state.cycleEndNotifPending = false; changed = true; }
+    if(changed){
+      scheduleSave();
+      // il pallino sparisce solo se non resta nessun'altra notifica attiva
+      // (es. il banner del deficit, che non è "vista una volta e sparisce"
+      // ma resta finché il problema non è risolto)
+      if(!computeDeficitPlan()){
+        document.getElementById('notif-dot').style.display = 'none';
+      }
+    }
+  }
 });
 document.addEventListener('click', (e) => {
   const wrap = document.querySelector('.notif-wrap-bell');
@@ -2548,6 +3290,7 @@ const SPESA_CATEGORIES = [
   { id: 'abbonamenti',   emoji: '📱', color: '#6B7FD7', get label(){ return tr('cat_abbonamenti'); } },
   { id: 'veicolo',       emoji: '🚗', color: '#D77A6B', get label(){ return tr('cat_veicolo'); } },
   { id: 'cibo',          emoji: '🍽️', color: '#D9A44E', get label(){ return tr('cat_cibo'); } },
+  { id: 'salute',        emoji: '🩺', color: '#C15C5C', get label(){ return tr('cat_salute'); } },
   { id: 'bar',           emoji: '☕', color: '#B8722E', get label(){ return tr('cat_bar'); } },
   { id: 'market',        emoji: '🛒', color: '#5FA08A', get label(){ return tr('cat_market'); } },
   { id: 'investimenti',  emoji: '📈', color: '#3D5A80', get label(){ return tr('cat_investimenti'); } },
@@ -2636,7 +3379,7 @@ function buildItemSection(sectionKey, title, pairs, kind, ctx){
   header.innerHTML = `
     <span class="item-section-chevron${collapsed ? '' : ' expanded'}">${CHEVRON_SVG}</span>
     <span class="item-section-title">${title}</span>
-    ${count > 0 ? `<span class="item-section-summary">${fmt(total)} &middot; ${count} ${count === 1 ? 'voce' : 'voci'}</span>` : ''}
+    ${count > 0 ? `<span class="item-section-summary">${fmt(total)} &middot; ${count} ${count === 1 ? tr('voce_one') : tr('voce_many')}</span>` : ''}
   `;
   header.addEventListener('click', () => {
     if(collapsedSections.has(sectionKey)) collapsedSections.delete(sectionKey); else collapsedSections.add(sectionKey);
@@ -2654,8 +3397,8 @@ function buildItemSection(sectionKey, title, pairs, kind, ctx){
       const empty = document.createElement('div');
       empty.className = 'entry-empty-note';
       empty.textContent = kind === 'entrate'
-        ? (ctx.isWeek ? 'Nessuna entrata extra registrata in questa settimana.' : 'Nessuna entrata extra registrata per questo giorno.')
-        : (ctx.isWeek ? 'Nessuna spesa registrata in questa settimana.' : 'Nessuna spesa registrata per questo giorno.');
+        ? (ctx.isWeek ? tr('empty_entrate_week') : tr('empty_entrate_day'))
+        : (ctx.isWeek ? tr('empty_spese_week') : tr('empty_spese_day'));
       itemsContainer.appendChild(empty);
     }else{
       pairs.forEach(({ day, item }) => {
@@ -2678,7 +3421,7 @@ function buildItemSection(sectionKey, title, pairs, kind, ctx){
       state.entries[targetDay][kind].push(newItem);
       if(ctx.isWeek){ rerenderWeekRow(ctx.weekIndex); rerenderDayRow(targetDay); }
       else{ rerenderDayRow(ctx.day); renderWeeklyTable(); }
-      renderThresholds(); renderDeficitAlert(); renderSummary(); renderChart(); renderCategoryChart(); updatePatrimonio();
+      checkWeeklySubcyclesComplete(); renderThresholds(); renderPiggyBank(); renderSavingsGoal(); renderDeficitAlert(); renderStreak(); renderTraguardi(); renderSummary(); renderChart(); renderCategoryChart(); renderArchivio(); updatePatrimonio();
       if(document.getElementById('past-editor-overlay').style.display !== 'none'){ renderPastEditorList(); renderTable(); renderWeeklyTable(); }
       scheduleSave();
       if(typeof requestAnimationFrame === 'function'){
@@ -2841,12 +3584,12 @@ function makeDayRow(day, t, isToday, forceEditable){
     <span class="entry-chevron">${isPast ? LOCK_SVG : CHEVRON_SVG}</span>
     <span class="entry-label">${dayHeaderLabel(day)}</span>
     <span class="entry-summary">
-      ${voci > 0 ? `<span class="entry-summary-note">${voci} ${voci === 1 ? 'voce' : 'voci'}</span>` : ''}
+      ${voci > 0 ? `<span class="entry-summary-note">${voci} ${voci === 1 ? tr('voce_one') : tr('voce_many')}</span>` : ''}
       <span class="entry-summary-margine ${hasData ? (margine >= 0 ? 'pos' : 'neg') : ''}">${hasData ? fmt(margine) : '—'}</span>
     </span>
   `;
   if(isPast){
-    header.title = 'Giorno passato: modificabile solo dalla sezione dedicata (ingranaggio qui sopra)';
+    header.title = tr('title_giorno_passato');
   }else{
     header.addEventListener('click', () => {
       if(trackingSet.has(day)) trackingSet.delete(day); else trackingSet.add(day);
@@ -2921,8 +3664,8 @@ function makeDayRowBody(day, t){
   const ctx = { isWeek: false, day };
   const entratePairs = entrate.map(item => ({ day, item }));
   const spesePairs = spese.map(item => ({ day, item }));
-  body.insertBefore(buildItemSection('day-' + day + '-spese', 'Spese del giorno', spesePairs, 'spese', ctx), finalBlock);
-  body.insertBefore(buildItemSection('day-' + day + '-entrate', 'Entrate extra del giorno', entratePairs, 'entrate', ctx), finalBlock);
+  body.insertBefore(buildItemSection('day-' + day + '-spese', tr('section_spese_giorno'), spesePairs, 'spese', ctx), finalBlock);
+  body.insertBefore(buildItemSection('day-' + day + '-entrate', tr('section_entrate_giorno'), entratePairs, 'entrate', ctx), finalBlock);
 
   return body;
 }
@@ -2932,7 +3675,7 @@ function toggleDayClosed(day){
   state.entries[day].chiuso = !state.entries[day].chiuso;
   rerenderDayRow(day);
   renderWeeklyTable();
-  renderThresholds(); renderDeficitAlert(); renderSummary(); renderChart(); renderCategoryChart(); updatePatrimonio();
+  checkWeeklySubcyclesComplete(); renderThresholds(); renderPiggyBank(); renderSavingsGoal(); renderDeficitAlert(); renderStreak(); renderTraguardi(); renderSummary(); renderChart(); renderCategoryChart(); renderArchivio(); updatePatrimonio();
   if(document.getElementById('past-editor-overlay').style.display !== 'none'){ renderPastEditorList(); renderTable(); renderWeeklyTable(); }
   scheduleSave();
 }
@@ -2968,7 +3711,7 @@ function refreshDayRow(day){
   if(summary){
     let noteEl = summary.querySelector('.entry-summary-note');
     if(voci > 0){
-      const txt = voci + (voci === 1 ? ' voce' : ' voci');
+      const txt = voci + ' ' + (voci === 1 ? tr('voce_one') : tr('voce_many'));
       if(noteEl){ noteEl.textContent = txt; }
       else{
         noteEl = document.createElement('span');
@@ -3031,7 +3774,7 @@ function makeItemRow(day, item, kind, opts){
   const isIncome = kind === 'entrate';
   const importoClass = isIncome ? 'income-importo' : 'expense-importo';
   const notaClass = isIncome ? 'income-nota' : 'expense-nota';
-  const notaPlaceholder = isIncome ? 'Motivo dell\'entrata (facoltativo)' : 'Motivo della spesa (facoltativo)';
+  const notaPlaceholder = isIncome ? tr('nota_placeholder_entrata') : tr('nota_placeholder_spesa');
   const editing = editingItems.has(item.id);
 
   const row = document.createElement('div');
@@ -3052,7 +3795,7 @@ function makeItemRow(day, item, kind, opts){
   function fullRefresh(affectedDays){
     affectedDays.forEach(d => rerenderDayRow(d));
     if(opts.showDaySelector) rerenderWeekRow(opts.weekIndex); else renderWeeklyTable();
-    renderThresholds(); renderDeficitAlert(); renderSummary(); renderChart(); renderCategoryChart(); updatePatrimonio();
+    checkWeeklySubcyclesComplete(); renderThresholds(); renderPiggyBank(); renderSavingsGoal(); renderDeficitAlert(); renderStreak(); renderTraguardi(); renderSummary(); renderChart(); renderCategoryChart(); renderArchivio(); updatePatrimonio();
     if(document.getElementById('past-editor-overlay').style.display !== 'none'){ renderPastEditorList(); renderTable(); renderWeeklyTable(); }
     scheduleSave();
   }
@@ -3080,7 +3823,7 @@ function makeItemRow(day, item, kind, opts){
       for(let d = start; d <= end; d++){
         const opt = document.createElement('option');
         opt.value = d;
-        opt.textContent = 'Giorno ' + String(d).padStart(2, '0');
+        opt.textContent = tr('day_option_label') + ' ' + String(d).padStart(2, '0');
         if(d === day) opt.selected = true;
         daySelect.appendChild(opt);
       }
@@ -3138,13 +3881,13 @@ function makeItemRow(day, item, kind, opts){
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
     saveBtn.className = 'expense-save';
-    saveBtn.textContent = 'Salva';
+    saveBtn.textContent = tr('btn_save');
 
     const delBtn = document.createElement('button');
     delBtn.type = 'button';
     delBtn.className = 'expense-del';
     delBtn.innerHTML = '&times;';
-    delBtn.title = 'Rimuovi voce';
+    delBtn.title = tr('title_rimuovi_voce');
 
     saveBtn.addEventListener('click', () => {
       const rawValue = daySelect ? daySelect.value : String(day);
@@ -3189,7 +3932,7 @@ function makeItemRow(day, item, kind, opts){
     if(opts.showDaySelector){
       const dayBadge = document.createElement('span');
       dayBadge.className = 'expense-saved-day';
-      dayBadge.textContent = day === 'week' ? 'Settimana' : 'Giorno ' + String(day).padStart(2, '0');
+      dayBadge.textContent = day === 'week' ? tr('day_badge_week') : tr('day_option_label') + ' ' + String(day).padStart(2, '0');
       row.appendChild(dayBadge);
     }
 
@@ -3206,7 +3949,7 @@ function makeItemRow(day, item, kind, opts){
 
       const notaSpan = document.createElement('span');
       notaSpan.className = 'expense-saved-nota' + (item.nota ? '' : ' empty');
-      notaSpan.textContent = item.nota ? item.nota : 'Nessuna nota';
+      notaSpan.textContent = item.nota ? item.nota : tr('nota_vuota');
       row.appendChild(notaSpan);
     }else if(item.categoria){
       const cat = categoryById(item.categoria);
@@ -3233,7 +3976,7 @@ function makeItemRow(day, item, kind, opts){
     const editBtn = document.createElement('button');
     editBtn.type = 'button';
     editBtn.className = 'expense-edit';
-    editBtn.title = 'Modifica voce';
+    editBtn.title = tr('title_modifica_voce');
     editBtn.innerHTML = PENCIL_SVG;
     editBtn.addEventListener('click', () => {
       editingItems.add(item.id);
@@ -3251,7 +3994,7 @@ function makeItemRow(day, item, kind, opts){
     delBtn.type = 'button';
     delBtn.className = 'expense-del';
     delBtn.innerHTML = '&times;';
-    delBtn.title = 'Rimuovi voce';
+    delBtn.title = tr('title_rimuovi_voce');
     delBtn.addEventListener('click', removeItem);
     row.appendChild(delBtn);
   }
@@ -3340,14 +4083,14 @@ function makeWeekRow(weekIndex, t, forceEditable){
   header.className = 'entry-row-header';
   header.innerHTML = `
     <span class="entry-chevron">${isPastWeek ? LOCK_SVG : CHEVRON_SVG}</span>
-    <span class="entry-label">Sett. ${weekIndex}</span>
+    <span class="entry-label">${tr('week_label_prefix')} ${weekIndex}</span>
     <span class="entry-summary">
-      <span class="entry-summary-note">giorni ${String(a.start).padStart(2,'0')}&ndash;${String(a.end).padStart(2,'0')} &middot; ${a.registrati}/${a.numDays} registrati</span>
+      <span class="entry-summary-note">${weekDateRangeLabel(a.start, a.end)} &middot; ${tr('week_registrati_count').replace('{n}', a.registrati).replace('{tot}', a.numDays)}</span>
       <span class="entry-summary-margine ${a.haQualcosa ? (a.margineTot >= 0 ? 'pos' : 'neg') : ''}">${a.haQualcosa ? fmt(a.margineTot) : '—'}</span>
     </span>
   `;
   if(isPastWeek){
-    header.title = 'Settimana passata: modificabile solo dalla sezione dedicata (ingranaggio qui sopra)';
+    header.title = tr('title_settimana_passata');
   }else{
     header.addEventListener('click', () => {
       if(trackingSet.has(weekIndex)) trackingSet.delete(weekIndex); else trackingSet.add(weekIndex);
@@ -3404,8 +4147,8 @@ function makeWeekRowBody(weekIndex, t){
 
   const finalBlock = body.querySelector('.entry-final');
   const ctx = { isWeek: true, weekIndex, defaultDay: a.start };
-  body.insertBefore(buildItemSection('week-' + weekIndex + '-spese', 'Spese della settimana — scegli il giorno per ognuna', a.speseItems, 'spese', ctx), finalBlock);
-  body.insertBefore(buildItemSection('week-' + weekIndex + '-entrate', 'Entrate extra della settimana — scegli il giorno per ognuna', a.entrateItems, 'entrate', ctx), finalBlock);
+  body.insertBefore(buildItemSection('week-' + weekIndex + '-spese', tr('section_spese_settimana'), a.speseItems, 'spese', ctx), finalBlock);
+  body.insertBefore(buildItemSection('week-' + weekIndex + '-entrate', tr('section_entrate_settimana'), a.entrateItems, 'entrate', ctx), finalBlock);
 
   return body;
 }
@@ -3415,7 +4158,7 @@ function toggleWeekClosed(weekIndex){
   state.weekItems[weekIndex].chiuso = !state.weekItems[weekIndex].chiuso;
   rerenderWeekRow(weekIndex);
   renderTable();
-  renderThresholds(); renderDeficitAlert(); renderSummary(); renderChart(); renderCategoryChart(); updatePatrimonio();
+  checkWeeklySubcyclesComplete(); renderThresholds(); renderPiggyBank(); renderSavingsGoal(); renderDeficitAlert(); renderStreak(); renderTraguardi(); renderSummary(); renderChart(); renderCategoryChart(); renderArchivio(); updatePatrimonio();
   if(document.getElementById('past-editor-overlay').style.display !== 'none'){ renderPastEditorList(); renderTable(); renderWeeklyTable(); }
   scheduleSave();
 }
@@ -3486,6 +4229,7 @@ function archiveCurrentCycle(){
     cicloInizio: state.mese,
     cicloFine: cycleEnd.getFullYear() + '-' + String(cycleEnd.getMonth() + 1).padStart(2, '0') + '-' + String(cycleEnd.getDate()).padStart(2, '0'),
     giorni: g,
+    cycleType: state.cycleType || 'monthly',
     stipendio: state.stipendio || 0,
     speseFisse: totaleCostiFissi(),
     margineFinale,
@@ -3496,7 +4240,80 @@ function archiveCurrentCycle(){
   };
   if(!Array.isArray(state.archivio)) state.archivio = [];
   state.archivio.unshift(archived); // il più recente per primo
+
+  // notifica il ciclo appena concluso (mensile o settimanale) in
+  // campanella, con la possibilità di vedere il dettaglio giorno per
+  // giorno — l'indice è sempre 0 dato che il ciclo appena archiviato va
+  // sempre in cima alla lista
+  state.cycleEndNotifPending = true;
+  state.cycleEndNotifIndex = 0;
 }
+
+// Apre il dettaglio giorno per giorno di un ciclo già archiviato: riusa gli
+// stessi calcoli già scritti per il ciclo CORRENTE, "impersonando" per un
+// attimo lo stato con i dati del ciclo archiviato, poi lo ripristina.
+function openCycleDetail(archiveIndex){
+  const cycle = state.archivio && state.archivio[archiveIndex];
+  if(!cycle) return;
+
+  document.getElementById('cycle-detail-title').textContent = formatDateIt(cycle.cicloInizio) + ' → ' + formatDateIt(cycle.cicloFine);
+  const resultEl = document.getElementById('cycle-detail-result-value');
+  resultEl.textContent = fmt(cycle.margineFinale);
+  resultEl.className = 'piggy-stats-total-value' + (cycle.margineFinale < 0 ? ' neg' : '');
+
+  let days;
+  if(cycle.dayDetails){
+    // ciclo SETTIMANALE: il giorno per giorno è già stato calcolato e
+    // salvato al momento dell'archiviazione (usando il rapporto
+    // stipendio/spese dell'INTERO mese, l'unico corretto) — qui lo
+    // riprendo così com'è, senza ricalcolare nulla.
+    days = cycle.dayDetails;
+  }else{
+    // ciclo MENSILE: riuso gli stessi calcoli del ciclo corrente,
+    // "impersonando" per un attimo lo stato con i dati archiviati.
+    const savedState = state;
+    state = {
+      ...savedState,
+      mese: cycle.cicloInizio,
+      giorni: cycle.giorni,
+      stipendio: cycle.stipendio,
+      costiItems: cycle.costiItems,
+      entries: cycle.entries,
+      weekItems: cycle.weekItems,
+    };
+    const t = targets();
+    days = [];
+    for(let day = 1; day <= cycle.giorni; day++){
+      if(dayHasEffectiveData(day)){
+        days.push({ label: dayHeaderLabel(day), margine: dayOwnMargine(day, t).margine });
+      }
+    }
+    state = savedState;
+  }
+
+  const list = document.getElementById('cycle-detail-days-list');
+  const empty = document.getElementById('cycle-detail-days-empty');
+  list.innerHTML = '';
+  if(days.length === 0){
+    list.style.display = 'none';
+    empty.style.display = 'block';
+  }else{
+    list.style.display = '';
+    empty.style.display = 'none';
+    days.forEach(({ label, margine }) => {
+      const row = document.createElement('div');
+      row.className = 'piggy-stats-day-row';
+      const sign = margine >= 0 ? '+' : '';
+      row.innerHTML = `<span class="piggy-stats-day-date">${label}</span><span class="piggy-stats-day-amount${margine < 0 ? ' neg' : ''}">${sign}${fmt(margine)}</span>`;
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById('cycle-detail-overlay').style.display = 'flex';
+}
+document.getElementById('cycle-detail-close-x').addEventListener('click', () => {
+  document.getElementById('cycle-detail-overlay').style.display = 'none';
+});
 
 function formatDateIt(dateStr){
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -3504,6 +4321,44 @@ function formatDateIt(dateStr){
 }
 
 let expandedArchivio = new Set();
+
+// Elimina un ciclo dall'Archivio, riallineando con cura tutto quello che
+// fa riferimento agli indici della lista (le righe già espanse, e
+// l'eventuale notifica "ciclo concluso" ancora da vedere) — altrimenti,
+// spostandosi tutti gli indici successivi di uno, rischierebbero di
+// puntare al ciclo sbagliato dopo la cancellazione.
+function deleteArchivioRow(idx){
+  const removed = state.archivio[idx];
+  state.archivio.splice(idx, 1);
+
+  // se era una settimana, la "libero" di nuovo: così, se la ricompili da
+  // capo, il sistema non la considera più "già gestita" e la notifica e
+  // l'archiviazione possono ripartire da zero.
+  if(removed && removed.cycleType === 'weekly' && removed.weekIdx !== undefined && Array.isArray(state.archivedWeeklySubcycles)){
+    state.archivedWeeklySubcycles = state.archivedWeeklySubcycles.filter(w => w !== removed.weekIdx);
+  }
+
+  const newExpanded = new Set();
+  expandedArchivio.forEach(i => {
+    if(i < idx) newExpanded.add(i);
+    else if(i > idx) newExpanded.add(i - 1);
+  });
+  expandedArchivio = newExpanded;
+
+  if(state.cycleEndNotifPending){
+    if(state.cycleEndNotifIndex === idx){
+      // il ciclo a cui si riferiva la notifica non esiste più
+      state.cycleEndNotifPending = false;
+      state.cycleEndNotifIndex = null;
+    }else if(state.cycleEndNotifIndex > idx){
+      state.cycleEndNotifIndex -= 1;
+    }
+  }
+
+  renderArchivio();
+  renderDeficitAlert();
+  scheduleSave();
+}
 
 function renderArchivio(){
   const list = document.getElementById('archivio-list');
@@ -3527,14 +4382,24 @@ function renderArchivio(){
 
     const header = document.createElement('div');
     header.className = 'entry-row-header';
+    const typeBadge = cycle.cycleType === 'weekly'
+      ? `<span class="archivio-type-badge weekly">${tr('cycle_notif_type_weekly')}</span>`
+      : `<span class="archivio-type-badge monthly">${tr('cycle_notif_type_monthly')}</span>`;
     header.innerHTML = `
       <span class="entry-chevron">${CHEVRON_SVG}</span>
-      <span class="entry-label archivio-label">${formatDateIt(cycle.cicloInizio)} → ${formatDateIt(cycle.cicloFine)}</span>
+      <span class="entry-label archivio-label">${typeBadge} ${formatDateIt(cycle.cicloInizio)} → ${formatDateIt(cycle.cicloFine)}</span>
       <span class="entry-summary">
-        <span class="entry-summary-note">${cycle.daysWithData} di ${cycle.giorni} giorni registrati</span>
+        <span class="entry-summary-note">${tr('archivio_days_registered').replace('{data}', cycle.daysWithData).replace('{tot}', cycle.giorni)}</span>
         <span class="entry-summary-margine ${cycle.margineFinale >= 0 ? 'pos' : 'neg'}">${fmt(cycle.margineFinale)}</span>
       </span>
+      <button type="button" class="archivio-delete-btn" title="${tr('btn_delete_archivio_row')}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+      </button>
     `;
+    header.querySelector('.archivio-delete-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showConfirm(tr('confirm_delete_archivio_row'), () => deleteArchivioRow(idx));
+    });
     header.addEventListener('click', () => {
       if(expandedArchivio.has(idx)) expandedArchivio.delete(idx); else expandedArchivio.add(idx);
       renderArchivio();
@@ -3542,38 +4407,601 @@ function renderArchivio(){
     row.appendChild(header);
 
     if(expanded){
-      const speseVariabili = Object.values(cycle.entries || {}).reduce((sum, day) => {
-        const spese = (day.spese || []).reduce((s, it) => s + (parseFloat(it.importo) || 0), 0);
-        const entrate = (day.entrate || []).reduce((s, it) => s + (parseFloat(it.importo) || 0), 0);
-        return sum + spese - entrate;
-      }, 0);
-      const speseVariabiliSettimana = Object.values(cycle.weekItems || {}).reduce((sum, w) => {
-        const spese = (w.spese || []).reduce((s, it) => s + (parseFloat(it.importo) || 0), 0);
-        const entrate = (w.entrate || []).reduce((s, it) => s + (parseFloat(it.importo) || 0), 0);
-        return sum + spese - entrate;
-      }, 0);
       const body = document.createElement('div');
       body.className = 'entry-row-body';
-      body.innerHTML = `
+      if(cycle.cycleType === 'weekly'){
+        // le settimane sono sotto-cicli: non hanno un proprio stipendio o
+        // spese fisse distinti da quelli del mese in cui cadono, quindi
+        // mostro solo l'essenziale.
+        body.innerHTML = `
+          <div class="entry-fields entry-fields-2col">
+            <div class="entry-field"><label>${tr('label_giorni_nel_ciclo')}</label><span class="readonly-cell">${cycle.giorni}</span></div>
+            <div class="entry-field"><label>${tr('archivio_days_registered_label')}</label><span class="readonly-cell">${cycle.daysWithData}</span></div>
+          </div>
+          <div class="entry-final">
+            <span class="label">${tr('label_risultato_ciclo')}</span>
+            <span class="value ${cycle.margineFinale >= 0 ? 'pos' : 'neg'}">${fmt(cycle.margineFinale)}</span>
+          </div>
+          <button type="button" class="cycle-notif-more-btn" onclick="openCycleDetail(${idx})" style="margin-top:14px;">${tr('cycle_notif_more')}</button>
+        `;
+      }else{
+        const speseVariabili = Object.values(cycle.entries || {}).reduce((sum, day) => {
+          const spese = (day.spese || []).reduce((s, it) => s + (parseFloat(it.importo) || 0), 0);
+          const entrate = (day.entrate || []).reduce((s, it) => s + (parseFloat(it.importo) || 0), 0);
+          return sum + spese - entrate;
+        }, 0);
+        const speseVariabiliSettimana = Object.values(cycle.weekItems || {}).reduce((sum, w) => {
+          const spese = (w.spese || []).reduce((s, it) => s + (parseFloat(it.importo) || 0), 0);
+          const entrate = (w.entrate || []).reduce((s, it) => s + (parseFloat(it.importo) || 0), 0);
+          return sum + spese - entrate;
+        }, 0);
+        body.innerHTML = `
         <div class="entry-fields entry-fields-2col">
-          <div class="entry-field"><label>Stipendio &euro;</label><span class="readonly-cell">${fmt(cycle.stipendio)}</span></div>
-          <div class="entry-field"><label>Spese fisse &euro;</label><span class="readonly-cell">${fmt(cycle.speseFisse)}</span></div>
+          <div class="entry-field"><label>${tr('label_stipendio_euro')}</label><span class="readonly-cell">${fmt(cycle.stipendio)}</span></div>
+          <div class="entry-field"><label>${tr('label_spese_fisse_euro')}</label><span class="readonly-cell">${fmt(cycle.speseFisse)}</span></div>
         </div>
         <div class="entry-fields entry-fields-2col">
-          <div class="entry-field"><label>Spese/entrate del ciclo &euro;</label><span class="readonly-cell">${fmt(speseVariabili + speseVariabiliSettimana)}</span></div>
-          <div class="entry-field"><label>Giorni nel ciclo</label><span class="readonly-cell">${cycle.giorni}</span></div>
+          <div class="entry-field"><label>${tr('label_spese_entrate_ciclo')}</label><span class="readonly-cell">${fmt(speseVariabili + speseVariabiliSettimana)}</span></div>
+          <div class="entry-field"><label>${tr('label_giorni_nel_ciclo')}</label><span class="readonly-cell">${cycle.giorni}</span></div>
         </div>
         <div class="entry-final">
-          <span class="label">Risultato del ciclo</span>
+          <span class="label">${tr('label_risultato_ciclo')}</span>
           <span class="value ${cycle.margineFinale >= 0 ? 'pos' : 'neg'}">${fmt(cycle.margineFinale)}</span>
         </div>
+        <button type="button" class="cycle-notif-more-btn" onclick="openCycleDetail(${idx})" style="margin-top:14px;">${tr('cycle_notif_more')}</button>
       `;
+      }
       row.appendChild(body);
     }
 
     list.appendChild(row);
   });
 }
+
+function renderTraguardi(){
+  const list = document.getElementById('traguardi-list');
+  const emptyNote = document.getElementById('traguardi-empty');
+  if(!list) return;
+  list.innerHTML = '';
+
+  const goals = (state.achievedGoals || []).map((g, i) => ({ type: 'goal', reachedAt: g.reachedAt, data: g, sourceIndex: i }));
+  const piggy = (state.piggyMilestones || []).map((m, i) => ({ type: 'piggy', reachedAt: m.reachedAt, data: m, sourceIndex: i }));
+  const combined = [...goals, ...piggy];
+  if(combined.length === 0){
+    list.style.display = 'none';
+    emptyNote.style.display = '';
+    return;
+  }
+  list.style.display = '';
+  emptyNote.style.display = 'none';
+
+  // i più recenti in cima, indipendentemente dal tipo di traguardo — una
+  // sola bacheca cronologica per obiettivi personalizzati E livelli del
+  // salvadanaio
+  combined.sort((a, b) => a.reachedAt < b.reachedAt ? 1 : (a.reachedAt > b.reachedAt ? -1 : 0));
+
+  combined.forEach(entry => {
+    const reachedDate = new Date(entry.reachedAt + 'T00:00:00');
+    const dateLabel = reachedDate.getDate() + ' ' + MESI_ABBR[reachedDate.getMonth()].toLowerCase() + ' ' + reachedDate.getFullYear();
+    const item = document.createElement('div');
+    item.className = 'traguardo-item';
+    let inner;
+    if(entry.type === 'goal'){
+      const g = entry.data;
+      inner = `
+        <span class="traguardo-icon">&#127942;</span>
+        <div>
+          <div class="traguardo-amount">${fmt(g.amount)}</div>
+          <div class="traguardo-detail">${tr(g.daysToReach === 1 ? 'traguardo_detail_one' : 'traguardo_detail_many').replace('{days}', g.daysToReach).replace('{date}', dateLabel)}</div>
+        </div>
+      `;
+    }else{
+      const m = entry.data;
+      inner = `
+        <span class="traguardo-icon">${m.badge}</span>
+        <div>
+          <div class="traguardo-amount">${tr(m.nameKey)}</div>
+          <div class="traguardo-detail">${tr('traguardo_piggy_detail').replace('{amount}', fmt(m.amount)).replace('{date}', dateLabel)}</div>
+        </div>
+      `;
+    }
+    item.innerHTML = inner + `
+      <button type="button" class="traguardo-delete-btn" title="${tr('btn_delete_archivio_row')}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+      </button>
+    `;
+    item.querySelector('.traguardo-delete-btn').addEventListener('click', () => {
+      showConfirm(tr('confirm_delete_archivio_row'), () => deleteTraguardoRow(entry.type, entry.sourceIndex));
+    });
+    list.appendChild(item);
+  });
+}
+
+// Elimina un traguardo (obiettivo raggiunto o livello del salvadanaio) —
+// splitta la cancellazione sull'array giusto in base al tipo, dato che in
+// Traguardi le due fonti vengono unite solo per la visualizzazione.
+function deleteTraguardoRow(type, sourceIndex){
+  if(type === 'goal'){
+    state.achievedGoals.splice(sourceIndex, 1);
+  }else{
+    state.piggyMilestones.splice(sourceIndex, 1);
+  }
+  renderTraguardi();
+  scheduleSave();
+}
+
+document.querySelectorAll('.archivio-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.archivio-tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    const tab = btn.dataset.tab;
+    document.getElementById('archivio-cicli-view').style.display = tab === 'cicli' ? '' : 'none';
+    document.getElementById('archivio-traguardi-view').style.display = tab === 'traguardi' ? '' : 'none';
+  });
+});
+
+// ===== OBIETTIVO DI RISPARMIO LIBERO =====
+// Alimentato dallo stesso identico margine cumulato mostrato altrove
+// (computeSeries), così i numeri raccontano sempre la stessa storia in
+// tutta l'app. La scadenza è facoltativa: se manca, mostriamo solo
+// l'incoraggiamento generico; se c'è, calcoliamo quanto serve al giorno
+// per arrivarci in tempo.
+// ===== SALVADANAIO ANIMATO =====
+// Rappresenta visivamente lo stesso margine cumulato mostrato altrove,
+// suddiviso in livelli — così anche chi preferisce un colpo d'occhio
+// invece dei numeri ha un modo immediato di vedere quanto ha messo via.
+const PIGGY_TIERS = [
+  { key: 'none',    threshold: 0,    nameKey: 'piggy_level_none',     badge: '🐷', color: '#B0AEB0' },
+  { key: 'bronzo',  threshold: 100,  nameKey: 'piggy_level_bronze',   badge: '🥉', color: '#CD7F32' },
+  { key: 'argento', threshold: 500,  nameKey: 'piggy_level_silver',   badge: '🥈', color: '#A8A9AD' },
+  { key: 'oro',     threshold: 1000, nameKey: 'piggy_level_gold',     badge: '🥇', color: '#D4AF37' },
+  { key: 'platino', threshold: 5000, nameKey: 'piggy_level_platinum', badge: '💎', color: '#6FB1D6' },
+];
+let lastPiggyTierIndex = null; // per accorgersi quando si sale di livello e far partire l'animazione
+
+function currentPiggyTierIndex(amount){
+  let idx = 0;
+  for(let i = 0; i < PIGGY_TIERS.length; i++){
+    if(amount >= PIGGY_TIERS[i].threshold) idx = i;
+  }
+  return idx;
+}
+
+// Piccola coccola interattiva: cliccando sul maialino si agita e ci
+// cadono dentro un paio di monete dalla fessura — non cambia nessun dato,
+// è solo un gesto divertente per chi vuole "controllare" il salvadanaio.
+// Tap ravvicinati fanno crescere il maialino (2°, 3° tap); al 4° tap le
+// monete escono tutte fuori e si apre la schermata delle statistiche.
+function shakePiggy(){
+  const visual = document.getElementById('piggy-visual');
+  if(!visual) return;
+  visual.classList.remove('shaking');
+  void visual.offsetWidth; // forza il reflow, per poter ripartire anche se innescato di recente
+  visual.classList.add('shaking');
+  setTimeout(() => visual.classList.remove('shaking'), 500);
+}
+function playPiggyCoinAnimation(){
+  shakePiggy();
+  const svg = document.getElementById('piggy-svg');
+  if(!svg) return;
+  const coinXs = [92, 100, 108];
+  coinXs.forEach((x, i) => {
+    setTimeout(() => {
+      const coin = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      coin.setAttribute('cx', x);
+      coin.setAttribute('cy', '32');
+      coin.setAttribute('r', '6');
+      coin.setAttribute('fill', '#E8C15A');
+      coin.setAttribute('stroke', '#B8862E');
+      coin.setAttribute('stroke-width', '1.5');
+      coin.setAttribute('class', 'piggy-coin');
+      svg.appendChild(coin);
+      coin.addEventListener('animationend', () => coin.remove());
+    }, i * 90);
+  });
+}
+function playPiggyCoinBurst(){
+  shakePiggy();
+  const svg = document.getElementById('piggy-svg');
+  if(!svg) return;
+  const bursts = [
+    { x: -55, y: -35 }, { x: 55, y: -40 }, { x: -28, y: -68 },
+    { x: 28, y: -62 }, { x: 0, y: -78 },
+  ];
+  bursts.forEach((off, i) => {
+    setTimeout(() => {
+      const coin = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      coin.setAttribute('cx', '100');
+      coin.setAttribute('cy', '45');
+      coin.setAttribute('r', '6');
+      coin.setAttribute('fill', '#E8C15A');
+      coin.setAttribute('stroke', '#B8862E');
+      coin.setAttribute('stroke-width', '1.5');
+      coin.setAttribute('class', 'piggy-coin-burst');
+      coin.style.setProperty('--burst-x', off.x + 'px');
+      coin.style.setProperty('--burst-y', off.y + 'px');
+      svg.appendChild(coin);
+      coin.addEventListener('animationend', () => coin.remove());
+    }, i * 55);
+  });
+}
+function resetPiggyGrowth(){
+  const visual = document.getElementById('piggy-visual');
+  if(visual) visual.classList.remove('grown-1', 'grown-2');
+}
+
+// riempie e apre la schermata "statistiche di risparmio": quando hai
+// risparmiato, quanto, e quanto manca al prossimo livello del salvadanaio
+function openPiggyStats(){
+  const totalSaved = currentSavedAmount();
+  document.getElementById('piggy-stats-total-value').textContent = fmt(totalSaved);
+
+  const g = Math.max(1, state.giorni || 1);
+  const isCurrentCycle = state.mese === currentCycleDefault();
+  const lastDay = isCurrentCycle ? Math.min(todayDayInCycle(), g) : g;
+  const savedDays = [];
+  for(let day = 1; day <= lastDay; day++){
+    if(dayHasEffectiveData(day)){
+      const { margine } = dayOwnMargine(day);
+      if(margine >= 0) savedDays.push({ day, margine });
+    }
+  }
+
+  const daysList = document.getElementById('piggy-stats-days-list');
+  const daysEmpty = document.getElementById('piggy-stats-days-empty');
+  daysList.innerHTML = '';
+  if(savedDays.length === 0){
+    daysList.style.display = 'none';
+    daysEmpty.style.display = 'block';
+  }else{
+    daysList.style.display = '';
+    daysEmpty.style.display = 'none';
+    [...savedDays].reverse().forEach(({ day, margine }) => {
+      const row = document.createElement('div');
+      row.className = 'piggy-stats-day-row';
+      row.innerHTML = `<span class="piggy-stats-day-date">${dayHeaderLabel(day)}</span><span class="piggy-stats-day-amount">+${fmt(margine)}</span>`;
+      daysList.appendChild(row);
+    });
+  }
+
+  const tierIdx = currentPiggyTierIndex(totalSaved);
+  const tier = PIGGY_TIERS[tierIdx];
+  const nextTier = PIGGY_TIERS[tierIdx + 1] || null;
+  const encourageEl = document.getElementById('piggy-stats-encourage');
+  if(nextTier){
+    const span = nextTier.threshold - tier.threshold;
+    const progressInTier = totalSaved - tier.threshold;
+    const pct = Math.max(0, Math.min(100, Math.round((progressInTier / span) * 100)));
+    const missing = Math.max(0, nextTier.threshold - totalSaved);
+    encourageEl.innerHTML = `
+      <div class="piggy-stats-encourage-row">
+        <span class="piggy-stats-encourage-badge">${nextTier.badge}</span>
+        <span class="piggy-stats-encourage-name">${tr(nextTier.nameKey)}</span>
+      </div>
+      <div class="piggy-stats-encourage-bar-track"><div class="piggy-stats-encourage-bar-fill" style="width:${pct}%; background:${nextTier.color};"></div></div>
+      <div class="piggy-stats-encourage-text">${tr('piggy_stats_encourage_progress').replace('{missing}', fmt(missing)).replace('{nextname}', tr(nextTier.nameKey))}</div>
+    `;
+  }else{
+    encourageEl.innerHTML = `<div class="piggy-stats-encourage-text">${tr('piggy_stats_encourage_max')}</div>`;
+  }
+
+  // elenco di tutti i livelli, con quelli già raggiunti evidenziati e
+  // quello attuale (il prossimo obiettivo) messo ancora più in risalto
+  const roadmapEl = document.getElementById('piggy-stats-roadmap');
+  roadmapEl.innerHTML = PIGGY_TIERS.slice(1).map((t, idx) => {
+    const realIdx = idx + 1; // slice(1) ha tolto 'none' in testa
+    const achieved = realIdx <= tierIdx;
+    const isCurrent = nextTier && t.key === nextTier.key;
+    const cls = achieved ? 'achieved' : (isCurrent ? 'current' : '');
+    const rightSide = achieved
+      ? '<span class="piggy-stats-roadmap-check">&#10003;</span>'
+      : `<span class="piggy-stats-roadmap-amount">${fmt(t.threshold)}</span>`;
+    return `
+      <div class="piggy-stats-roadmap-item ${cls}">
+        <span class="piggy-stats-roadmap-badge">${t.badge}</span>
+        <span class="piggy-stats-roadmap-name">${tr(t.nameKey)}</span>
+        ${rightSide}
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('piggy-stats-overlay').style.display = 'flex';
+}
+document.getElementById('piggy-stats-close-x').addEventListener('click', () => {
+  document.getElementById('piggy-stats-overlay').style.display = 'none';
+});
+
+let piggyTapCount = 0;
+let piggyTapResetTimer = null;
+document.getElementById('piggy-visual').addEventListener('click', () => {
+  piggyTapCount++;
+  clearTimeout(piggyTapResetTimer);
+  const visual = document.getElementById('piggy-visual');
+
+  if(piggyTapCount === 1){
+    visual.classList.remove('grown-1', 'grown-2');
+    playPiggyCoinAnimation();
+  }else if(piggyTapCount === 2){
+    visual.classList.remove('grown-2');
+    visual.classList.add('grown-1');
+    playPiggyCoinAnimation();
+  }else if(piggyTapCount === 3){
+    visual.classList.remove('grown-1');
+    visual.classList.add('grown-2');
+    playPiggyCoinAnimation();
+  }else{
+    // 4° tap: le monete escono tutte fuori, poi si apre il riepilogo
+    playPiggyCoinBurst();
+    setTimeout(() => {
+      resetPiggyGrowth();
+      openPiggyStats();
+    }, 550);
+    piggyTapCount = 0;
+    return; // il ciclo di tap si conclude qui, niente timer di reset da riavviare
+  }
+
+  // se non arriva un altro tap entro breve, la sequenza si azzera e il
+  // maialino torna alla dimensione normale
+  piggyTapResetTimer = setTimeout(() => {
+    piggyTapCount = 0;
+    resetPiggyGrowth();
+  }, 1200);
+});
+
+function renderPiggyBank(){
+  const amount = currentSavedAmount();
+  const tierIdx = currentPiggyTierIndex(amount);
+  const tier = PIGGY_TIERS[tierIdx];
+  const nextTier = PIGGY_TIERS[tierIdx + 1] || null;
+
+  document.getElementById('piggy-level-badge').textContent = tier.badge;
+  document.getElementById('piggy-level-name').textContent = tr(tier.nameKey);
+
+  let pct, subText;
+  if(nextTier){
+    const span = nextTier.threshold - tier.threshold;
+    const progressInTier = amount - tier.threshold;
+    pct = Math.max(0, Math.min(100, Math.round((progressInTier / span) * 100)));
+    subText = tr('piggy_sub_progress')
+      .replace('{current}', fmt(amount)).replace('{next}', fmt(nextTier.threshold)).replace('{nextname}', tr(nextTier.nameKey));
+  }else{
+    pct = 100;
+    subText = tr('piggy_sub_max').replace('{current}', fmt(amount));
+  }
+
+  document.getElementById('piggy-bar-fill').style.width = pct + '%';
+  document.getElementById('piggy-bar-fill').style.background = tier.color;
+  document.getElementById('piggy-sub').textContent = subText;
+
+  // il riempimento del salvadanaio SVG sale dal basso in base a quanto
+  // siamo vicini al livello successivo (non resta vuoto per tutto un
+  // livello per poi riempirsi di scatto all'ultimo)
+  const fillFullHeight = 104; // l'ellisse del corpo va da y=40 a y=144
+  const fillHeight = fillFullHeight * (pct / 100);
+  const fillEl = document.getElementById('piggy-fill');
+  fillEl.setAttribute('height', fillHeight);
+  fillEl.setAttribute('y', 144 - fillHeight);
+  fillEl.setAttribute('fill', tier.color);
+
+  // animazione di sblocco: solo quando si SALE davvero di livello durante
+  // la sessione (non al primissimo render, altrimenti animerebbe anche
+  // solo aprendo l'app con un livello già raggiunto in precedenza)
+  const box = document.getElementById('piggy-box');
+  if(lastPiggyTierIndex !== null && tierIdx > lastPiggyTierIndex){
+    box.classList.remove('level-up');
+    void box.offsetWidth; // forza il reflow, per poter far ripartire l'animazione anche se innescata da poco
+    box.classList.add('level-up');
+    setTimeout(() => box.classList.remove('level-up'), 1300);
+  }
+  lastPiggyTierIndex = tierIdx;
+
+  // registro nell'Archivio in modo permanente OGNI livello attraversato
+  // finora (non solo quello attuale) — così anche un salto improvviso di
+  // più livelli in una volta (es. un grande incasso) non ne lascia
+  // indietro nessuno. Il controllo per singolo livello è indipendente da
+  // quello dell'animazione (che è solo di sessione), così eventuali
+  // oscillazioni del margine dovute a modifiche successive non creano
+  // doppioni.
+  for(let i = 1; i <= tierIdx; i++){
+    const t = PIGGY_TIERS[i];
+    if(!state.piggyMilestones.some(m => m.tierKey === t.key)){
+      state.piggyMilestones.push({
+        tierKey: t.key,
+        nameKey: t.nameKey,
+        badge: t.badge,
+        reachedAt: todayISODate(),
+        amount: amount,
+      });
+      scheduleSave();
+    }
+  }
+}
+
+function currentSavedAmount(){
+  const { points, daysWithData } = computeSeries();
+  return daysWithData > 0 ? Math.max(0, points[daysWithData - 1].cumMargine) : 0;
+}
+function daysUntil(dateStr){
+  const target = new Date(dateStr + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.round((target - today) / 86400000);
+}
+function todayISODate(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+// Controlla se l'obiettivo attivo è appena stato raggiunto (per la prima
+// volta): se sì, lo archivia per sempre in "Traguardi" e prepara la
+// notifica di congratulazioni nella campanella. Va chiamato prima di
+// disegnare la card, così i numeri mostrati sono già coerenti.
+function checkGoalAchievement(){
+  const goal = state.savingsGoal;
+  if(!goal || goal.achieved) return;
+  const saved = currentSavedAmount();
+  if(saved < goal.amount) return;
+  goal.achieved = true;
+  // difesa in più: se l'obiettivo arriva da una versione precedente
+  // dell'app (senza data di inizio salvata), non deve mai risultare in un
+  // calcolo impossibile — meglio mostrare almeno "1 giorno" che "NaN".
+  let daysToReach = 1;
+  if(goal.createdAt){
+    const createdDate = new Date(goal.createdAt + 'T00:00:00');
+    if(!isNaN(createdDate.getTime())){
+      const today = new Date(); today.setHours(0,0,0,0);
+      daysToReach = Math.max(1, Math.round((today - createdDate) / 86400000));
+    }
+  }
+  state.achievedGoals.push({
+    amount: goal.amount,
+    createdAt: goal.createdAt || todayISODate(),
+    reachedAt: todayISODate(),
+    daysToReach,
+  });
+  state.goalCongratsPending = true;
+  scheduleSave();
+}
+function renderSavingsGoal(){
+  checkGoalAchievement();
+  const box = document.getElementById('savings-goal-box');
+  const display = document.getElementById('savings-goal-display');
+  const form = document.getElementById('savings-goal-form');
+  const editBtn = document.getElementById('savings-goal-edit-btn');
+  const goal = state.savingsGoal;
+
+  editBtn.textContent = goal ? tr('goal_edit_btn_change') : tr('goal_edit_btn');
+
+  if(form.style.display === 'block') return; // non tocco il form mentre l'utente lo sta compilando
+
+  if(!goal){
+    display.style.display = 'none';
+    return;
+  }
+  display.style.display = 'block';
+  const saved = currentSavedAmount();
+  const pct = Math.min(100, Math.round((saved / goal.amount) * 100));
+  const reached = saved >= goal.amount;
+
+  document.getElementById('savings-goal-progress-text').textContent = tr('goal_progress_text')
+    .replace('{current}', fmt(saved)).replace('{target}', fmt(goal.amount));
+  document.getElementById('savings-goal-percent').textContent = pct + '%';
+  const fill = document.getElementById('savings-goal-bar-fill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('reached', reached);
+
+  let sub;
+  if(reached){
+    sub = tr('goal_sub_reached');
+  }else if(!goal.deadline){
+    sub = tr('goal_sub_no_deadline');
+  }else{
+    const days = daysUntil(goal.deadline);
+    if(days <= 0){
+      sub = tr('goal_sub_deadline_passed');
+    }else{
+      const missing = Math.max(0, goal.amount - saved);
+      const perDay = fmt(missing / days);
+      sub = tr(days <= 7 ? 'goal_sub_deadline_tight' : 'goal_sub_deadline_ok')
+        .replace('{days}', days).replace('{perday}', perDay);
+    }
+  }
+  document.getElementById('savings-goal-sub').textContent = sub;
+}
+
+// Riempie i tre menu (giorno/mese/anno) della scadenza obiettivo — i nomi
+// dei mesi restano quelli già tradotti usati in tutto il resto dell'app.
+function populateSavingsGoalDateSelects(){
+  const daySel = document.getElementById('savings-goal-day');
+  const monthSel = document.getElementById('savings-goal-month');
+  const yearSel = document.getElementById('savings-goal-year');
+
+  daySel.innerHTML = `<option value="">${tr('date_select_day')}</option>` +
+    Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('');
+
+  monthSel.innerHTML = `<option value="">${tr('date_select_month')}</option>` +
+    Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${MESI_IT[i]}</option>`).join('');
+
+  const thisYear = new Date().getFullYear();
+  yearSel.innerHTML = `<option value="">${tr('date_select_year')}</option>` +
+    Array.from({ length: 11 }, (_, i) => thisYear + i).map(y => `<option value="${y}">${y}</option>`).join('');
+}
+
+function openSavingsGoalForm(){
+  document.getElementById('savings-goal-display').style.display = 'none';
+  document.getElementById('savings-goal-form').style.display = 'block';
+  document.getElementById('savings-goal-error').style.display = 'none';
+  const goal = state.savingsGoal;
+  document.getElementById('savings-goal-amount').value = goal ? goal.amount : '';
+  populateSavingsGoalDateSelects();
+  const daySel = document.getElementById('savings-goal-day');
+  const monthSel = document.getElementById('savings-goal-month');
+  const yearSel = document.getElementById('savings-goal-year');
+  if(goal && goal.deadline){
+    const [y, m, d] = goal.deadline.split('-');
+    daySel.value = String(parseInt(d, 10));
+    monthSel.value = String(parseInt(m, 10));
+    yearSel.value = y;
+  }else{
+    daySel.value = '';
+    monthSel.value = '';
+    yearSel.value = '';
+  }
+  document.getElementById('savings-goal-clear-btn').style.display = goal ? '' : 'none';
+}
+function closeSavingsGoalForm(){
+  document.getElementById('savings-goal-form').style.display = 'none';
+  renderSavingsGoal();
+}
+// Piccola coccola interattiva: prima di aprire il modulo, una freccia
+// "colpisce" il bersaglio — giusto un momento di gioco, per rendere più
+// vivo il gesto di impostare un obiettivo.
+function playGoalTargetAnimation(callback){
+  const overlay = document.getElementById('goal-target-anim-overlay');
+  if(!overlay){ callback(); return; }
+  overlay.style.display = 'flex';
+  const arrow = overlay.querySelector('.goal-arrow-inner');
+  const targetGroup = overlay.querySelector('.goal-target-group');
+  const burst = overlay.querySelector('.goal-impact-lines');
+  [arrow, targetGroup, burst].forEach(el => {
+    if(!el) return;
+    el.style.animation = 'none';
+    void el.offsetWidth; // forza il reflow, per poter ripartire anche se innescata di recente
+    el.style.animation = '';
+  });
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    callback();
+  }, 880);
+}
+document.getElementById('savings-goal-edit-btn').addEventListener('click', () => {
+  playGoalTargetAnimation(openSavingsGoalForm);
+});
+document.getElementById('savings-goal-cancel-btn').addEventListener('click', closeSavingsGoalForm);
+document.getElementById('savings-goal-clear-btn').addEventListener('click', () => {
+  state.savingsGoal = null;
+  closeSavingsGoalForm();
+  scheduleSave();
+});
+document.getElementById('savings-goal-save-btn').addEventListener('click', () => {
+  const amount = parseFloat(document.getElementById('savings-goal-amount').value);
+  const errorEl = document.getElementById('savings-goal-error');
+  if(!(amount > 0)){
+    errorEl.textContent = tr('goal_amount_error');
+    errorEl.style.display = 'block';
+    return;
+  }
+  errorEl.style.display = 'none';
+  const day = document.getElementById('savings-goal-day').value;
+  const month = document.getElementById('savings-goal-month').value;
+  const year = document.getElementById('savings-goal-year').value;
+  const deadline = (day && month && year) ? `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` : null;
+  // se stavo già inseguendo un obiettivo non ancora raggiunto, e lo sto solo
+  // modificando (non sostituendo da zero), la data di inizio resta quella
+  // originale — altrimenti riparte da oggi.
+  const existing = state.savingsGoal;
+  const createdAt = (existing && !existing.achieved && existing.createdAt) ? existing.createdAt : todayISODate();
+  state.savingsGoal = { amount, deadline, createdAt, achieved: false };
+  closeSavingsGoalForm();
+  scheduleSave();
+});
 
 function renderSummary(){
   const { points, daysWithData, daysOnBudget } = computeSeries();
@@ -3582,13 +5010,13 @@ function renderSummary(){
 
   document.getElementById('sum-margine').textContent = fmt(atDataPoint.cumMargine);
   document.getElementById('sum-margine').className = 'value ' + (atDataPoint.cumMargine >= 0 ? 'pos' : 'neg');
-  document.getElementById('sum-margine-sub').textContent = daysWithData + ' di ' + g + ' giorni registrati';
+  document.getElementById('sum-margine-sub').textContent = tr('archivio_days_registered').replace('{data}', daysWithData).replace('{tot}', g);
 
   document.getElementById('sum-vs-pareggio').textContent = daysOnBudget + ' / ' + daysWithData;
   document.getElementById('sum-vs-pareggio').className = 'value ' + (daysWithData === 0 || daysOnBudget === daysWithData ? 'pos' : (daysOnBudget === 0 ? 'neg' : ''));
   document.getElementById('sum-vs-pareggio-sub').textContent = daysWithData > 0
-    ? (daysOnBudget === daysWithData ? 'sempre entro il margine disponibile' : 'giorni con margine non negativo')
-    : 'nessun giorno registrato';
+    ? (daysOnBudget === daysWithData ? tr('sum_vs_pareggio_sub_always') : tr('sum_vs_pareggio_sub_normal'))
+    : tr('sum_vs_pareggio_sub_none');
 }
 
 function renderChart(){
@@ -3745,7 +5173,7 @@ function computeCategoryTotals(){
     .map(cat => ({ id: cat.id, label: cat.label, emoji: cat.emoji, color: cat.color, total: totals[cat.id] || 0 }))
     .filter(c => c.total > 0);
   if(uncategorized > 0){
-    entries.push({ id: 'nessuna', label: 'Senza categoria', emoji: '❔', color: '#B5B9C4', total: uncategorized });
+    entries.push({ id: 'nessuna', label: tr('senza_categoria'), emoji: '❔', color: '#B5B9C4', total: uncategorized });
   }
   const grandTotal = entries.reduce((sum, e) => sum + e.total, 0);
   return { entries, grandTotal };
@@ -3760,7 +5188,7 @@ function renderCategoryChart(){
 
   if(grandTotal <= 0 || entries.length === 0){
     holder.innerHTML = '';
-    legendHolder.innerHTML = '<div class="entry-empty-note">Aggiungi una categoria alle tue spese (casa, cibo, market...) per vedere qui dove vanno i tuoi soldi.</div>';
+    legendHolder.innerHTML = '<div class="entry-empty-note">' + tr('category_chart_empty') + '</div>';
     return;
   }
 
@@ -3781,7 +5209,7 @@ function renderCategoryChart(){
   holder.innerHTML = `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
     ${arcs}
     <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-family="Fraunces, serif" font-weight="600" font-size="16" fill="var(--ink)">${fmt(grandTotal)}</text>
-    <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="var(--ink-faint)">spesi questo mese</text>
+    <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="var(--ink-faint)">${tr('category_chart_spent_label')}</text>
   </svg>`;
 
   legendHolder.innerHTML = '';
@@ -3799,16 +5227,131 @@ function renderCategoryChart(){
   });
 }
 
+// Piccola coccola interattiva, come per il salvadanaio: al tocco il
+// grafico fa un simpatico "balletto" elastico e qualche scintilla parte
+// dal centro — non cambia nessun dato, è solo un gesto divertente.
+function playCategoryChartAnimation(){
+  const holder = document.getElementById('category-chart-holder');
+  const svg = holder ? holder.querySelector('svg') : null;
+  if(!holder || !svg) return;
+
+  holder.classList.remove('wobbling');
+  void holder.offsetWidth; // forza il reflow, per poter ripartire anche se toccato di recente
+  holder.classList.add('wobbling');
+  setTimeout(() => holder.classList.remove('wobbling'), 600);
+
+  const cx = 80, cy = 80;
+  const sparkles = [
+    { x: -34, y: -42 }, { x: 32, y: -46 }, { x: -48, y: 12 },
+    { x: 46, y: 16 }, { x: 0, y: -56 },
+  ];
+  sparkles.forEach((off, i) => {
+    setTimeout(() => {
+      const sp = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      sp.setAttribute('x', cx);
+      sp.setAttribute('y', cy);
+      sp.setAttribute('font-size', '15');
+      sp.setAttribute('text-anchor', 'middle');
+      sp.textContent = '✨';
+      sp.setAttribute('class', 'category-chart-sparkle');
+      sp.style.setProperty('--sp-x', off.x + 'px');
+      sp.style.setProperty('--sp-y', off.y + 'px');
+      svg.appendChild(sp);
+      sp.addEventListener('animationend', () => sp.remove());
+    }, i * 55);
+  });
+}
+document.getElementById('category-chart-holder').addEventListener('click', playCategoryChartAnimation);
+
+// Per i cicli SETTIMANALI, se ormai tutti e 7 i giorni hanno già dei dati,
+// il ciclo si considera concluso subito — non serve aspettare che passi
+// davvero una settimana di tempo reale. Compilando l'ultimo giorno
+// (insieme ai 6 precedenti) parte subito archiviazione e notifica, come
+// se il tempo fosse arrivato al confine naturale.
+// Le settimane NON sono un tipo di ciclo alternativo al mese: sono
+// sotto-cicli automatici DENTRO il ciclo mensile, allineati allo
+// stipendio — la stessa suddivisione già usata per la vista Settimanale
+// del registro (buildWeekBoundaries), con l'ultima settimana "corta" se il
+// mese non si divide esattamente per 7. Appena TUTTI i giorni di una di
+// queste settimane hanno un verdetto, quella settimana si archivia da
+// sola — con la sua notifica — senza aspettare la fine del mese.
+function checkWeeklySubcyclesComplete(){
+  if(!state.mese) return;
+  if(!Array.isArray(state.archivedWeeklySubcycles)) state.archivedWeeklySubcycles = [];
+  const g = Math.max(1, state.giorni || 1);
+  const boundaries = buildWeekBoundaries(g);
+  boundaries.forEach((range, i) => {
+    const weekIdx = i + 1;
+    if(state.archivedWeeklySubcycles.includes(weekIdx)) return; // questa settimana è già stata archiviata
+    for(let day = range.start; day <= range.end; day++){
+      if(!dayHasEffectiveData(day)) return; // manca ancora almeno un giorno di questa settimana
+    }
+    archiveWeeklySubcycle(weekIdx, range);
+  });
+}
+
+// Archivia UNA settimana (sotto-ciclo) del mese corrente: il risultato è
+// la somma dei bilanci isolati dei suoi giorni (non il margine cumulato di
+// tutto il mese). IMPORTANTE: il bilancio di ogni giorno dipende dal
+// rapporto stipendio/spese-fisse DELL'INTERO MESE (non dei soli 7 giorni
+// della settimana) — quindi calcolo e salvo già pronti i valori di ogni
+// giorno adesso, mentre lo stato riflette ancora il mese vero, invece di
+// doverli ricalcolare più avanti con un numero di giorni sbagliato.
+function archiveWeeklySubcycle(weekIdx, range){
+  const { start, end } = range;
+  const g = end - start + 1;
+  const cycleStartDate = dateForDay(start);
+  const cycleEndDate = dateForDay(end);
+
+  const t = targets();
+  let margineFinale = 0;
+  let daysWithData = 0;
+  const dayDetails = [];
+  for(let day = start; day <= end; day++){
+    if(dayHasEffectiveData(day)){
+      daysWithData++;
+      const { margine } = dayOwnMargine(day, t);
+      margineFinale += margine;
+      dayDetails.push({ label: dayHeaderLabel(day), margine });
+    }
+  }
+
+  const archived = {
+    cicloInizio: cycleStartDate.getFullYear() + '-' + String(cycleStartDate.getMonth() + 1).padStart(2, '0') + '-' + String(cycleStartDate.getDate()).padStart(2, '0'),
+    cicloFine: cycleEndDate.getFullYear() + '-' + String(cycleEndDate.getMonth() + 1).padStart(2, '0') + '-' + String(cycleEndDate.getDate()).padStart(2, '0'),
+    giorni: g,
+    cycleType: 'weekly',
+    weekIdx, // così, se questa voce venisse eliminata dall'archivio, si può "liberare" di nuovo la stessa settimana
+    margineFinale,
+    daysWithData,
+    dayDetails, // giorno per giorno già pronto: non serve ricalcolarlo più avanti
+  };
+  if(!Array.isArray(state.archivio)) state.archivio = [];
+  state.archivio.unshift(archived);
+
+  state.cycleEndNotifPending = true;
+  state.cycleEndNotifIndex = 0;
+
+  if(!Array.isArray(state.archivedWeeklySubcycles)) state.archivedWeeklySubcycles = [];
+  state.archivedWeeklySubcycles.push(weekIdx);
+  scheduleSave();
+}
+
 function renderAll(){
+  checkWeeklySubcyclesComplete();
   renderTodayBar();
   renderThresholds();
+  renderPiggyBank();
+  renderSavingsGoal();
   renderDeficitAlert();
+  renderStreak();
   renderTable();
   renderWeeklyTable();
   renderSummary();
   renderChart();
   renderCategoryChart();
   renderArchivio();
+  renderTraguardi();
   updatePatrimonio();
 }
 
@@ -3889,29 +5432,19 @@ document.getElementById('emergenza-importo').addEventListener('input', e => {
 
 // NAVIGAZIONE TRA SCHERMATE
 const SCREENS = ['cassa', 'investimenti', 'altriconti'];
-// contenuto della cover condivisa per ciascuna schermata
-const SCREEN_META = {
-  cassa: {
-    eyebrow: 'Pianificazione &middot; Finanza personale',
-    title: 'Gestione Portafoglio',
-    info: 'Spalma costi fissi e stipendio sui giorni del mese, registra incasso e spesa quotidiani, e tieni il margine sotto controllo per chiudere il mese in risparmio.'
-  },
-  investimenti: {
-    eyebrow: 'Patrimonio &middot; Trading e scommesse',
-    title: 'Investimenti',
-    info: 'Trading e scommesse separati: quanto hai disponibile, quanto hai investito e quanto hai guadagnato. Quello disponibile si somma sempre al totale in alto.'
-  },
-  altriconti: {
-    eyebrow: 'Fondo di riserva',
-    title: 'Altri Conti',
-    info: 'Un conto tenuto separato dal resto, da usare solo in caso di emergenza. Anche questo importo si somma al tuo patrimonio totale.'
-  }
+// il titolo grande della copertina, per ciascuna schermata, riusa le
+// stesse chiavi già tradotte per i tab di navigazione — stesso testo,
+// stesso significato, un solo posto da aggiornare in futuro.
+const SCREEN_META_KEYS = {
+  cassa: 'nav_cassa',
+  investimenti: 'nav_investimenti',
+  altriconti: 'nav_altriconti',
 };
 
 function updateSharedCover(screen){
-  const meta = SCREEN_META[screen];
-  if(!meta) return;
-  document.getElementById('cover-title').textContent = meta.title;
+  const key = SCREEN_META_KEYS[screen];
+  if(!key) return;
+  document.getElementById('cover-title').textContent = tr(key);
 }
 
 document.querySelectorAll('.nav-tab').forEach(btn => {
@@ -3983,10 +5516,14 @@ const GUIDE_STEPS = [
   { target: null, titleKey: 'guide_step1_title', textKey: 'guide_step1_text' },
   { target: '#add-costo', panel: 'setup', titleKey: 'guide_step2_title', textKey: 'guide_step2_text' },
   { target: '#panel-head-soglie .panel-head-left', panel: 'soglie', titleKey: 'guide_step3_title', textKey: 'guide_step3_text' },
+  { target: '#streak-badge', panel: null, titleKey: 'guide_step_streak_title', textKey: 'guide_step_streak_text' },
   { target: '#panel-head-registro .panel-head-left', panel: 'registro', titleKey: 'guide_step4_title', textKey: 'guide_step4_text' },
   { target: '.gran-toggle-btn[data-mode="week"]', panel: 'registro', titleKey: 'guide_step5_title', textKey: 'guide_step5_text' },
+  { target: '#piggy-box', panel: 'salvadanaio', titleKey: 'guide_step_piggy_title', textKey: 'guide_step_piggy_text' },
+  { target: '#savings-goal-edit-btn', panel: 'obiettivo', titleKey: 'guide_step_goal_title', textKey: 'guide_step_goal_text' },
   { target: '#notif-bell-btn', panel: null, titleKey: 'guide_step6_title', textKey: 'guide_step6_text' },
   { target: '#panel-head-archivio .panel-head-left', panel: 'archivio', titleKey: 'guide_step7_title', textKey: 'guide_step7_text' },
+  { target: '.archivio-tab-btn[data-tab="traguardi"]', panel: 'archivio', titleKey: 'guide_step_traguardi_title', textKey: 'guide_step_traguardi_text' },
   { target: null, titleKey: 'guide_step8_title', textKey: 'guide_step8_text' },
 ];
 let guideStepIndex = 0;
@@ -4062,6 +5599,10 @@ function startGuideTour(){
 }
 function endGuideTour(){
   document.getElementById('guide-overlay').style.display = 'none';
+  // il percorso guidato espande i pannelli via via che li mostra: appena
+  // finisce — sia arrivando in fondo sia saltandolo — si riparte sempre
+  // con il menu tutto compresso, come al primo avvio.
+  collapseAllPanels();
 }
 document.getElementById('guide-next-btn').addEventListener('click', () => {
   if(guideStepIndex === GUIDE_STEPS.length - 1){ endGuideTour(); return; }
@@ -4117,12 +5658,29 @@ const TRANSLATIONS = {
     nav_cassa: 'Gestione Portafoglio', nav_investimenti: 'Investimenti', nav_altriconti: 'Altri Conti',
     panel_setup: 'Impostazione del mese', panel_soglie: 'Quanto puoi spendere',
     panel_bilancio: 'Come sta andando il mese', panel_categorie: 'Dove vanno i tuoi soldi',
-    panel_registro: 'Registro spese', panel_archivio: 'Archivio contabile',
+    panel_registro: 'Registro spese', panel_archivio: 'Archivio',
+    panel_salvadanaio: '🐷 Il tuo salvadanaio', panel_obiettivo: '🎯 Obiettivo di risparmio',
     panel_trading: 'Trading', panel_betting: 'Betting', panel_altriconti: 'Conto di emergenza',
     view_day: 'Giornaliera', view_week: 'Settimanale',
     btn_cancel: 'Annulla', btn_confirm: 'Conferma', btn_add_row: '+ aggiungi voce',
     btn_restart_month: 'Ricomincia il mese', btn_add_expense: '+ aggiungi spesa', btn_add_income: '+ aggiungi entrata',
     btn_save: 'Salva', btn_undo: 'Annulla',
+    title_modifica_voce: 'Modifica voce', title_rimuovi_voce: 'Rimuovi voce',
+    title_giorno_passato: 'Giorno passato: modificabile solo dalla sezione dedicata (ingranaggio qui sopra)',
+    title_settimana_passata: 'Settimana passata: modificabile solo dalla sezione dedicata (ingranaggio qui sopra)',
+    day_option_label: 'Giorno', onboarding_wait: 'Un attimo...',
+    error_server_unreachable: 'Impossibile contattare il server. Controlla la connessione.',
+    nota_placeholder_entrata: 'Motivo dell\'entrata (facoltativo)', nota_placeholder_spesa: 'Motivo della spesa (facoltativo)',
+    day_badge_week: 'Settimana', nota_vuota: 'Nessuna nota', senza_categoria: 'Senza categoria',
+    category_chart_empty: 'Aggiungi una categoria alle tue spese (casa, cibo, market...) per vedere qui dove vanno i tuoi soldi.',
+    category_chart_spent_label: 'spesi questo mese',
+    patrimonio_label: 'Quanto hai in totale',
+    granularity_label: 'Vista:',
+    sum_margine_label: 'Quanto hai risparmiato finora',
+    sum_vs_pareggio_label: 'Giorni in cui sei stato nei tuoi limiti',
+    sum_vs_pareggio_sub_always: 'sempre entro il margine disponibile',
+    sum_vs_pareggio_sub_normal: 'giorni con margine non negativo',
+    sum_vs_pareggio_sub_none: 'nessun giorno registrato',
 
     auth_login_title: 'Bentornato', auth_login_subtitle: 'Accedi per ritrovare la tua gestione del portafoglio, i tuoi investimenti e il tuo patrimonio, sincronizzati su ogni dispositivo.',
     auth_login_submit: 'Accedi', auth_login_switch_text: 'Non hai un account?', auth_login_switch_btn: 'Crea account',
@@ -4136,7 +5694,13 @@ const TRANSLATIONS = {
     onboarding_slide3_title: 'Da quante persone è composto il nucleo familiare?', onboarding_persone_placeholder: 'Es. 1', onboarding_persone_error: 'Inserisci un numero valido (almeno 1).',
     onboarding_slide4_title: 'A quanto ammonta il tuo stipendio o le tue entrate mensili?', onboarding_stipendio_placeholder: 'Es. 2000', onboarding_stipendio_error: 'Inserisci un importo valido.',
     onboarding_slide5_title: 'Che giorno del mese prendi lo stipendio?', onboarding_giorno_placeholder: 'Es. 27', onboarding_giorno_error: 'Inserisci un giorno valido, da 1 a 31.',
-    onboarding_continue: 'Continua', onboarding_enter: 'Entra',
+    onboarding_continue: 'Continua', onboarding_enter: 'Entra', onboarding_back: 'Indietro',
+
+    piggy_card_title: '🐷 Il tuo salvadanaio',
+    piggy_level_none: 'Ancora nessun livello', piggy_level_bronze: 'Bronzo', piggy_level_silver: 'Argento',
+    piggy_level_gold: 'Oro', piggy_level_platinum: 'Platino',
+    piggy_sub_progress: '{current} di {next} verso {nextname}',
+    piggy_sub_max: 'Livello massimo raggiunto — {current} messi da parte, un vero orgoglio!',
 
     guide_skip: 'Salta il tour', guide_back: 'Indietro', guide_next: 'Avanti', guide_finish: 'Fine', guide_count: '{n} di {tot}',
     guide_step1_title: 'Facciamo un giro insieme?', guide_step1_text: 'Ti mostro in pochi passaggi dove cliccare per impostare tutto. Puoi saltare in qualsiasi momento.',
@@ -4145,18 +5709,43 @@ const TRANSLATIONS = {
     guide_step4_title: 'Il registro spese', guide_step4_text: 'Clicca su un giorno per aprirlo, e annota lì una spesa o un\'entrata.',
     guide_step5_title: 'Giornaliera o settimanale', guide_step5_text: 'Passa da una vista all\'altra in ogni momento, da qui.',
     guide_step6_title: 'I tuoi avvisi', guide_step6_text: 'Se rischi di andare in rosso, te lo segnalo qui, con un piano concreto per rimetterti in pari.',
-    guide_step7_title: 'L\'archivio contabile', guide_step7_text: 'Quando un ciclo si chiude, lo ritrovi qui, con il risultato finale — sempre consultabile, mai modificabile.',
+    guide_step7_title: 'L\'archivio', guide_step7_text: 'Quando un ciclo si chiude, lo ritrovi qui, con il risultato finale — sempre consultabile, mai modificabile.',
     guide_step8_title: 'Hai finito il tour!', guide_step8_text: 'Ora esplora pure il resto con calma. Puoi rivederlo quando vuoi dal pulsante informazioni in alto, vicino al tema.',
+
+    guide_step_streak_title: 'La tua serie di giorni',
+    guide_step_streak_text: 'La fiamma conta i giorni di fila in cui resti in budget. Chiudi ogni giorno in positivo (o con "Nessuna spesa") per farla crescere — un giorno dimenticato la interrompe, quindi conviene tenerla viva ogni giorno.',
+    guide_step_piggy_title: 'Il tuo salvadanaio',
+    guide_step_piggy_text: 'Il margine che metti da parte si vede riempire qui dentro, livello dopo livello: Bronzo, Argento, Oro, Platino. Un piccolo festeggiamento ogni volta che sali di livello.',
+    guide_step_goal_title: 'I tuoi obiettivi',
+    guide_step_goal_text: 'Imposta un obiettivo di risparmio, con o senza scadenza, e segui i progressi con una barra dedicata. Quando lo raggiungi, te lo faccio sapere subito.',
+    guide_step_traguardi_title: 'I tuoi traguardi',
+    guide_step_traguardi_text: 'Ogni obiettivo raggiunto resta archiviato qui per sempre, con quanto hai risparmiato e in quanti giorni ci sei riuscito — una vera bacheca dei tuoi successi.',
 
     notif_title: 'Avvisi', notif_empty: 'Nessun avviso al momento. Va tutto bene!',
 
-    cat_casa: 'Casa', cat_abbonamenti: 'Abbonamenti', cat_veicolo: 'Veicolo', cat_cibo: 'Cibo',
+    cat_casa: 'Casa', cat_abbonamenti: 'Abbonamenti', cat_veicolo: 'Veicolo', cat_cibo: 'Cibo', cat_salute: 'Salute',
     cat_bar: 'Bar/Ristoranti', cat_market: 'Market', cat_investimenti: 'Investimenti', cat_risparmi: 'Risparmi', cat_altro: 'Altro',
 
     day_close_btn: 'Nessuna spesa in questo giorno', day_closed_badge: 'Giorno chiuso: nessuna spesa',
     week_close_btn: 'Nessuna spesa questa settimana', week_closed_badge: 'Settimana chiusa: nessuna spesa',
 
     field_giorno_pagamento: 'Giorno di pagamento', field_giorni_ciclo: 'Giorni nel ciclo', field_stipendio: 'Stipendio mensile (€)',
+    field_tipo_ciclo: 'Tipo di ciclo', cycle_type_monthly: 'Mensile', cycle_type_weekly: 'Settimanale',
+    btn_close_cycle_now: 'Chiudi il ciclo adesso',
+    confirm_close_cycle_now: 'Vuoi chiudere subito il ciclo attuale e farne partire uno nuovo? Il risultato di questo ciclo verrà archiviato così com\'è adesso, anche se mancano giorni alla scadenza naturale. L\'azione non si può annullare.',
+    btn_delete_archivio_row: 'Elimina',
+    confirm_delete_archivio_row: 'Vuoi eliminare definitivamente questa voce dall\'archivio? L\'azione non si può annullare.',
+    field_giorno_settimana: 'Giorno di inizio settimana',
+    weekday_0: 'Domenica', weekday_1: 'Lunedì', weekday_2: 'Martedì', weekday_3: 'Mercoledì',
+    weekday_4: 'Giovedì', weekday_5: 'Venerdì', weekday_6: 'Sabato',
+
+    cycle_notif_title: 'Ciclo {type} concluso',
+    cycle_notif_type_weekly: 'settimanale', cycle_notif_type_monthly: 'mensile',
+    cycle_notif_body: '{range}: hai chiuso con un risultato di {result}.',
+    cycle_notif_more: 'Vedi di più',
+    cycle_detail_result_label: 'Risultato del ciclo',
+    cycle_detail_days_title: 'Giorno per giorno',
+    cycle_detail_days_empty: 'Nessun giorno registrato in questo ciclo.',
     field_spese_fisse: 'Spese fisse del mese',
 
     label_giorni_precedenti: 'Giorni precedenti', label_settimane_precedenti: 'Settimane precedenti',
@@ -4196,6 +5785,10 @@ const TRANSLATIONS = {
     tut_desc_registro: 'Qui annoti ogni spesa e ogni entrata, giorno per giorno o a settimane.',
     tut_desc_investimenti: 'Quando hai margine, qui tieni traccia di trading e scommesse.',
     tut_desc_altriconti: 'Il tuo fondo per le emergenze, tenuto separato dal resto.',
+    tut_desc_streak: 'Ogni giorno chiuso in budget allunga la fiamma — un giorno dimenticato la interrompe, quindi conviene non perderne l\'abitudine.',
+    tut_desc_piggy: 'Il margine che risparmi si vede riempire qui, livello dopo livello: Bronzo, Argento, Oro, Platino.',
+    tut_desc_goals: 'Imposta un traguardo di risparmio, con o senza scadenza, e segui i progressi con una barra dedicata.',
+    tut_desc_traguardi_list: 'Ogni obiettivo raggiunto resta archiviato per sempre, con quanto hai risparmiato e in quanti giorni.',
     tut_close_btn: 'Ho capito, iniziamo!',
     tut_guide_link: 'Preferisci un percorso guidato, passo passo?',
 
@@ -4208,17 +5801,112 @@ const TRANSLATIONS = {
     past_editor_title_day: 'Modifica i giorni precedenti', past_editor_title_week: 'Modifica le settimane precedenti',
     past_editor_empty: 'Non ci sono ancora giorni precedenti a oggi in questo mese.',
     archivio_empty: 'Non hai ancora cicli conclusi: qui troverai lo storico dei mesi passati man mano che si chiudono.',
+
+    streak_tooltip_zero: 'Nessuna serie attiva: chiudi oggi in budget per iniziare a costruirne una!',
+    streak_tooltip_one: '1 giorno di fila in budget!',
+    streak_tooltip_many: '{n} giorni di fila in budget!',
+    streak_info: 'La fiamma conta i giorni consecutivi chiusi in budget — senza andare in rosso, o chiusi apposta con "Nessuna spesa". Un giorno passato mai registrato interrompe subito la serie.',
+    streak_info_current_one: ' Al momento sei a 1 giorno di fila.',
+    streak_info_current_many: ' Al momento sei a {n} giorni di fila.',
+
+    goal_title: 'Obiettivo di risparmio', goal_edit_btn: 'Imposta un obiettivo', goal_edit_btn_change: 'Modifica obiettivo',
+    goal_amount_label: 'Obiettivo (€)', goal_deadline_label: 'Entro quando (opzionale)', goal_clear_btn: 'Rimuovi',
+    date_select_day: 'Giorno', date_select_month: 'Mese', date_select_year: 'Anno',
+    goal_progress_text: '{current} di {target}',
+    goal_sub_no_deadline: 'Continua così: ogni euro non speso ti avvicina al traguardo.',
+    goal_sub_reached: 'Obiettivo raggiunto! Puoi impostarne uno nuovo quando vuoi.',
+    goal_sub_deadline_ok: 'Mancano {days} giorni: ti servono circa {perday}/giorno per arrivarci in tempo.',
+    goal_sub_deadline_tight: 'Mancano solo {days} giorni: servirebbero circa {perday}/giorno — un obiettivo ambizioso, ma ogni passo conta.',
+    goal_sub_deadline_passed: 'La scadenza che avevi impostato è passata. Puoi aggiornare l\'obiettivo quando vuoi.',
+    goal_amount_error: 'Inserisci un obiettivo maggiore di zero.',
+
+    goal_congrats_title: 'Obiettivo raggiunto! 🎉',
+    goal_congrats_text_one: 'Complimenti, hai raggiunto {amount} in {days} giorno! Puoi vedere tutti i tuoi traguardi in Archivio.',
+    goal_congrats_text_many: 'Complimenti, hai raggiunto {amount} in {days} giorni! Puoi vedere tutti i tuoi traguardi in Archivio.',
+    archivio_tab_cicli: 'Cicli', archivio_tab_traguardi: 'Traguardi',
+    traguardi_empty: 'Non hai ancora raggiunto nessun obiettivo: quando ci riesci, lo ritroverai qui per sempre.',
+    traguardo_detail_one: 'Raggiunto in {days} giorno &middot; {date}',
+    traguardo_detail_many: 'Raggiunto in {days} giorni &middot; {date}',
+    traguardo_piggy_detail: '{amount} messi da parte &middot; {date}',
+
+    piggy_stats_title: '🐷💰 Le tue statistiche di risparmio',
+    piggy_stats_total_label: 'Totale risparmiato finora',
+    piggy_stats_days_title: 'I giorni in cui hai risparmiato',
+    piggy_stats_days_empty: 'Non hai ancora giorni in positivo registrati — ricomincia da un piccolo passo oggi stesso!',
+    piggy_stats_encourage_progress: 'Ti mancano {missing} per arrivare a {nextname} — continua così, ce la puoi fare!',
+    piggy_stats_encourage_max: 'Hai raggiunto il livello massimo del salvadanaio! Sei un vero campione del risparmio. 🏆',
+    piggy_stats_roadmap_title: 'I livelli del salvadanaio',
+
+    panel_info_setup: 'Qui inserisci stipendio e spese fisse: la base da cui parte tutto il resto.',
+    panel_info_soglie: 'Il tuo limite sano per oggi o per questa settimana, calcolato al volo.',
+    panel_info_bilancio: 'Un colpo d\'occhio su quanto stai mettendo da parte, giorno dopo giorno — con il tuo salvadanaio a livelli e i tuoi obiettivi di risparmio personalizzati.',
+    panel_info_categorie: 'Le tue spese (comprese quelle fisse) divise per categoria, per capire subito cosa pesa di più.',
+    panel_info_registro: 'Qui annoti ogni spesa e ogni entrata, giorno per giorno o a settimane.',
+    panel_info_trading: 'Quanto hai disponibile, quanto hai investito e quanto stai guadagnando con il trading.',
+    panel_info_betting: 'Quanto hai disponibile, quanto hai investito e quanto stai guadagnando con le scommesse.',
+    panel_info_altriconti: 'Il tuo fondo per le emergenze, tenuto separato dal resto del patrimonio.',
+    panel_info_archivio: 'Lo storico dei cicli già conclusi, con il risultato raggiunto in ognuno, e la bacheca dei tuoi traguardi — consultabile ma non modificabile.',
+    panel_info_salvadanaio: 'Il margine che risparmi si vede riempire qui, livello dopo livello: Bronzo, Argento, Oro, Platino. Tocca il maialino per una sorpresa.',
+    panel_info_obiettivo: 'Imposta un traguardo di risparmio, con o senza scadenza, e segui i progressi con una barra dedicata. Quando lo raggiungi, te lo faccio sapere subito.',
+
+    setup_tag_saved: 'salvato', setup_tag_saving: 'salvataggio...', setup_tag_error: 'errore salvataggio',
+    last_save_prefix: 'Ultimo salvataggio: ', total_prefix: 'Totale: ',
+    chart_legend_zero: 'linea dello zero', chart_legend_savings: 'il tuo risparmio',
+    empty_costi_fissi: 'Nessuna spesa fissa registrata: aggiungine una quando vuoi con il pulsante qui sotto.',
+    empty_entrate_week: 'Nessuna entrata extra registrata in questa settimana.',
+    empty_entrate_day: 'Nessuna entrata extra registrata per questo giorno.',
+    empty_spese_week: 'Nessuna spesa registrata in questa settimana.',
+    empty_spese_day: 'Nessuna spesa registrata per questo giorno.',
+    empty_categoria: 'Nessuna categoria',
+    voce_one: 'voce', voce_many: 'voci',
+    section_spese_giorno: 'Spese del giorno', section_entrate_giorno: 'Entrate extra del giorno',
+    section_spese_settimana: 'Spese della settimana — scegli il giorno per ognuna',
+    section_entrate_settimana: 'Entrate extra della settimana — scegli il giorno per ognuna',
+    trading_result_prefix: 'Risultato: ',
+    label_soldi_disponibili: 'Soldi disponibili (broker/sito)', label_quanto_investito: 'Quanto hai investito',
+    label_pct_guadagnata: '% guadagnata', label_nome_conto: 'Nome del conto (opzionale)',
+    label_importo_disponibile: 'Importo disponibile (€)', tag_per_emergenze: 'per le emergenze',
+    placeholder_nome_conto: 'es. Conto deposito, libretto di risparmio...',
+
+    archivio_days_registered: '{data} di {tot} giorni registrati',
+    archivio_days_registered_label: 'Giorni registrati',
+    label_stipendio_euro: 'Stipendio €', label_spese_fisse_euro: 'Spese fisse €',
+    label_spese_entrate_ciclo: 'Spese/entrate del ciclo €', label_giorni_nel_ciclo: 'Giorni nel ciclo',
+    label_risultato_ciclo: 'Risultato del ciclo',
+
+    week_registrati_count: '{n}/{tot} registrati', week_label_prefix: 'Sett.',
+    today_bar_week_suffix: ' — Settimana {n}', today_bar_fraction: 'Giorno {day} di {tot}',
+    today_bar_other_cycle: 'Stai seguendo un ciclo diverso da quello attuale',
+
+    auth_eyebrow: 'Gestione Portafoglio', app_tab_title: 'Gestione Portafoglio', btn_logout: 'Esci',
   },
   en: {
-    nav_cassa: 'Portfolio Management', nav_investimenti: 'Investments', nav_altriconti: 'Other Accounts',
+    nav_cassa: 'Personal Finance Management', nav_investimenti: 'Investments', nav_altriconti: 'Other Accounts',
     panel_setup: 'Month settings', panel_soglie: 'How much you can spend',
     panel_bilancio: 'How the month is going', panel_categorie: 'Where your money goes',
-    panel_registro: 'Expense log', panel_archivio: 'Accounting archive',
+    panel_registro: 'Expense log', panel_archivio: 'Archive',
+    panel_salvadanaio: '🐷 Your piggy bank', panel_obiettivo: '🎯 Savings goal',
     panel_trading: 'Trading', panel_betting: 'Betting', panel_altriconti: 'Emergency fund',
     view_day: 'Daily', view_week: 'Weekly',
     btn_cancel: 'Cancel', btn_confirm: 'Confirm', btn_add_row: '+ add item',
     btn_restart_month: 'Restart the month', btn_add_expense: '+ add expense', btn_add_income: '+ add income',
     btn_save: 'Save', btn_undo: 'Undo',
+    title_modifica_voce: 'Edit entry', title_rimuovi_voce: 'Remove entry',
+    title_giorno_passato: 'Past day: only editable from the dedicated section (gear icon above)',
+    title_settimana_passata: 'Past week: only editable from the dedicated section (gear icon above)',
+    day_option_label: 'Day', onboarding_wait: 'One moment...',
+    error_server_unreachable: 'Could not reach the server. Check your connection.',
+    nota_placeholder_entrata: 'Reason for the income (optional)', nota_placeholder_spesa: 'Reason for the expense (optional)',
+    day_badge_week: 'Week', nota_vuota: 'No note', senza_categoria: 'No category',
+    category_chart_empty: 'Add a category to your expenses (home, food, groceries...) to see here where your money goes.',
+    category_chart_spent_label: 'spent this month',
+    patrimonio_label: 'How much you have in total',
+    granularity_label: 'View:',
+    sum_margine_label: "How much you've saved so far",
+    sum_vs_pareggio_label: 'Days you stayed within your limits',
+    sum_vs_pareggio_sub_always: 'always within your available margin',
+    sum_vs_pareggio_sub_normal: 'days with non-negative margin',
+    sum_vs_pareggio_sub_none: 'no days logged',
 
     auth_login_title: 'Welcome back', auth_login_subtitle: 'Sign in to get back to your portfolio, investments and net worth, synced across every device.',
     auth_login_submit: 'Sign in', auth_login_switch_text: "Don't have an account?", auth_login_switch_btn: 'Create account',
@@ -4232,7 +5920,13 @@ const TRANSLATIONS = {
     onboarding_slide3_title: 'How many people are in your household?', onboarding_persone_placeholder: 'E.g. 1', onboarding_persone_error: 'Enter a valid number (at least 1).',
     onboarding_slide4_title: 'How much is your salary or monthly income?', onboarding_stipendio_placeholder: 'E.g. 2000', onboarding_stipendio_error: 'Enter a valid amount.',
     onboarding_slide5_title: 'What day of the month do you get paid?', onboarding_giorno_placeholder: 'E.g. 27', onboarding_giorno_error: 'Enter a valid day, from 1 to 31.',
-    onboarding_continue: 'Continue', onboarding_enter: 'Enter',
+    onboarding_continue: 'Continue', onboarding_enter: 'Enter', onboarding_back: 'Back',
+
+    piggy_card_title: '🐷 Your piggy bank',
+    piggy_level_none: 'No level yet', piggy_level_bronze: 'Bronze', piggy_level_silver: 'Silver',
+    piggy_level_gold: 'Gold', piggy_level_platinum: 'Platinum',
+    piggy_sub_progress: '{current} of {next} toward {nextname}',
+    piggy_sub_max: "Top level reached — {current} set aside, that's something to be proud of!",
 
     guide_skip: 'Skip the tour', guide_back: 'Back', guide_next: 'Next', guide_finish: 'Done', guide_count: '{n} of {tot}',
     guide_step1_title: 'Shall we take a quick tour?', guide_step1_text: "I'll show you in a few steps where to click to set everything up. You can skip at any time.",
@@ -4241,18 +5935,43 @@ const TRANSLATIONS = {
     guide_step4_title: 'The expense log', guide_step4_text: 'Click on a day to open it, and note down an expense or income there.',
     guide_step5_title: 'Daily or weekly', guide_step5_text: 'Switch between views at any time, from here.',
     guide_step6_title: 'Your alerts', guide_step6_text: "If you risk going into the red, I'll flag it here, with a concrete plan to get back on track.",
-    guide_step7_title: 'The accounting archive', guide_step7_text: 'Once a cycle closes, you\'ll find it here, with the final result — always viewable, never editable.',
+    guide_step7_title: 'The archive', guide_step7_text: 'Once a cycle closes, you\'ll find it here, with the final result — always viewable, never editable.',
     guide_step8_title: "You're done with the tour!", guide_step8_text: 'Now feel free to explore the rest at your own pace. You can revisit it anytime from the info button up top, next to the theme toggle.',
+
+    guide_step_streak_title: 'Your streak',
+    guide_step_streak_text: 'The flame counts consecutive days you stay in budget. Close each day in the green (or with "No expenses") to grow it — a forgotten day breaks it, so it\'s worth keeping it alive every day.',
+    guide_step_piggy_title: 'Your piggy bank',
+    guide_step_piggy_text: 'The margin you set aside fills this up, level by level: Bronze, Silver, Gold, Platinum. A little celebration every time you level up.',
+    guide_step_goal_title: 'Your goals',
+    guide_step_goal_text: "Set a savings goal, with or without a deadline, and track progress with a dedicated bar. When you reach it, I'll let you know right away.",
+    guide_step_traguardi_title: 'Your milestones',
+    guide_step_traguardi_text: 'Every goal you reach stays archived here forever, with how much you saved and how many days it took — a real showcase of your wins.',
 
     notif_title: 'Alerts', notif_empty: "No alerts right now. All good!",
 
-    cat_casa: 'Home', cat_abbonamenti: 'Subscriptions', cat_veicolo: 'Vehicle', cat_cibo: 'Food',
+    cat_casa: 'Home', cat_abbonamenti: 'Subscriptions', cat_veicolo: 'Vehicle', cat_cibo: 'Food', cat_salute: 'Health',
     cat_bar: 'Bar/Restaurants', cat_market: 'Groceries', cat_investimenti: 'Investments', cat_risparmi: 'Savings', cat_altro: 'Other',
 
     day_close_btn: 'No expenses this day', day_closed_badge: 'Day closed: no expenses',
     week_close_btn: 'No expenses this week', week_closed_badge: 'Week closed: no expenses',
 
     field_giorno_pagamento: 'Payday', field_giorni_ciclo: 'Days in cycle', field_stipendio: 'Monthly salary (€)',
+    field_tipo_ciclo: 'Cycle type', cycle_type_monthly: 'Monthly', cycle_type_weekly: 'Weekly',
+    btn_close_cycle_now: 'Close the cycle now',
+    confirm_close_cycle_now: "Do you want to close the current cycle right now and start a new one? This cycle's result will be archived as it stands, even if there are days left before its natural end. This can't be undone.",
+    btn_delete_archivio_row: 'Delete',
+    confirm_delete_archivio_row: "Do you want to permanently delete this entry from the archive? This can't be undone.",
+    field_giorno_settimana: 'Week start day',
+    weekday_0: 'Sunday', weekday_1: 'Monday', weekday_2: 'Tuesday', weekday_3: 'Wednesday',
+    weekday_4: 'Thursday', weekday_5: 'Friday', weekday_6: 'Saturday',
+
+    cycle_notif_title: '{type} cycle ended',
+    cycle_notif_type_weekly: 'Weekly', cycle_notif_type_monthly: 'Monthly',
+    cycle_notif_body: '{range}: you closed with a result of {result}.',
+    cycle_notif_more: 'See more',
+    cycle_detail_result_label: 'Cycle result',
+    cycle_detail_days_title: 'Day by day',
+    cycle_detail_days_empty: 'No days logged in this cycle.',
     field_spese_fisse: 'Fixed monthly expenses',
 
     label_giorni_precedenti: 'Previous days', label_settimane_precedenti: 'Previous weeks',
@@ -4292,6 +6011,10 @@ const TRANSLATIONS = {
     tut_desc_registro: 'Here you note down every expense and income, day by day or by week.',
     tut_desc_investimenti: 'Once you have margin, track trading and betting here.',
     tut_desc_altriconti: 'Your emergency fund, kept separate from the rest.',
+    tut_desc_streak: 'Every day closed in budget extends the flame — a forgotten day breaks it, so it\'s worth keeping up the habit.',
+    tut_desc_piggy: 'The margin you save fills this up, level by level: Bronze, Silver, Gold, Platinum.',
+    tut_desc_goals: 'Set a savings goal, with or without a deadline, and track progress with a dedicated bar.',
+    tut_desc_traguardi_list: 'Every goal you reach stays archived forever, with how much you saved and in how many days.',
     tut_close_btn: "Got it, let's start!",
     tut_guide_link: 'Prefer a step-by-step guided tour?',
 
@@ -4304,6 +6027,84 @@ const TRANSLATIONS = {
     past_editor_title_day: 'Edit previous days', past_editor_title_week: 'Edit previous weeks',
     past_editor_empty: "There are no previous days yet this month.",
     archivio_empty: "You don't have any closed cycles yet: you'll find the history of past months here as they close.",
+
+    streak_tooltip_zero: 'No active streak yet: close today in budget to start building one!',
+    streak_tooltip_one: '1 day in a row in budget!',
+    streak_tooltip_many: '{n} days in a row in budget!',
+    streak_info: 'The flame counts consecutive days closed in budget — without going into the red, or closed on purpose with "No expenses". A past day never logged breaks the streak right away.',
+    streak_info_current_one: ' Right now you\'re at 1 day in a row.',
+    streak_info_current_many: ' Right now you\'re at {n} days in a row.',
+
+    goal_title: 'Savings goal', goal_edit_btn: 'Set a goal', goal_edit_btn_change: 'Edit goal',
+    goal_amount_label: 'Goal (€)', goal_deadline_label: 'By when (optional)', goal_clear_btn: 'Remove',
+    date_select_day: 'Day', date_select_month: 'Month', date_select_year: 'Year',
+    goal_progress_text: '{current} of {target}',
+    goal_sub_no_deadline: "Keep going: every euro you don't spend gets you closer to the goal.",
+    goal_sub_reached: "Goal reached! You can set a new one anytime.",
+    goal_sub_deadline_ok: '{days} days left: you need about {perday}/day to get there in time.',
+    goal_sub_deadline_tight: 'Only {days} days left: you\'d need about {perday}/day — ambitious, but every bit counts.',
+    goal_sub_deadline_passed: 'The deadline you set has passed. You can update the goal anytime.',
+    goal_amount_error: 'Enter a goal greater than zero.',
+
+    goal_congrats_title: 'Goal reached! 🎉',
+    goal_congrats_text_one: "Congratulations, you reached {amount} in {days} day! You can see all your milestones in the Archive.",
+    goal_congrats_text_many: "Congratulations, you reached {amount} in {days} days! You can see all your milestones in the Archive.",
+    archivio_tab_cicli: 'Cycles', archivio_tab_traguardi: 'Milestones',
+    traguardi_empty: "You haven't reached any goal yet: once you do, you'll find it here forever.",
+    traguardo_detail_one: 'Reached in {days} day &middot; {date}',
+    traguardo_detail_many: 'Reached in {days} days &middot; {date}',
+    traguardo_piggy_detail: '{amount} set aside &middot; {date}',
+
+    piggy_stats_title: '🐷💰 Your savings stats',
+    piggy_stats_total_label: 'Total saved so far',
+    piggy_stats_days_title: 'The days you saved on',
+    piggy_stats_days_empty: "You don't have any days in the green yet — start today with a small step!",
+    piggy_stats_encourage_progress: "You're {missing} away from {nextname} — keep going, you can do it!",
+    piggy_stats_encourage_max: "You've reached the top piggy bank level! A true savings champion. 🏆",
+    piggy_stats_roadmap_title: 'The piggy bank levels',
+
+    panel_info_setup: 'Here you enter your salary and fixed expenses: the base everything else starts from.',
+    panel_info_soglie: 'Your healthy limit for today or this week, calculated on the fly.',
+    panel_info_bilancio: 'A quick glance at how much you\'re setting aside, day after day — with your leveled-up piggy bank and your own savings goals.',
+    panel_info_categorie: 'Your expenses (including fixed ones) split by category, to instantly see what weighs the most.',
+    panel_info_registro: 'Here you note down every expense and income, day by day or by week.',
+    panel_info_trading: 'How much you have available, how much you\'ve invested, and how much you\'re earning with trading.',
+    panel_info_betting: 'How much you have available, how much you\'ve invested, and how much you\'re earning with betting.',
+    panel_info_altriconti: 'Your emergency fund, kept separate from the rest of your net worth.',
+    panel_info_archivio: 'The history of cycles already closed, with the result reached in each, plus a showcase of your milestones — viewable but not editable.',
+    panel_info_salvadanaio: 'The margin you save fills this up, level by level: Bronze, Silver, Gold, Platinum. Tap the piggy bank for a surprise.',
+    panel_info_obiettivo: "Set a savings goal, with or without a deadline, and track progress with a dedicated bar. When you reach it, I'll let you know right away.",
+
+    setup_tag_saved: 'saved', setup_tag_saving: 'saving...', setup_tag_error: 'save error',
+    last_save_prefix: 'Last saved: ', total_prefix: 'Total: ',
+    chart_legend_zero: 'zero line', chart_legend_savings: 'your savings',
+    empty_costi_fissi: 'No fixed expense logged yet: add one anytime with the button below.',
+    empty_entrate_week: 'No extra income logged this week.',
+    empty_entrate_day: 'No extra income logged for this day.',
+    empty_spese_week: 'No expenses logged this week.',
+    empty_spese_day: 'No expenses logged for this day.',
+    empty_categoria: 'No category',
+    voce_one: 'entry', voce_many: 'entries',
+    section_spese_giorno: 'Expenses for the day', section_entrate_giorno: 'Extra income for the day',
+    section_spese_settimana: 'Expenses for the week — choose the day for each',
+    section_entrate_settimana: 'Extra income for the week — choose the day for each',
+    trading_result_prefix: 'Result: ',
+    label_soldi_disponibili: 'Money available (broker/site)', label_quanto_investito: 'How much you\'ve invested',
+    label_pct_guadagnata: '% gained', label_nome_conto: 'Account name (optional)',
+    label_importo_disponibile: 'Amount available (€)', tag_per_emergenze: 'for emergencies',
+    placeholder_nome_conto: 'e.g. Savings account, deposit account...',
+
+    archivio_days_registered: '{data} of {tot} days logged',
+    archivio_days_registered_label: 'Days logged',
+    label_stipendio_euro: 'Salary €', label_spese_fisse_euro: 'Fixed expenses €',
+    label_spese_entrate_ciclo: 'Expenses/income for the cycle €', label_giorni_nel_ciclo: 'Days in the cycle',
+    label_risultato_ciclo: 'Cycle result',
+
+    week_registrati_count: '{n}/{tot} logged', week_label_prefix: 'Wk.',
+    today_bar_week_suffix: ' — Week {n}', today_bar_fraction: 'Day {day} of {tot}',
+    today_bar_other_cycle: "You're viewing a cycle different from the current one",
+
+    auth_eyebrow: 'Personal Finance Management', app_tab_title: 'Personal Finance Management', btn_logout: 'Log out',
   },
 };
 let currentLang = localStorage.getItem('__app_lang__') || 'it';
@@ -4328,6 +6129,15 @@ function applyStaticTranslations(){
   });
   // riallinea anche i testi che cambiano in base allo stato (login/registrazione)
   if(typeof setAuthMode === 'function' && typeof authMode !== 'undefined'){ setAuthMode(authMode); }
+  // titolo della scheda del browser + titolo grande della copertina della
+  // schermata attualmente aperta (non passano da data-i18n perché cambiano
+  // anche in base a quale sotto-schermata è attiva)
+  const pageTitleEl = document.getElementById('page-title');
+  if(pageTitleEl) pageTitleEl.textContent = tr('app_tab_title');
+  if(typeof updateSharedCover === 'function'){
+    const activeTab = document.querySelector('.nav-tab.active');
+    if(activeTab) updateSharedCover(activeTab.dataset.screen);
+  }
 }
 function setLang(lang){
   if(!TRANSLATIONS[lang]) return;
@@ -4364,18 +6174,6 @@ document.addEventListener('click', (e) => {
   });
 });
 
-const PANEL_INFO = {
-  setup: 'Qui inserisci stipendio e spese fisse: la base da cui parte tutto il resto.',
-  soglie: 'Il tuo limite sano per oggi o per questa settimana, calcolato al volo.',
-  bilancio: 'Un colpo d\'occhio su quanto stai mettendo da parte, giorno dopo giorno.',
-  categorie: 'Le tue spese (comprese quelle fisse) divise per categoria, per capire subito cosa pesa di più.',
-  registro: 'Qui annoti ogni spesa e ogni entrata, giorno per giorno o a settimane.',
-  trading: 'Quanto hai disponibile, quanto hai investito e quanto stai guadagnando con il trading.',
-  betting: 'Quanto hai disponibile, quanto hai investito e quanto stai guadagnando con le scommesse.',
-  altriconti: 'Il tuo fondo per le emergenze, tenuto separato dal resto del patrimonio.',
-  archivio: 'Lo storico dei cicli già conclusi, con il risultato raggiunto in ognuno — consultabile ma non modificabile.',
-};
-
 function togglePanelInfo(btn, panelId){
   const tooltip = document.getElementById('panel-info-tooltip');
   const alreadyOpenForThis = tooltip.dataset.for === panelId && tooltip.style.display !== 'none';
@@ -4383,7 +6181,7 @@ function togglePanelInfo(btn, panelId){
     tooltip.style.display = 'none';
     return;
   }
-  document.getElementById('panel-info-tooltip-text').textContent = PANEL_INFO[panelId] || '';
+  document.getElementById('panel-info-tooltip-text').textContent = tr('panel_info_' + panelId);
   tooltip.dataset.for = panelId;
   tooltip.style.display = 'block';
   const rect = btn.getBoundingClientRect();
@@ -4398,7 +6196,7 @@ document.querySelectorAll('.panel-info-btn').forEach(btn => {
   });
 });
 document.addEventListener('click', (e) => {
-  if(!e.target.closest('.panel-info-btn') && !e.target.closest('#panel-info-tooltip')){
+  if(!e.target.closest('.panel-info-btn') && !e.target.closest('#panel-info-tooltip') && !e.target.closest('#streak-badge')){
     document.getElementById('panel-info-tooltip').style.display = 'none';
   }
 });
@@ -4431,6 +6229,8 @@ function renderOnboardingStep(){
     d.classList.toggle('active', parseInt(d.dataset.dot, 10) === onboardingStep);
   });
   document.getElementById('onboarding-next-btn').textContent = onboardingStep === ONBOARDING_STEPS ? tr('onboarding_enter') : tr('onboarding_continue');
+  // "Indietro" non ha senso sulla primissima slide (non c'è dove tornare)
+  document.getElementById('onboarding-back-btn').style.display = onboardingStep > 1 ? '' : 'none';
   if(onboardingStep === 2){
     requestAnimationFrame(() => document.getElementById('onboarding-nome').focus());
   }else if(onboardingStep === 3){
@@ -4441,6 +6241,15 @@ function renderOnboardingStep(){
     requestAnimationFrame(() => document.getElementById('onboarding-giorno-stipendio').focus());
   }
 }
+
+document.getElementById('onboarding-back-btn').addEventListener('click', () => {
+  if(onboardingStep <= 1) return;
+  // si torna indietro senza validare la slide corrente: chi vuole
+  // rivedere/correggere un dato precedente non deve prima "risolvere"
+  // quella in cui si trova.
+  onboardingStep--;
+  renderOnboardingStep();
+});
 
 document.getElementById('onboarding-next-btn').addEventListener('click', async () => {
   if(onboardingStep === 2){
@@ -4493,7 +6302,7 @@ document.getElementById('onboarding-next-btn').addEventListener('click', async (
 
     const nextBtn = document.getElementById('onboarding-next-btn');
     nextBtn.disabled = true;
-    nextBtn.textContent = 'Un attimo...';
+    nextBtn.textContent = tr('onboarding_wait');
     // salvataggio immediato (non ritardato): se l'utente chiude subito il
     // browser dopo l'onboarding, il profilo non deve andare perso.
     await saveNow();
@@ -4579,7 +6388,7 @@ document.getElementById('auth-form').addEventListener('submit', async (e) => {
       showApp(json.email);
     }
   }catch(err){
-    errorEl.textContent = 'Impossibile contattare il server. Controlla la connessione.';
+    errorEl.textContent = tr('error_server_unreachable');
     errorEl.style.display = 'block';
   }finally{
     submitBtn.disabled = false;
@@ -4766,6 +6575,7 @@ setInterval(() => {
     state.giorni = daysInMonth(state.mese);
     state.entries = {};
     state.weekItems = {};
+    state.archivedWeeklySubcycles = [];
     renderAll();
     scheduleSave();
   }
