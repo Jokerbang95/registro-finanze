@@ -395,6 +395,44 @@
   .confirm-cancel-btn:hover{ filter: brightness(0.96); }
   .confirm-ok-btn{ background: var(--red); color: #fff; }
   .confirm-ok-btn:hover{ filter: brightness(0.92); }
+
+  /* ===== PERCORSO GUIDATO ===== */
+  #guide-overlay{ position:fixed; inset:0; z-index:500; }
+  .guide-dim{ position:absolute; inset:0; background: rgba(10,10,12,0.45); }
+  .guide-highlight{
+    position:absolute; z-index:501; border-radius: var(--r-md);
+    box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(10,10,12,0.45);
+    transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease;
+    pointer-events:none;
+  }
+  .guide-card{
+    position:absolute; z-index:502; width:320px; max-width:88vw;
+    background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow-md);
+    padding:18px 20px; transition: top .25s ease, left .25s ease;
+  }
+  .guide-card-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .guide-card-count{ font-family:'Inter', sans-serif; font-size:11.5px; font-weight:600; color: var(--ink-faint); }
+  .guide-skip-btn{
+    font-family:'Inter', sans-serif; font-size:11.5px; font-weight:600; color: var(--ink-faint);
+    background:none; border:none; text-decoration:underline; cursor:pointer; padding:0;
+  }
+  .guide-skip-btn:hover{ color: var(--ink-soft); }
+  .guide-card-title{ font-family:'Fraunces', serif; font-weight:600; font-size:16px; color: var(--ink); margin-bottom:8px; }
+  .guide-card-text{ font-size:13px; line-height:1.6; color: var(--ink-soft); margin-bottom:18px; }
+  .guide-card-nav{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .guide-dots{ display:flex; gap:5px; }
+  .guide-dot{ width:6px; height:6px; border-radius:50%; background: var(--border); }
+  .guide-dot.active{ background: var(--accent); width:16px; border-radius: var(--r-pill); }
+  .guide-back-btn, .guide-next-btn{
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; border-radius: var(--r-pill);
+    padding:9px 16px; cursor:pointer; border:1px solid transparent; transition: filter .15s;
+  }
+  .guide-back-btn{ background: var(--bg); color: var(--ink-soft); border-color: var(--border); }
+  .guide-back-btn:hover{ filter: brightness(0.96); }
+  .guide-back-btn:disabled{ opacity:0; pointer-events:none; }
+  .guide-next-btn{ background: var(--accent); color:#fff; }
+  .guide-next-btn:hover{ filter: brightness(0.92); }
+  @media (max-width:560px){ .guide-card{ width:280px; padding:16px 18px; } }
   #past-editor-list{ margin-top:4px; }
   .entry-row.past-group .entry-row-header{ cursor: default; background: var(--bg); }
   .entry-row.past-group .entry-row-header:hover{ background: var(--bg); }
@@ -636,7 +674,7 @@
 
   /* NAVIGAZIONE PRINCIPALE */
   .topnav{
-    position: sticky; top: 0; z-index: 20;
+    position: sticky; top: 0; z-index: 700;
     background: var(--surface); border-bottom: 1px solid var(--border);
   }
   .topnav-inner{
@@ -1005,6 +1043,7 @@
     </div>
 
     <button type="button" class="auth-submit" id="tutorial-close-btn">Ho capito, iniziamo!</button>
+    <button type="button" id="tutorial-guide-link" style="display:block; width:100%; text-align:center; margin-top:14px; background:none; border:none; cursor:pointer; font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color:var(--ink-faint); text-decoration:underline;">Preferisci un percorso guidato, passo passo?</button>
   </div>
 </div>
 
@@ -1021,6 +1060,27 @@
      in alcuni contesti (es. anteprima incorporata) può restare bloccato e
      non mostrarsi mai, lasciando l'impressione che il pulsante "non faccia
      nulla". Questa funziona sempre, ovunque l'app venga aperta. -->
+<!-- PERCORSO GUIDATO: dopo il popup di benvenuto, mostra passo passo dove
+     cliccare per impostare l'app — punta agli elementi veri della pagina,
+     non è solo testo statico. Scorrevole e saltabile in ogni momento. -->
+<div id="guide-overlay" style="display:none;">
+  <div class="guide-dim"></div>
+  <div class="guide-highlight" id="guide-highlight" style="display:none;"></div>
+  <div class="guide-card" id="guide-card">
+    <div class="guide-card-top">
+      <span class="guide-card-count" id="guide-card-count">1 di 7</span>
+      <button type="button" class="guide-skip-btn" id="guide-skip-btn">Salta il tour</button>
+    </div>
+    <div class="guide-card-title" id="guide-card-title"></div>
+    <div class="guide-card-text" id="guide-card-text"></div>
+    <div class="guide-card-nav">
+      <button type="button" class="guide-back-btn" id="guide-back-btn">Indietro</button>
+      <div class="guide-dots" id="guide-dots"></div>
+      <button type="button" class="guide-next-btn" id="guide-next-btn">Avanti</button>
+    </div>
+  </div>
+</div>
+
 <div id="confirm-overlay" class="tutorial-overlay" style="display:none;">
   <div class="tutorial-card confirm-card">
     <p id="confirm-message" class="confirm-message"></p>
@@ -3869,6 +3929,127 @@ function showOnboarding(email){
 
 // Popup che spiega la missione dell'app e le sezioni, una sola volta,
 // subito dopo che l'onboarding è stato completato.
+// ===== PERCORSO GUIDATO: mostra passo passo dove cliccare per impostare
+// l'app, puntando agli elementi VERI della pagina (non solo testo) =====
+const GUIDE_STEPS = [
+  { target: null, title: 'Facciamo un giro insieme?', text: 'Ti mostro in pochi passaggi dove cliccare per impostare tutto. Puoi saltare in qualsiasi momento.' },
+  { target: '#add-costo', panel: 'setup', title: 'Le tue spese fisse', text: 'Stipendio e giorno di pagamento li hai già inseriti in fase di registrazione. Aggiungi qui affitto, bollette, abbonamenti — tutto quello che paghi ogni mese a cifra fissa.' },
+  { target: '#panel-head-soglie .panel-head-left', panel: 'soglie', title: 'Quanto puoi spendere', text: 'Qui vedi subito il tuo margine sano, aggiornato in automatico — sia al giorno che a settimana.' },
+  { target: '#panel-head-registro .panel-head-left', panel: 'registro', title: 'Il registro spese', text: 'Clicca su un giorno per aprirlo, e annota lì una spesa o un\'entrata.' },
+  { target: '.gran-toggle-btn[data-mode="week"]', panel: 'registro', title: 'Giornaliera o settimanale', text: 'Passa da una vista all\'altra in ogni momento, da qui.' },
+  { target: '#notif-bell-btn', panel: null, title: 'I tuoi avvisi', text: 'Se rischi di andare in rosso, te lo segnalo qui, con un piano concreto per rimetterti in pari.' },
+  { target: '#panel-head-archivio .panel-head-left', panel: 'archivio', title: 'L\'archivio contabile', text: 'Quando un ciclo si chiude, lo ritrovi qui, con il risultato finale — sempre consultabile, mai modificabile.' },
+  { target: null, title: 'Hai finito il tour!', text: 'Ora esplora pure il resto con calma. Puoi rivederlo quando vuoi dal pulsante informazioni in alto, vicino al tema.' },
+];
+let guideStepIndex = 0;
+
+function expandPanelForGuide(panelId){
+  if(!panelId) return;
+  if(collapsedPanels.has(panelId)){
+    collapsedPanels.delete(panelId);
+    applyPanelState(panelId);
+  }
+}
+
+function positionGuideVisuals(step){
+  const highlight = document.getElementById('guide-highlight');
+  const card = document.getElementById('guide-card');
+  const target = step.target ? document.querySelector(step.target) : null;
+
+  if(target){
+    target.scrollIntoView({ block: 'center', behavior: 'auto' });
+    // scroll istantaneo (non "smooth"): per le sezioni più lontane
+    // un'animazione ancora in corso darebbe una posizione sbagliata,
+    // perché la pagina sarebbe ancora a metà dello scorrimento.
+    requestAnimationFrame(() => {
+      const rect = target.getBoundingClientRect();
+      const pad = 6;
+      highlight.style.display = '';
+      highlight.style.top = (rect.top - pad) + 'px';
+      highlight.style.left = (rect.left - pad) + 'px';
+      highlight.style.width = (rect.width + pad * 2) + 'px';
+      highlight.style.height = (rect.height + pad * 2) + 'px';
+
+      const cardHeight = card.offsetHeight || 220;
+      const cardWidth = card.offsetWidth || 320;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      let cardTop = spaceBelow > cardHeight + 30 ? rect.bottom + 16 : Math.max(16, rect.top - cardHeight - 16);
+      cardTop = Math.min(cardTop, window.innerHeight - cardHeight - 16); // mai oltre il fondo visibile
+      cardTop = Math.max(16, cardTop);
+      let cardLeft = rect.left;
+      if(cardLeft + cardWidth > window.innerWidth - 16) cardLeft = window.innerWidth - cardWidth - 16;
+      if(cardLeft < 16) cardLeft = 16;
+      card.style.top = cardTop + 'px';
+      card.style.left = cardLeft + 'px';
+    });
+  }else{
+    highlight.style.display = 'none';
+    const cardWidth = card.offsetWidth || 320;
+    const cardHeight = card.offsetHeight || 220;
+    card.style.top = Math.max(16, (window.innerHeight - cardHeight) / 2) + 'px';
+    card.style.left = Math.max(16, (window.innerWidth - cardWidth) / 2) + 'px';
+  }
+}
+
+function renderGuideStep(){
+  const step = GUIDE_STEPS[guideStepIndex];
+  document.getElementById('guide-card-count').textContent = (guideStepIndex + 1) + ' di ' + GUIDE_STEPS.length;
+  document.getElementById('guide-card-title').textContent = step.title;
+  document.getElementById('guide-card-text').textContent = step.text;
+  document.getElementById('guide-back-btn').disabled = guideStepIndex === 0;
+  document.getElementById('guide-next-btn').textContent = guideStepIndex === GUIDE_STEPS.length - 1 ? 'Fine' : 'Avanti';
+  document.getElementById('guide-dots').innerHTML = GUIDE_STEPS.map((_, i) =>
+    '<span class="guide-dot' + (i === guideStepIndex ? ' active' : '') + '"></span>'
+  ).join('');
+
+  expandPanelForGuide(step.panel);
+  requestAnimationFrame(() => positionGuideVisuals(step));
+}
+
+function startGuideTour(){
+  document.getElementById('tutorial-overlay').style.display = 'none';
+  guideStepIndex = 0;
+  document.getElementById('guide-overlay').style.display = 'block';
+  renderGuideStep();
+}
+function endGuideTour(){
+  document.getElementById('guide-overlay').style.display = 'none';
+}
+document.getElementById('guide-next-btn').addEventListener('click', () => {
+  if(guideStepIndex === GUIDE_STEPS.length - 1){ endGuideTour(); return; }
+  guideStepIndex++;
+  renderGuideStep();
+});
+document.getElementById('guide-back-btn').addEventListener('click', () => {
+  if(guideStepIndex === 0) return;
+  guideStepIndex--;
+  renderGuideStep();
+});
+document.getElementById('guide-skip-btn').addEventListener('click', endGuideTour);
+// le slide del percorso guidato sono scorrevoli anche con uno swipe (utile
+// soprattutto su mobile), oltre ai pulsanti Avanti/Indietro
+let guideTouchStartX = null;
+document.getElementById('guide-card').addEventListener('touchstart', e => {
+  guideTouchStartX = e.touches[0].clientX;
+});
+document.getElementById('guide-card').addEventListener('touchend', e => {
+  if(guideTouchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - guideTouchStartX;
+  guideTouchStartX = null;
+  if(Math.abs(dx) < 40) return;
+  if(dx < 0) document.getElementById('guide-next-btn').click();
+  else document.getElementById('guide-back-btn').click();
+});
+window.addEventListener('resize', () => {
+  if(document.getElementById('guide-overlay').style.display !== 'none'){
+    positionGuideVisuals(GUIDE_STEPS[guideStepIndex]);
+  }
+});
+
+// se true, appena si chiude il popup di benvenuto parte subito il percorso
+// guidato — solo la primissima volta, subito dopo la registrazione.
+let pendingGuideTour = false;
+
 function showTutorial(){
   const nome = greetingName();
   document.getElementById('tutorial-name').textContent = nome || 'amico';
@@ -3919,9 +4100,15 @@ window.addEventListener('resize', () => { document.getElementById('panel-info-to
 
 document.getElementById('tutorial-close-btn').addEventListener('click', () => {
   document.getElementById('tutorial-overlay').style.display = 'none';
+  if(pendingGuideTour){ pendingGuideTour = false; startGuideTour(); }
 });
 document.getElementById('tutorial-close-x').addEventListener('click', () => {
   document.getElementById('tutorial-overlay').style.display = 'none';
+  pendingGuideTour = false;
+});
+document.getElementById('tutorial-guide-link').addEventListener('click', () => {
+  pendingGuideTour = false;
+  startGuideTour();
 });
 // il pulsante "i" in alto riapre la stessa spiegazione in qualsiasi momento
 document.getElementById('general-info-btn').addEventListener('click', () => {
@@ -4007,6 +4194,7 @@ document.getElementById('onboarding-next-btn').addEventListener('click', async (
     hydrateInputs();
     renderAll();
     collapseAllPanels(); // si parte con le sezioni chiuse, un passo alla volta
+    pendingGuideTour = true; // appena chiuso il popup di benvenuto, parte il tour guidato
     showTutorial();
     return;
   }
