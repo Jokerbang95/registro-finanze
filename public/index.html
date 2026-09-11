@@ -682,6 +682,19 @@
     display:flex; align-items:center; justify-content:flex-end; gap: 16px;
     flex-wrap: wrap;
   }
+  /* Su schermi stretti la barra in alto deve restare su UNA riga sola: se va
+     a capo diventa troppo alta e rischia di coprire i popup sotto (come il
+     tasto "chiudi" del tutorial). Si accorcia il necessario, mai va a capo. */
+  @media (max-width: 480px){
+    .topnav-inner{ flex-wrap: nowrap; padding: 8px 12px; gap: 6px; overflow-x: auto; }
+    .patrimonio-badge{ gap: 6px; flex: 1 1 auto; min-width: 0; }
+    .patrimonio-label{ display: none; }
+    .patrimonio-value{ font-size: 15px; white-space: nowrap; }
+    .eye-btn, .theme-toggle-btn, .notif-bell-btn{ width:28px; height:28px; flex:0 0 auto; }
+    .logout-btn{ padding: 6px 9px; font-size: 11.5px; flex:0 0 auto; white-space: nowrap; }
+    #user-email-label{ display: none; } /* resta solo "Esci", il nome occupa troppo spazio */
+    .logout-sep{ display: none; }
+  }
   .nav-tabs-bar{
     background: var(--bg); border-bottom: 1px solid var(--border);
   }
@@ -799,6 +812,16 @@
     display:flex; align-items:center; justify-content:center; transition: background .15s, color .15s;
   }
   .theme-toggle-btn:hover{ background: var(--border); }
+  .lang-btn{ font-family:'Inter', sans-serif; font-size:10.5px; font-weight:700; letter-spacing:0.3px; }
+  .lang-dropdown{ width:auto; min-width:140px; padding:8px; }
+  .lang-option{
+    display:block; width:100%; text-align:left; font-family:'Inter', sans-serif; font-size:13px; font-weight:600;
+    color: var(--ink-soft); background:none; border:none; border-radius: var(--r-sm); padding:9px 12px; cursor:pointer;
+    transition: background .15s, color .15s;
+  }
+  .lang-option:hover{ background: var(--bg); color: var(--ink); }
+  .lang-option.active{ background: var(--accent-bg); color: var(--accent); }
+  .auth-top-buttons{ display:flex; align-items:center; gap:8px; }
   #general-info-btn{ font-family:'Fraunces', serif; font-style:italic; font-weight:600; font-size:14px; }
 
   .notif-wrap{ position:relative; display:inline-flex; }
@@ -811,6 +834,12 @@
     position:absolute; top:calc(100% + 8px); right:0; width:320px; max-width:88vw; z-index:250;
     background: var(--surface); border:1px solid var(--border); border-radius: var(--r-lg);
     box-shadow: var(--shadow-md); padding:16px; animation: tutorial-fade-in .15s ease;
+  }
+  /* su schermi stretti la campanella può stare vicino al bordo sinistro
+     della barra: ancorare la tendina al pulsante (right:0) la spingerebbe
+     fuori dallo schermo. Meglio agganciarla ai bordi della finestra. */
+  @media (max-width: 480px){
+    .notif-dropdown{ position:fixed; top:52px; left:12px; right:12px; width:auto; max-width:none; }
   }
   .notif-dropdown-title{ font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; margin-bottom:10px; }
   .notif-empty{ font-size:12.5px; color: var(--ink-faint); }
@@ -912,20 +941,29 @@
   <div class="auth-card">
     <div class="auth-top-row">
       <div class="auth-eyebrow">Gestione Portafoglio</div>
-      <button class="theme-toggle-btn" id="theme-toggle-btn-auth" type="button" title="Cambia tema"></button>
+      <div class="auth-top-buttons">
+        <div class="notif-wrap">
+          <button class="theme-toggle-btn lang-btn" id="lang-btn-auth" type="button" title="Lingua / Language">IT</button>
+          <div class="notif-dropdown lang-dropdown" id="lang-dropdown-auth" style="display:none;">
+            <button type="button" class="lang-option" data-lang="it">Italiano</button>
+            <button type="button" class="lang-option" data-lang="en">English</button>
+          </div>
+        </div>
+        <button class="theme-toggle-btn" id="theme-toggle-btn-auth" type="button" title="Cambia tema"></button>
+      </div>
     </div>
     <h1 id="auth-title">Bentornato</h1>
     <p id="auth-subtitle">Accedi per ritrovare la tua gestione del portafoglio, i tuoi investimenti e il tuo patrimonio, sincronizzati su ogni dispositivo.</p>
 
     <form id="auth-form" novalidate>
       <div class="field" style="margin-bottom:14px;">
-        <label for="auth-email">Email</label>
-        <input type="email" id="auth-email" autocomplete="email" required placeholder="nome@esempio.com">
+        <label for="auth-email" data-i18n="auth_email_label">Email</label>
+        <input type="email" id="auth-email" autocomplete="email" required placeholder="nome@esempio.com" data-i18n-placeholder="auth_email_placeholder">
       </div>
       <div class="field" style="margin-bottom:6px;">
-        <label for="auth-password">Password</label>
+        <label for="auth-password" data-i18n="auth_password_label">Password</label>
         <div class="password-field-wrap">
-          <input type="password" id="auth-password" autocomplete="current-password" required placeholder="Almeno 8 caratteri">
+          <input type="password" id="auth-password" autocomplete="current-password" required placeholder="Almeno 8 caratteri" data-i18n-placeholder="auth_password_placeholder">
           <button type="button" class="password-eye-btn" id="auth-password-eye" title="Mostra/nascondi password"></button>
         </div>
       </div>
@@ -945,43 +983,52 @@
   <div class="auth-card">
     <div class="auth-top-row">
       <div class="auth-eyebrow">Gestione Portafoglio</div>
-      <button class="theme-toggle-btn" id="theme-toggle-btn-onboarding" type="button" title="Cambia tema"></button>
+      <div class="auth-top-buttons">
+        <div class="notif-wrap">
+          <button class="theme-toggle-btn lang-btn" id="lang-btn-onboarding" type="button" title="Lingua / Language">IT</button>
+          <div class="notif-dropdown lang-dropdown" id="lang-dropdown-onboarding" style="display:none;">
+            <button type="button" class="lang-option" data-lang="it">Italiano</button>
+            <button type="button" class="lang-option" data-lang="en">English</button>
+          </div>
+        </div>
+        <button class="theme-toggle-btn" id="theme-toggle-btn-onboarding" type="button" title="Cambia tema"></button>
+      </div>
     </div>
 
     <div class="onboarding-slide" data-slide="1">
-      <h1 class="onboarding-tagline">Organizza le tue finanze</h1>
+      <h1 class="onboarding-tagline" data-i18n="onboarding_slide1">Organizza le tue finanze</h1>
     </div>
 
     <div class="onboarding-slide" data-slide="2" style="display:none;">
-      <h1>Come ti chiami?</h1>
+      <h1 data-i18n="onboarding_slide2_title">Come ti chiami?</h1>
       <div class="field" style="margin-top:18px;">
-        <input type="text" id="onboarding-nome" placeholder="Es. Alessandro" autocomplete="given-name">
+        <input type="text" id="onboarding-nome" placeholder="Es. Alessandro" autocomplete="given-name" data-i18n-placeholder="onboarding_nome_placeholder">
       </div>
-      <div id="onboarding-nome-error" class="auth-error" style="display:none;">Inserisci il tuo nome per continuare.</div>
+      <div id="onboarding-nome-error" class="auth-error" style="display:none;" data-i18n="onboarding_nome_error">Inserisci il tuo nome per continuare.</div>
     </div>
 
     <div class="onboarding-slide" data-slide="3" style="display:none;">
-      <h1>Da quante persone è composto il nucleo familiare?</h1>
+      <h1 data-i18n="onboarding_slide3_title">Da quante persone è composto il nucleo familiare?</h1>
       <div class="field" style="margin-top:18px;">
-        <input type="number" id="onboarding-persone" min="1" step="1" placeholder="Es. 1">
+        <input type="number" id="onboarding-persone" min="1" step="1" placeholder="Es. 1" data-i18n-placeholder="onboarding_persone_placeholder">
       </div>
-      <div id="onboarding-persone-error" class="auth-error" style="display:none;">Inserisci un numero valido (almeno 1).</div>
+      <div id="onboarding-persone-error" class="auth-error" style="display:none;" data-i18n="onboarding_persone_error">Inserisci un numero valido (almeno 1).</div>
     </div>
 
     <div class="onboarding-slide" data-slide="4" style="display:none;">
-      <h1>A quanto ammonta il tuo stipendio o le tue entrate mensili?</h1>
+      <h1 data-i18n="onboarding_slide4_title">A quanto ammonta il tuo stipendio o le tue entrate mensili?</h1>
       <div class="field" style="margin-top:18px;">
-        <input type="number" id="onboarding-stipendio" min="0" step="0.01" placeholder="Es. 2000">
+        <input type="number" id="onboarding-stipendio" min="0" step="0.01" placeholder="Es. 2000" data-i18n-placeholder="onboarding_stipendio_placeholder">
       </div>
-      <div id="onboarding-stipendio-error" class="auth-error" style="display:none;">Inserisci un importo valido.</div>
+      <div id="onboarding-stipendio-error" class="auth-error" style="display:none;" data-i18n="onboarding_stipendio_error">Inserisci un importo valido.</div>
     </div>
 
     <div class="onboarding-slide" data-slide="5" style="display:none;">
-      <h1>Che giorno del mese prendi lo stipendio?</h1>
+      <h1 data-i18n="onboarding_slide5_title">Che giorno del mese prendi lo stipendio?</h1>
       <div class="field" style="margin-top:18px;">
-        <input type="number" id="onboarding-giorno-stipendio" min="1" max="31" step="1" placeholder="Es. 27">
+        <input type="number" id="onboarding-giorno-stipendio" min="1" max="31" step="1" placeholder="Es. 27" data-i18n-placeholder="onboarding_giorno_placeholder">
       </div>
-      <div id="onboarding-giorno-stipendio-error" class="auth-error" style="display:none;">Inserisci un giorno valido, da 1 a 31.</div>
+      <div id="onboarding-giorno-stipendio-error" class="auth-error" style="display:none;" data-i18n="onboarding_giorno_error">Inserisci un giorno valido, da 1 a 31.</div>
     </div>
 
     <div class="onboarding-dots">
@@ -1000,50 +1047,45 @@
 <div id="tutorial-overlay" class="tutorial-overlay" style="display:none;">
   <div class="tutorial-card">
     <button class="tutorial-close-x" id="tutorial-close-x" type="button" title="Chiudi">&times;</button>
-    <div class="tutorial-eyebrow">Prima di iniziare</div>
-    <h2 class="tutorial-title">Ciao <span id="tutorial-name">tu</span>, benvenuto!</h2>
+    <div class="tutorial-eyebrow" data-i18n="tut_eyebrow">Prima di iniziare</div>
+    <h2 class="tutorial-title" id="tutorial-greeting">Ciao <span id="tutorial-name">tu</span>, benvenuto!</h2>
 
-    <p class="tutorial-mission">
-      L'idea è semplice: ogni giorno guadagni qualcosa e hai delle spese fisse da coprire.
-      Quello che resta è tuo, per vivere — ma se lo spendi tutto, giorno dopo giorno, alla fine del mese ti ritrovi con zero messo da parte.
-      Il senso di questa app è aiutarti a tenere un po' da parte ogni giorno, così quello che non spendi diventa <strong>margine</strong>: soldi veri, tuoi, che si accumulano.
-      Quando arriva una spesa in più, non peserà su quanto guadagni oggi, ma su quello che hai già messo via — ed è così che, con calma, costruisci qualcosa: prima un po' di sicurezza, poi magari anche un capitale da far crescere.
-    </p>
+<p class="tutorial-mission" id="tutorial-mission-text"></p>
 
-    <div class="tutorial-sections-title">Le sezioni, una alla volta</div>
+    <div class="tutorial-sections-title" data-i18n="tut_sections_title">Le sezioni, una alla volta</div>
     <div class="tutorial-sections">
       <div class="tutorial-section-item">
         <span class="tutorial-section-icon">🗓️</span>
-        <div><div class="tutorial-section-name">Impostazione del mese</div><div class="tutorial-section-desc">Qui inserisci stipendio e spese fisse: la base da cui parte tutto il resto.</div></div>
+        <div><div class="tutorial-section-name" data-i18n="panel_setup">Impostazione del mese</div><div class="tutorial-section-desc" data-i18n="tut_desc_setup">Qui inserisci stipendio e spese fisse: la base da cui parte tutto il resto.</div></div>
       </div>
       <div class="tutorial-section-item">
         <span class="tutorial-section-icon">🎯</span>
-        <div><div class="tutorial-section-name">Quanto puoi spendere</div><div class="tutorial-section-desc">Il tuo limite sano per oggi o per questa settimana, calcolato al volo.</div></div>
+        <div><div class="tutorial-section-name" data-i18n="panel_soglie">Quanto puoi spendere</div><div class="tutorial-section-desc" data-i18n="tut_desc_soglie">Il tuo limite sano per oggi o per questa settimana, calcolato al volo.</div></div>
       </div>
       <div class="tutorial-section-item">
         <span class="tutorial-section-icon">📈</span>
-        <div><div class="tutorial-section-name">Come sta andando il mese</div><div class="tutorial-section-desc">Un colpo d'occhio su quanto stai mettendo da parte, giorno dopo giorno.</div></div>
+        <div><div class="tutorial-section-name" data-i18n="panel_bilancio">Come sta andando il mese</div><div class="tutorial-section-desc" data-i18n="tut_desc_bilancio">Un colpo d'occhio su quanto stai mettendo da parte, giorno dopo giorno.</div></div>
       </div>
       <div class="tutorial-section-item">
         <span class="tutorial-section-icon">🥧</span>
-        <div><div class="tutorial-section-name">Dove vanno i tuoi soldi</div><div class="tutorial-section-desc">Le tue spese divise per categoria, per capire subito cosa pesa di più.</div></div>
+        <div><div class="tutorial-section-name" data-i18n="panel_categorie">Dove vanno i tuoi soldi</div><div class="tutorial-section-desc" data-i18n="tut_desc_categorie">Le tue spese divise per categoria, per capire subito cosa pesa di più.</div></div>
       </div>
       <div class="tutorial-section-item">
         <span class="tutorial-section-icon">📝</span>
-        <div><div class="tutorial-section-name">Registro spese</div><div class="tutorial-section-desc">Qui annoti ogni spesa e ogni entrata, giorno per giorno o a settimane.</div></div>
+        <div><div class="tutorial-section-name" data-i18n="panel_registro">Registro spese</div><div class="tutorial-section-desc" data-i18n="tut_desc_registro">Qui annoti ogni spesa e ogni entrata, giorno per giorno o a settimane.</div></div>
       </div>
       <div class="tutorial-section-item">
         <span class="tutorial-section-icon">💹</span>
-        <div><div class="tutorial-section-name">Investimenti</div><div class="tutorial-section-desc">Quando hai margine, qui tieni traccia di trading e scommesse.</div></div>
+        <div><div class="tutorial-section-name" data-i18n="nav_investimenti">Investimenti</div><div class="tutorial-section-desc" data-i18n="tut_desc_investimenti">Quando hai margine, qui tieni traccia di trading e scommesse.</div></div>
       </div>
       <div class="tutorial-section-item">
         <span class="tutorial-section-icon">🛟</span>
-        <div><div class="tutorial-section-name">Altri Conti</div><div class="tutorial-section-desc">Il tuo fondo per le emergenze, tenuto separato dal resto.</div></div>
+        <div><div class="tutorial-section-name" data-i18n="nav_altriconti">Altri Conti</div><div class="tutorial-section-desc" data-i18n="tut_desc_altriconti">Il tuo fondo per le emergenze, tenuto separato dal resto.</div></div>
       </div>
     </div>
 
-    <button type="button" class="auth-submit" id="tutorial-close-btn">Ho capito, iniziamo!</button>
-    <button type="button" id="tutorial-guide-link" style="display:block; width:100%; text-align:center; margin-top:14px; background:none; border:none; cursor:pointer; font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color:var(--ink-faint); text-decoration:underline;">Preferisci un percorso guidato, passo passo?</button>
+    <button type="button" class="auth-submit" id="tutorial-close-btn" data-i18n="tut_close_btn">Ho capito, iniziamo!</button>
+    <button type="button" id="tutorial-guide-link" data-i18n="tut_guide_link" style="display:block; width:100%; text-align:center; margin-top:14px; background:none; border:none; cursor:pointer; font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color:var(--ink-faint); text-decoration:underline;">Preferisci un percorso guidato, passo passo?</button>
   </div>
 </div>
 
@@ -1069,12 +1111,12 @@
   <div class="guide-card" id="guide-card">
     <div class="guide-card-top">
       <span class="guide-card-count" id="guide-card-count">1 di 7</span>
-      <button type="button" class="guide-skip-btn" id="guide-skip-btn">Salta il tour</button>
+      <button type="button" class="guide-skip-btn" id="guide-skip-btn" data-i18n="guide_skip">Salta il tour</button>
     </div>
     <div class="guide-card-title" id="guide-card-title"></div>
     <div class="guide-card-text" id="guide-card-text"></div>
     <div class="guide-card-nav">
-      <button type="button" class="guide-back-btn" id="guide-back-btn">Indietro</button>
+      <button type="button" class="guide-back-btn" id="guide-back-btn" data-i18n="guide_back">Indietro</button>
       <div class="guide-dots" id="guide-dots"></div>
       <button type="button" class="guide-next-btn" id="guide-next-btn">Avanti</button>
     </div>
@@ -1085,8 +1127,8 @@
   <div class="tutorial-card confirm-card">
     <p id="confirm-message" class="confirm-message"></p>
     <div class="confirm-actions">
-      <button id="confirm-cancel-btn" type="button" class="confirm-cancel-btn">Annulla</button>
-      <button id="confirm-ok-btn" type="button" class="confirm-ok-btn">Conferma</button>
+      <button id="confirm-cancel-btn" type="button" class="confirm-cancel-btn" data-i18n="btn_cancel">Annulla</button>
+      <button id="confirm-ok-btn" type="button" class="confirm-ok-btn" data-i18n="btn_confirm">Conferma</button>
     </div>
   </div>
 </div>
@@ -1098,7 +1140,7 @@
     <h2 class="tutorial-title" id="past-editor-title">Modifica i giorni precedenti</h2>
     <p class="tutorial-mission" style="margin-bottom:20px;">Qui puoi ancora correggere o completare quello che hai registrato nei giorni già trascorsi.</p>
     <div id="past-editor-list" class="entry-list"></div>
-    <div id="past-editor-empty" class="entry-empty-note" style="display:none;">Non ci sono ancora giorni precedenti a oggi in questo mese.</div>
+    <div id="past-editor-empty" class="entry-empty-note" style="display:none;" data-i18n="past_editor_empty">Non ci sono ancora giorni precedenti a oggi in questo mese.</div>
   </div>
 </div>
 
@@ -1111,19 +1153,26 @@
       <span class="patrimonio-label">Quanto hai in totale</span>
       <span class="patrimonio-value" id="patrimonio-value">€ 0,00</span>
       <button class="eye-btn" id="eye-patrimonio" type="button" title="Mostra/nascondi importo" style="color:var(--ink-soft);"></button>
-      <div class="notif-wrap">
+      <div class="notif-wrap notif-wrap-bell">
         <button class="theme-toggle-btn notif-bell-btn" id="notif-bell-btn" type="button" title="Avvisi">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <span class="notif-dot" id="notif-dot" style="display:none;"></span>
         </button>
         <div class="notif-dropdown" id="notif-dropdown" style="display:none;">
-          <div class="notif-dropdown-title">Avvisi</div>
+          <div class="notif-dropdown-title" data-i18n="notif_title">Avvisi</div>
           <div id="notif-dropdown-body"></div>
+        </div>
+      </div>
+      <div class="notif-wrap">
+        <button class="theme-toggle-btn lang-btn" id="lang-btn" type="button" title="Lingua / Language">IT</button>
+        <div class="notif-dropdown lang-dropdown" id="lang-dropdown" style="display:none;">
+          <button type="button" class="lang-option" data-lang="it">Italiano</button>
+          <button type="button" class="lang-option" data-lang="en">English</button>
         </div>
       </div>
       <button class="theme-toggle-btn" id="general-info-btn" type="button" title="Come funziona questa app">i</button>
       <button class="theme-toggle-btn" id="theme-toggle-btn" type="button" title="Cambia tema"></button>
-      <button class="logout-btn" id="logout-btn" type="button" title="Esci"><span id="user-email-label"></span> · Esci</button>
+      <button class="logout-btn" id="logout-btn" type="button" title="Esci"><span id="user-email-label"></span><span class="logout-sep"> &middot; </span>Esci</button>
     </div>
   </div>
 </div>
@@ -1137,9 +1186,9 @@
 <div class="nav-tabs-bar">
   <div class="nav-tabs-bar-inner">
     <div class="nav-tabs">
-      <button class="nav-tab active" data-screen="cassa">Gestione Portafoglio</button>
-      <button class="nav-tab" data-screen="investimenti">Investimenti</button>
-      <button class="nav-tab" data-screen="altriconti">Altri Conti</button>
+      <button class="nav-tab active" data-screen="cassa" data-i18n="nav_cassa">Gestione Portafoglio</button>
+      <button class="nav-tab" data-screen="investimenti" data-i18n="nav_investimenti">Investimenti</button>
+      <button class="nav-tab" data-screen="altriconti" data-i18n="nav_altriconti">Altri Conti</button>
     </div>
   </div>
 </div>
@@ -1153,7 +1202,7 @@
     <div class="panel-head" id="panel-head-setup">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="setup" type="button"></button>
-        <h2>Impostazione del mese</h2>
+        <h2 data-i18n="panel_setup">Impostazione del mese</h2>
         <button class="panel-info-btn" data-panel="setup" type="button">i</button>
       </div>
       <span class="tag" id="setup-tag">non salvato</span>
@@ -1173,26 +1222,26 @@
       </div>
       <div class="grid4">
         <div class="field">
-          <label for="giorno-stipendio">Giorno di pagamento</label>
+          <label for="giorno-stipendio" data-i18n="field_giorno_pagamento">Giorno di pagamento</label>
           <input type="number" id="giorno-stipendio" min="1" max="31" placeholder="es. 27">
         </div>
         <div class="field">
-          <label for="giorni">Giorni nel ciclo</label>
+          <label for="giorni" data-i18n="field_giorni_ciclo">Giorni nel ciclo</label>
           <input type="number" id="giorni" readonly>
         </div>
         <div class="field">
-          <label for="stipendio">Stipendio mensile (€)</label>
+          <label for="stipendio" data-i18n="field_stipendio">Stipendio mensile (€)</label>
           <input type="number" id="stipendio" step="0.01" placeholder="es. 2000">
         </div>
       </div>
 
       <div class="costi-section">
         <div class="costi-head">
-          <h3>Spese fisse del mese</h3>
+          <h3 data-i18n="field_spese_fisse">Spese fisse del mese</h3>
           <span class="costi-total" id="costi-total">Totale: € 0,00</span>
         </div>
         <div id="costi-rows"></div>
-        <button class="add-row-btn" id="add-costo">+ aggiungi voce</button>
+        <button class="add-row-btn" id="add-costo" data-i18n="btn_add_row">+ aggiungi voce</button>
       </div>
     </div>
   </div>
@@ -1202,7 +1251,7 @@
     <div class="panel-head" id="panel-head-soglie">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="soglie" type="button"></button>
-        <h2>Quanto puoi spendere</h2>
+        <h2 data-i18n="panel_soglie">Quanto puoi spendere</h2>
         <button class="panel-info-btn" data-panel="soglie" type="button">i</button>
       </div>
     </div>
@@ -1210,8 +1259,8 @@
       <div class="granularity-row" style="margin-top:0; padding-top:0; border-top:none;">
         <span class="granularity-label">Vista:</span>
         <div class="view-toggle" id="granularity-toggle">
-          <button class="view-toggle-btn gran-toggle-btn active" data-mode="day" type="button">Giornaliera</button>
-          <button class="view-toggle-btn gran-toggle-btn" data-mode="week" type="button">Settimanale</button>
+          <button class="view-toggle-btn gran-toggle-btn active" data-mode="day" type="button" data-i18n="view_day">Giornaliera</button>
+          <button class="view-toggle-btn gran-toggle-btn" data-mode="week" type="button" data-i18n="view_week">Settimanale</button>
         </div>
       </div>
 
@@ -1237,7 +1286,7 @@
           <div class="sub" id="target-live-sub">Si aggiorna in base a come sta andando davvero il mese</div>
         </div>
         <div class="threshold-card cumulato">
-          <div class="label" id="target-cum-label">Margine cumulato</div>
+          <div class="label" id="target-cum-label" data-i18n="th_cum_label">Margine cumulato</div>
           <div class="value" id="target-cum">€ 0,00</div>
           <div class="sub" id="target-cum-sub">Quanto hai incassato finora senza spenderlo</div>
         </div>
@@ -1251,10 +1300,10 @@
     <div class="panel-head" id="panel-head-bilancio">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="bilancio" type="button"></button>
-        <h2>Come sta andando il mese</h2>
+        <h2 data-i18n="panel_bilancio">Come sta andando il mese</h2>
         <button class="panel-info-btn" data-panel="bilancio" type="button">i</button>
       </div>
-      <button class="reset-btn" id="reset-entries">Ricomincia il mese</button>
+      <button class="reset-btn" id="reset-entries" data-i18n="btn_restart_month">Ricomincia il mese</button>
     </div>
     <div class="panel-body" id="panel-body-bilancio">
       <div class="summary-grid">
@@ -1286,7 +1335,7 @@
     <div class="panel-head" id="panel-head-categorie">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="categorie" type="button"></button>
-        <h2>Dove vanno i tuoi soldi</h2>
+        <h2 data-i18n="panel_categorie">Dove vanno i tuoi soldi</h2>
         <button class="panel-info-btn" data-panel="categorie" type="button">i</button>
       </div>
     </div>
@@ -1303,13 +1352,13 @@
     <div class="panel-head" id="panel-head-registro">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="registro" type="button"></button>
-        <h2>Registro spese</h2>
+        <h2 data-i18n="panel_registro">Registro spese</h2>
         <button class="panel-info-btn" data-panel="registro" type="button">i</button>
       </div>
       <div class="view-toggle-with-clear">
         <div class="view-toggle">
-          <button class="view-toggle-btn gran-toggle-btn active" data-mode="day" type="button">Giornaliera</button>
-          <button class="view-toggle-btn gran-toggle-btn" data-mode="week" type="button">Settimanale</button>
+          <button class="view-toggle-btn gran-toggle-btn active" data-mode="day" type="button" data-i18n="view_day">Giornaliera</button>
+          <button class="view-toggle-btn gran-toggle-btn" data-mode="week" type="button" data-i18n="view_week">Settimanale</button>
         </div>
         <button class="registro-clear-btn" id="registro-clear-btn" type="button" title="Svuota tutte le voci di questa vista">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
@@ -1328,13 +1377,13 @@
     <div class="panel-head" id="panel-head-archivio">
       <div class="panel-head-left">
         <button class="panel-collapse-btn" data-panel="archivio" type="button"></button>
-        <h2>Archivio contabile</h2>
+        <h2 data-i18n="panel_archivio">Archivio contabile</h2>
         <button class="panel-info-btn" data-panel="archivio" type="button">i</button>
       </div>
     </div>
     <div class="panel-body" id="panel-body-archivio">
       <div id="archivio-list" class="entry-list"></div>
-      <div id="archivio-empty" class="entry-empty-note" style="display:none;">Non hai ancora cicli conclusi: qui troverai lo storico dei mesi passati man mano che si chiudono.</div>
+      <div id="archivio-empty" class="entry-empty-note" style="display:none;" data-i18n="archivio_empty">Non hai ancora cicli conclusi: qui troverai lo storico dei mesi passati man mano che si chiudono.</div>
     </div>
   </div>
 
@@ -1355,7 +1404,7 @@
         <div class="panel-head trading-head" id="panel-head-trading">
           <div class="panel-head-left">
             <button class="panel-collapse-btn" data-panel="trading" type="button"></button>
-            <h2>Trading</h2>
+            <h2 data-i18n="panel_trading">Trading</h2>
             <button class="panel-info-btn" data-panel="trading" type="button">i</button>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
@@ -1389,7 +1438,7 @@
         <div class="panel-head betting-head" id="panel-head-betting">
           <div class="panel-head-left">
             <button class="panel-collapse-btn" data-panel="betting" type="button"></button>
-            <h2>Betting</h2>
+            <h2 data-i18n="panel_betting">Betting</h2>
             <button class="panel-info-btn" data-panel="betting" type="button">i</button>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
@@ -1426,7 +1475,7 @@
       <div class="panel-head emergency-head" id="panel-head-altriconti">
         <div class="panel-head-left">
           <button class="panel-collapse-btn" data-panel="altriconti" type="button"></button>
-          <h2>Conto di emergenza</h2>
+          <h2 data-i18n="panel_altriconti">Conto di emergenza</h2>
           <button class="panel-info-btn" data-panel="altriconti" type="button">i</button>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
@@ -1858,7 +1907,7 @@ function renderTodayBar(){
   const cycleEndDay = dateForDay(g);
   const cycleLabel = cycleStart.getDate() + ' ' + MESI_ABBR[cycleStart.getMonth()].toLowerCase() +
     ' → ' + cycleEndDay.getDate() + ' ' + MESI_ABBR[cycleEndDay.getMonth()].toLowerCase();
-  cycleEl.textContent = 'Ciclo contabile: ' + cycleLabel;
+  cycleEl.textContent = tr('label_ciclo_contabile') + ': ' + cycleLabel;
 
   if(isCurrentCycle && dayInCycle >= 1 && dayInCycle <= g){
     const wIdx = weekIndexForDay(dayInCycle);
@@ -2351,12 +2400,12 @@ function computeDeficitPlan(){
   let remainingDays = weekEnd - todayDay;
   let scope, note;
   if(remainingDays > 0){
-    scope = 'di questa settimana';
-    note = remainingDays + (remainingDays === 1 ? ' giorno rimanente' : ' giorni rimanenti');
+    scope = tr('deficit_scope_current');
+    note = remainingDays + ' ' + (remainingDays === 1 ? tr('deficit_days_singular') : tr('deficit_days_plural'));
   }else{
     remainingDays = 7;
-    scope = 'della prossima settimana';
-    note = '7 giorni';
+    scope = tr('deficit_scope_next');
+    note = tr('deficit_seven_days');
   }
   const perDay = deficit / remainingDays;
   const idealPerDay = t.disponibile;
@@ -2369,12 +2418,12 @@ function deficitBannerHTML(plan){
   return `
     <span class="deficit-banner-icon">&#9888;&#65039;</span>
     <div>
-      <div class="deficit-banner-title">Sei in rosso di ${fmt(plan.deficit)}</div>
+      <div class="deficit-banner-title">${tr('deficit_title').replace('{amount}', fmt(plan.deficit))}</div>
       <div class="deficit-banner-text">
-        Da inizio ciclo hai speso più di quanto guadagnato: se continui con questo ritmo, il ciclo rischia di chiudersi in deficit.
-        Per rimetterti in pari entro la fine ${plan.scope} (${plan.note}), prova a ridurre le spese di circa
-        <strong>${fmt(plan.perDay)} al giorno</strong> rispetto al tuo margine ideale &mdash; punta a circa
-        <strong>${fmt(plan.reducedPerDay)}/giorno</strong> invece di ${fmt(plan.idealPerDay)}/giorno.
+        ${tr('deficit_intro')}
+        ${tr('deficit_plan').replace('{scope}', plan.scope).replace('{note}', plan.note)}
+        <strong>${fmt(plan.perDay)} ${tr('deficit_perday_suffix')}</strong>
+        <strong>${fmt(plan.reducedPerDay)}${tr('deficit_final_suffix').replace('{ideal}', fmt(plan.idealPerDay))}</strong>
       </div>
     </div>
   `;
@@ -2394,7 +2443,7 @@ function renderDeficitAlert(){
   }else{
     banner.style.display = 'none';
     dot.style.display = 'none';
-    dropdownBody.innerHTML = '<div class="notif-empty">Nessun avviso al momento. Va tutto bene!</div>';
+    dropdownBody.innerHTML = '<div class="notif-empty">' + tr('notif_empty') + '</div>';
   }
 }
 
@@ -2404,7 +2453,7 @@ document.getElementById('notif-bell-btn').addEventListener('click', (e) => {
   dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
 });
 document.addEventListener('click', (e) => {
-  const wrap = document.querySelector('.notif-wrap');
+  const wrap = document.querySelector('.notif-wrap-bell');
   if(wrap && !wrap.contains(e.target)){
     document.getElementById('notif-dropdown').style.display = 'none';
   }
@@ -2413,22 +2462,23 @@ document.addEventListener('click', (e) => {
 function renderThresholds(){
   const t = targets();
   const mult = granularity === 'week' ? 7 : 1;
-  const periodo = granularity === 'week' ? 'a settimana' : 'al giorno';
-  const ogni = granularity === 'week' ? 'ogni settimana' : 'ogni giorno';
+  const periodo = granularity === 'week' ? tr('th_periodo_settimana') : tr('th_periodo_giorno');
+  const ogni = granularity === 'week' ? tr('th_ogni_settimana') : tr('th_ogni_giorno');
+  const periodo2 = granularity === 'week' ? tr('th_periodo2_settimana') : tr('th_periodo2_giorno');
 
-  document.getElementById('target-pareggio-label').innerHTML = 'Spese fisse &middot; ' + periodo;
+  document.getElementById('target-pareggio-label').innerHTML = tr('th_spese_fisse_label') + ' &middot; ' + periodo;
   document.getElementById('target-pareggio').textContent = fmt(t.pareggio * mult);
-  document.getElementById('target-pareggio-sub').textContent = 'Quanto ti serve ' + ogni + ' solo per coprire le spese fisse';
+  document.getElementById('target-pareggio-sub').textContent = tr('th_spese_fisse_sub').replace('{ogni}', ogni);
 
-  document.getElementById('target-stipendio-label').innerHTML = 'Stipendio &middot; ' + periodo;
+  document.getElementById('target-stipendio-label').innerHTML = tr('th_stipendio_label') + ' &middot; ' + periodo;
   document.getElementById('target-stipendio').textContent = fmt(t.stipendioGiorno * mult);
-  document.getElementById('target-stipendio-sub').textContent = 'Quanto vale, in media, ' + (granularity === 'week' ? 'una settimana' : 'una giornata') + ' del tuo stipendio';
+  document.getElementById('target-stipendio-sub').textContent = tr('th_stipendio_sub').replace('{periodo2}', periodo2);
 
-  document.getElementById('target-disponibile-label').textContent = granularity === 'week' ? 'Quanto puoi spendere a settimana' : 'Quanto puoi spendere al giorno';
+  document.getElementById('target-disponibile-label').textContent = granularity === 'week' ? tr('th_disponibile_label_week') : tr('th_disponibile_label_day');
   const dispEl = document.getElementById('target-disponibile');
   dispEl.textContent = fmt(t.disponibile * mult);
   dispEl.className = 'value' + (t.disponibile < 0 ? ' neg' : '');
-  document.getElementById('target-disponibile-sub').textContent = 'Quello che ti resta ' + ogni + ' dopo le spese fisse, senza andare in rosso';
+  document.getElementById('target-disponibile-sub').textContent = tr('th_disponibile_sub').replace('{ogni}', ogni);
 
   const isCurrentCycle = state.mese === currentCycleDefault();
   const todayCycleDay = isCurrentCycle ? todayDayInCycle() : 0;
@@ -2448,16 +2498,16 @@ function renderThresholds(){
     }else{
       idealMargin = t.disponibile * mult;
     }
-    idealSubText = 'La cifra ideale da non superare questa settimana, per non andare in rosso';
+    idealSubText = tr('th_live_sub_week');
   }else{
     if(isCurrentCycle && todayCycleDay >= 1 && todayCycleDay <= g){
       idealMargin = t.disponibile + dailyEntrateEffective(todayCycleDay) - dailySpesaEffective(todayCycleDay);
     }else{
       idealMargin = t.disponibile;
     }
-    idealSubText = 'La cifra ideale da non superare oggi, per non andare in rosso';
+    idealSubText = tr('th_live_sub_day');
   }
-  document.getElementById('target-live-label').textContent = granularity === 'week' ? 'Quanto ti resta questa settimana' : 'Quanto ti resta oggi';
+  document.getElementById('target-live-label').textContent = granularity === 'week' ? tr('th_live_label_week') : tr('th_live_label_day');
   const liveEl = document.getElementById('target-live');
   const liveSubEl = document.getElementById('target-live-sub');
   liveEl.textContent = fmt(idealMargin);
@@ -2476,10 +2526,10 @@ function renderThresholds(){
   let cumMargin, cumSubText;
   if(serieDaysWithData > 0){
     cumMargin = seriePoints[serieDaysWithData - 1].cumMargine;
-    cumSubText = 'Quanto hai incassato finora senza spenderlo, in tutto il ciclo (fino al Giorno ' + String(serieDaysWithData).padStart(2, '0') + ')';
+    cumSubText = tr('th_cum_sub_data').replace('{n}', String(serieDaysWithData).padStart(2, '0'));
   }else{
     cumMargin = granularity === 'week' ? t.disponibile * mult : t.disponibile;
-    cumSubText = 'Nessun dato ancora registrato: per ora coincide con quanto puoi spendere';
+    cumSubText = tr('th_cum_sub_empty');
   }
   const cumEl = document.getElementById('target-cum');
   const cumSubEl = document.getElementById('target-cum-sub');
@@ -2494,15 +2544,15 @@ const PENCIL_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" 
 
 // Categorie facoltative per le spese, usate anche nel grafico "Dove vanno i tuoi soldi"
 const SPESA_CATEGORIES = [
-  { id: 'casa',          label: 'Casa',          emoji: '🏠', color: '#8E6C4B' },
-  { id: 'abbonamenti',   label: 'Abbonamenti',   emoji: '📱', color: '#6B7FD7' },
-  { id: 'veicolo',       label: 'Veicolo',       emoji: '🚗', color: '#D77A6B' },
-  { id: 'cibo',          label: 'Cibo',          emoji: '🍽️', color: '#D9A44E' },
-  { id: 'bar',           label: 'Bar/Ristoranti',emoji: '☕', color: '#B8722E' },
-  { id: 'market',        label: 'Market',        emoji: '🛒', color: '#5FA08A' },
-  { id: 'investimenti',  label: 'Investimenti',  emoji: '📈', color: '#3D5A80' },
-  { id: 'risparmi',      label: 'Risparmi',      emoji: '💰', color: '#9C4F72' },
-  { id: 'altro',         label: 'Altro',         emoji: '📦', color: '#8489A0' },
+  { id: 'casa',          emoji: '🏠', color: '#8E6C4B', get label(){ return tr('cat_casa'); } },
+  { id: 'abbonamenti',   emoji: '📱', color: '#6B7FD7', get label(){ return tr('cat_abbonamenti'); } },
+  { id: 'veicolo',       emoji: '🚗', color: '#D77A6B', get label(){ return tr('cat_veicolo'); } },
+  { id: 'cibo',          emoji: '🍽️', color: '#D9A44E', get label(){ return tr('cat_cibo'); } },
+  { id: 'bar',           emoji: '☕', color: '#B8722E', get label(){ return tr('cat_bar'); } },
+  { id: 'market',        emoji: '🛒', color: '#5FA08A', get label(){ return tr('cat_market'); } },
+  { id: 'investimenti',  emoji: '📈', color: '#3D5A80', get label(){ return tr('cat_investimenti'); } },
+  { id: 'risparmi',      emoji: '💰', color: '#9C4F72', get label(){ return tr('cat_risparmi'); } },
+  { id: 'altro',         emoji: '📦', color: '#8489A0', get label(){ return tr('cat_altro'); } },
 ];
 function categoryById(id){ return SPESA_CATEGORIES.find(c => c.id === id) || null; }
 
@@ -2617,7 +2667,7 @@ function buildItemSection(sectionKey, title, pairs, kind, ctx){
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.className = kind === 'entrate' ? 'add-income-btn' : 'add-expense-btn';
-    addBtn.textContent = kind === 'entrate' ? '+ aggiungi entrata' : '+ aggiungi spesa';
+    addBtn.textContent = kind === 'entrate' ? tr('btn_add_income') : tr('btn_add_expense');
     const importoClass = kind === 'entrate' ? 'income-importo' : 'expense-importo';
     addBtn.addEventListener('click', () => {
       const newItem = { id: nextCostiId(), importo: null, nota: '' };
@@ -2662,7 +2712,7 @@ function renderPastEditorList(){
   let any = false;
 
   if(granularity === 'week'){
-    titleEl.textContent = 'Modifica le settimane precedenti';
+    titleEl.textContent = tr('past_editor_title_week');
     if(isCurrentCycle){
       const currentWeekIdx = weekIndexForDay(Math.min(todayDayInCycle(), g));
       for(let w = 1; w < currentWeekIdx; w++){
@@ -2671,7 +2721,7 @@ function renderPastEditorList(){
       }
     }
   }else{
-    titleEl.textContent = 'Modifica i giorni precedenti';
+    titleEl.textContent = tr('past_editor_title_day');
     if(isCurrentCycle){
       const lastPast = Math.min(todayDayInCycle() - 1, g);
       for(let d = 1; d <= lastPast; d++){
@@ -2714,13 +2764,13 @@ function makePastGroupRow(mode){
     if(count < 1) return null;
     summaryText = count + (count === 1 ? ' settimana' : ' settimane');
     lastPastDay = weekRange(currentWeekIdx - 1, g).end;
-    label = 'Settimane precedenti';
+    label = tr('label_settimane_precedenti');
   }else{
     count = Math.min(dayInCycle - 1, g);
     if(count < 1) return null;
     summaryText = count + (count === 1 ? ' giorno' : ' giorni');
     lastPastDay = count;
-    label = 'Giorni precedenti';
+    label = tr('label_giorni_precedenti');
   }
 
   const { points, daysWithData } = computeSeries();
@@ -2829,16 +2879,16 @@ function makeDayRowBody(day, t){
   body.className = 'entry-row-body';
   body.innerHTML = `
     <div class="entry-fields entry-fields-2col">
-      <div class="entry-field"><label>Guadagno &euro;</label><span class="readonly-cell">${fmt(t.stipendioGiorno)}</span></div>
+      <div class="entry-field"><label>${tr('label_guadagno')}</label><span class="readonly-cell">${fmt(t.stipendioGiorno)}</span></div>
       <div class="entry-field">
-        <label>Ti resta &euro;${isAdjusted ? ' <span class="field-adjusted-tag">aggiornato</span>' : ''}</label>
+        <label>${tr('label_ti_resta')}${isAdjusted ? ' <span class="field-adjusted-tag">' + tr('label_aggiornato') + '</span>' : ''}</label>
         <span class="readonly-cell${isAdjusted ? ' adjusted' : ''}">${fmt(dispAdjusted)}</span>
       </div>
     </div>
     ${isAdjusted ? `<div class="week-amort-note">Di base avresti ${fmt(t.disponibile)} al giorno &mdash; qui include anche una parte delle voci "tutta la settimana": ${amortEntrata > 0 ? '+' + fmt(amortEntrata) : ''}${(amortEntrata > 0 && amortSpesa > 0) ? ' &middot; ' : ''}${amortSpesa > 0 ? '−' + fmt(amortSpesa) : ''}</div>` : ''}
     <div class="day-close-row"></div>
     <div class="entry-final">
-      <span class="label">Bilancio del giorno</span>
+      <span class="label">${tr('label_bilancio_giorno')}</span>
       <span class="value ${hasData ? (margine >= 0 ? 'pos' : 'neg') : ''}">${hasData ? fmt(margine) : '—'}</span>
     </div>
   `;
@@ -2852,8 +2902,8 @@ function makeDayRowBody(day, t){
     if(isClosed){
       closeRow.innerHTML = `
         <div class="day-closed-badge">
-          <span>&check; Giorno chiuso: nessuna spesa</span>
-          <button type="button" class="day-close-undo">Annulla</button>
+          <span>&check; ${tr('day_closed_badge')}</span>
+          <button type="button" class="day-close-undo">${tr('btn_undo')}</button>
         </div>
       `;
       closeRow.querySelector('.day-close-undo').addEventListener('click', () => toggleDayClosed(day));
@@ -2861,7 +2911,7 @@ function makeDayRowBody(day, t){
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'day-close-btn';
-      btn.textContent = 'Nessuna spesa in questo giorno';
+      btn.textContent = tr('day_close_btn');
       btn.addEventListener('click', () => toggleDayClosed(day));
       closeRow.appendChild(btn);
     }
@@ -3319,12 +3369,12 @@ function makeWeekRowBody(weekIndex, t){
   body.className = 'entry-row-body';
   body.innerHTML = `
     <div class="entry-fields entry-fields-2col">
-      <div class="entry-field"><label>Guadagno &euro;</label><span class="readonly-cell">${fmt(a.incassoTot)}</span></div>
-      <div class="entry-field"><label>Ti resta &euro;</label><span class="readonly-cell">${fmt(a.dispTot)}</span></div>
+      <div class="entry-field"><label>${tr('label_guadagno')}</label><span class="readonly-cell">${fmt(a.incassoTot)}</span></div>
+      <div class="entry-field"><label>${tr('label_ti_resta')}</label><span class="readonly-cell">${fmt(a.dispTot)}</span></div>
     </div>
     <div class="week-close-row"></div>
     <div class="entry-final">
-      <span class="label">Bilancio della settimana</span>
+      <span class="label">${tr('label_bilancio_settimana')}</span>
       <span class="value ${a.haQualcosa ? (a.margineTot >= 0 ? 'pos' : 'neg') : ''}">${a.haQualcosa ? fmt(a.margineTot) : '—'}</span>
     </div>
   `;
@@ -3337,8 +3387,8 @@ function makeWeekRowBody(weekIndex, t){
     if(a.isClosed){
       closeRow.innerHTML = `
         <div class="day-closed-badge">
-          <span>&check; Settimana chiusa: nessuna spesa</span>
-          <button type="button" class="day-close-undo">Annulla</button>
+          <span>&check; ${tr('week_closed_badge')}</span>
+          <button type="button" class="day-close-undo">${tr('btn_undo')}</button>
         </div>
       `;
       closeRow.querySelector('.day-close-undo').addEventListener('click', () => toggleWeekClosed(weekIndex));
@@ -3346,7 +3396,7 @@ function makeWeekRowBody(weekIndex, t){
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'week-close-btn';
-      btn.textContent = 'Nessuna spesa questa settimana';
+      btn.textContent = tr('week_close_btn');
       btn.addEventListener('click', () => toggleWeekClosed(weekIndex));
       closeRow.appendChild(btn);
     }
@@ -3806,7 +3856,7 @@ function showConfirm(message, onConfirm){
 }
 
 document.getElementById('reset-entries').addEventListener('click', () => {
-  showConfirm('Vuoi ricominciare il mese da capo? Tutti i valori giornalieri inseriti verranno azzerati.', () => {
+  showConfirm(tr('confirm_restart_month'), () => {
     state.entries = {};
     renderAll();
     scheduleSave();
@@ -3815,9 +3865,7 @@ document.getElementById('reset-entries').addEventListener('click', () => {
 
 document.getElementById('registro-clear-btn').addEventListener('click', () => {
   const isWeek = granularity === 'week';
-  const msg = isWeek
-    ? 'Vuoi svuotare tutte le spese e le entrate inserite a livello di settimana? L\'azione non si può annullare.'
-    : 'Vuoi svuotare tutte le spese e le entrate inserite giorno per giorno? L\'azione non si può annullare.';
+  const msg = isWeek ? tr('confirm_clear_week') : tr('confirm_clear_day');
   showConfirm(msg, () => {
     if(isWeek){
       state.weekItems = {};
@@ -3932,14 +3980,14 @@ function showOnboarding(email){
 // ===== PERCORSO GUIDATO: mostra passo passo dove cliccare per impostare
 // l'app, puntando agli elementi VERI della pagina (non solo testo) =====
 const GUIDE_STEPS = [
-  { target: null, title: 'Facciamo un giro insieme?', text: 'Ti mostro in pochi passaggi dove cliccare per impostare tutto. Puoi saltare in qualsiasi momento.' },
-  { target: '#add-costo', panel: 'setup', title: 'Le tue spese fisse', text: 'Stipendio e giorno di pagamento li hai già inseriti in fase di registrazione. Aggiungi qui affitto, bollette, abbonamenti — tutto quello che paghi ogni mese a cifra fissa.' },
-  { target: '#panel-head-soglie .panel-head-left', panel: 'soglie', title: 'Quanto puoi spendere', text: 'Qui vedi subito il tuo margine sano, aggiornato in automatico — sia al giorno che a settimana.' },
-  { target: '#panel-head-registro .panel-head-left', panel: 'registro', title: 'Il registro spese', text: 'Clicca su un giorno per aprirlo, e annota lì una spesa o un\'entrata.' },
-  { target: '.gran-toggle-btn[data-mode="week"]', panel: 'registro', title: 'Giornaliera o settimanale', text: 'Passa da una vista all\'altra in ogni momento, da qui.' },
-  { target: '#notif-bell-btn', panel: null, title: 'I tuoi avvisi', text: 'Se rischi di andare in rosso, te lo segnalo qui, con un piano concreto per rimetterti in pari.' },
-  { target: '#panel-head-archivio .panel-head-left', panel: 'archivio', title: 'L\'archivio contabile', text: 'Quando un ciclo si chiude, lo ritrovi qui, con il risultato finale — sempre consultabile, mai modificabile.' },
-  { target: null, title: 'Hai finito il tour!', text: 'Ora esplora pure il resto con calma. Puoi rivederlo quando vuoi dal pulsante informazioni in alto, vicino al tema.' },
+  { target: null, titleKey: 'guide_step1_title', textKey: 'guide_step1_text' },
+  { target: '#add-costo', panel: 'setup', titleKey: 'guide_step2_title', textKey: 'guide_step2_text' },
+  { target: '#panel-head-soglie .panel-head-left', panel: 'soglie', titleKey: 'guide_step3_title', textKey: 'guide_step3_text' },
+  { target: '#panel-head-registro .panel-head-left', panel: 'registro', titleKey: 'guide_step4_title', textKey: 'guide_step4_text' },
+  { target: '.gran-toggle-btn[data-mode="week"]', panel: 'registro', titleKey: 'guide_step5_title', textKey: 'guide_step5_text' },
+  { target: '#notif-bell-btn', panel: null, titleKey: 'guide_step6_title', textKey: 'guide_step6_text' },
+  { target: '#panel-head-archivio .panel-head-left', panel: 'archivio', titleKey: 'guide_step7_title', textKey: 'guide_step7_text' },
+  { target: null, titleKey: 'guide_step8_title', textKey: 'guide_step8_text' },
 ];
 let guideStepIndex = 0;
 
@@ -3993,11 +4041,11 @@ function positionGuideVisuals(step){
 
 function renderGuideStep(){
   const step = GUIDE_STEPS[guideStepIndex];
-  document.getElementById('guide-card-count').textContent = (guideStepIndex + 1) + ' di ' + GUIDE_STEPS.length;
-  document.getElementById('guide-card-title').textContent = step.title;
-  document.getElementById('guide-card-text').textContent = step.text;
+  document.getElementById('guide-card-count').textContent = tr('guide_count').replace('{n}', guideStepIndex + 1).replace('{tot}', GUIDE_STEPS.length);
+  document.getElementById('guide-card-title').textContent = tr(step.titleKey);
+  document.getElementById('guide-card-text').textContent = tr(step.textKey);
   document.getElementById('guide-back-btn').disabled = guideStepIndex === 0;
-  document.getElementById('guide-next-btn').textContent = guideStepIndex === GUIDE_STEPS.length - 1 ? 'Fine' : 'Avanti';
+  document.getElementById('guide-next-btn').textContent = guideStepIndex === GUIDE_STEPS.length - 1 ? tr('guide_finish') : tr('guide_next');
   document.getElementById('guide-dots').innerHTML = GUIDE_STEPS.map((_, i) =>
     '<span class="guide-dot' + (i === guideStepIndex ? ' active' : '') + '"></span>'
   ).join('');
@@ -4052,12 +4100,270 @@ let pendingGuideTour = false;
 
 function showTutorial(){
   const nome = greetingName();
-  document.getElementById('tutorial-name').textContent = nome || 'amico';
+  document.getElementById('tutorial-greeting').textContent = tr('tut_greeting').replace('{name}', nome || (currentLang === 'en' ? 'friend' : 'amico'));
+  document.getElementById('tutorial-mission-text').innerHTML = tr('tut_mission');
   document.getElementById('onboarding-screen').style.display = 'none';
   document.getElementById('tutorial-overlay').style.display = 'flex';
 }
 
 // spiegazione dedicata di ogni singola sezione, mostrata dal suo tastino "i"
+// ===================================================================
+// LINGUA: dizionario delle traduzioni + logica di cambio lingua.
+// Per aggiungere una nuova lingua in futuro basta aggiungere una nuova
+// chiave (es. "fr") con lo stesso identico set di chiavi di "it"/"en".
+// ===================================================================
+const TRANSLATIONS = {
+  it: {
+    nav_cassa: 'Gestione Portafoglio', nav_investimenti: 'Investimenti', nav_altriconti: 'Altri Conti',
+    panel_setup: 'Impostazione del mese', panel_soglie: 'Quanto puoi spendere',
+    panel_bilancio: 'Come sta andando il mese', panel_categorie: 'Dove vanno i tuoi soldi',
+    panel_registro: 'Registro spese', panel_archivio: 'Archivio contabile',
+    panel_trading: 'Trading', panel_betting: 'Betting', panel_altriconti: 'Conto di emergenza',
+    view_day: 'Giornaliera', view_week: 'Settimanale',
+    btn_cancel: 'Annulla', btn_confirm: 'Conferma', btn_add_row: '+ aggiungi voce',
+    btn_restart_month: 'Ricomincia il mese', btn_add_expense: '+ aggiungi spesa', btn_add_income: '+ aggiungi entrata',
+    btn_save: 'Salva', btn_undo: 'Annulla',
+
+    auth_login_title: 'Bentornato', auth_login_subtitle: 'Accedi per ritrovare la tua gestione del portafoglio, i tuoi investimenti e il tuo patrimonio, sincronizzati su ogni dispositivo.',
+    auth_login_submit: 'Accedi', auth_login_switch_text: 'Non hai un account?', auth_login_switch_btn: 'Crea account',
+    auth_register_title: 'Crea il tuo account', auth_register_subtitle: 'Un account per salvare i tuoi dati in modo sicuro e ritrovarli su qualsiasi dispositivo.',
+    auth_register_submit: 'Crea account', auth_register_switch_text: 'Hai già un account?', auth_register_switch_btn: 'Accedi',
+    auth_email_label: 'Email', auth_password_label: 'Password',
+    auth_email_placeholder: 'nome@esempio.com', auth_password_placeholder: 'Almeno 8 caratteri',
+
+    onboarding_slide1: 'Organizza le tue finanze',
+    onboarding_slide2_title: 'Come ti chiami?', onboarding_nome_placeholder: 'Es. Alessandro', onboarding_nome_error: 'Inserisci il tuo nome per continuare.',
+    onboarding_slide3_title: 'Da quante persone è composto il nucleo familiare?', onboarding_persone_placeholder: 'Es. 1', onboarding_persone_error: 'Inserisci un numero valido (almeno 1).',
+    onboarding_slide4_title: 'A quanto ammonta il tuo stipendio o le tue entrate mensili?', onboarding_stipendio_placeholder: 'Es. 2000', onboarding_stipendio_error: 'Inserisci un importo valido.',
+    onboarding_slide5_title: 'Che giorno del mese prendi lo stipendio?', onboarding_giorno_placeholder: 'Es. 27', onboarding_giorno_error: 'Inserisci un giorno valido, da 1 a 31.',
+    onboarding_continue: 'Continua', onboarding_enter: 'Entra',
+
+    guide_skip: 'Salta il tour', guide_back: 'Indietro', guide_next: 'Avanti', guide_finish: 'Fine', guide_count: '{n} di {tot}',
+    guide_step1_title: 'Facciamo un giro insieme?', guide_step1_text: 'Ti mostro in pochi passaggi dove cliccare per impostare tutto. Puoi saltare in qualsiasi momento.',
+    guide_step2_title: 'Le tue spese fisse', guide_step2_text: 'Stipendio e giorno di pagamento li hai già inseriti in fase di registrazione. Aggiungi qui affitto, bollette, abbonamenti — tutto quello che paghi ogni mese a cifra fissa.',
+    guide_step3_title: 'Quanto puoi spendere', guide_step3_text: 'Qui vedi subito il tuo margine sano, aggiornato in automatico — sia al giorno che a settimana.',
+    guide_step4_title: 'Il registro spese', guide_step4_text: 'Clicca su un giorno per aprirlo, e annota lì una spesa o un\'entrata.',
+    guide_step5_title: 'Giornaliera o settimanale', guide_step5_text: 'Passa da una vista all\'altra in ogni momento, da qui.',
+    guide_step6_title: 'I tuoi avvisi', guide_step6_text: 'Se rischi di andare in rosso, te lo segnalo qui, con un piano concreto per rimetterti in pari.',
+    guide_step7_title: 'L\'archivio contabile', guide_step7_text: 'Quando un ciclo si chiude, lo ritrovi qui, con il risultato finale — sempre consultabile, mai modificabile.',
+    guide_step8_title: 'Hai finito il tour!', guide_step8_text: 'Ora esplora pure il resto con calma. Puoi rivederlo quando vuoi dal pulsante informazioni in alto, vicino al tema.',
+
+    notif_title: 'Avvisi', notif_empty: 'Nessun avviso al momento. Va tutto bene!',
+
+    cat_casa: 'Casa', cat_abbonamenti: 'Abbonamenti', cat_veicolo: 'Veicolo', cat_cibo: 'Cibo',
+    cat_bar: 'Bar/Ristoranti', cat_market: 'Market', cat_investimenti: 'Investimenti', cat_risparmi: 'Risparmi', cat_altro: 'Altro',
+
+    day_close_btn: 'Nessuna spesa in questo giorno', day_closed_badge: 'Giorno chiuso: nessuna spesa',
+    week_close_btn: 'Nessuna spesa questa settimana', week_closed_badge: 'Settimana chiusa: nessuna spesa',
+
+    field_giorno_pagamento: 'Giorno di pagamento', field_giorni_ciclo: 'Giorni nel ciclo', field_stipendio: 'Stipendio mensile (€)',
+    field_spese_fisse: 'Spese fisse del mese',
+
+    label_giorni_precedenti: 'Giorni precedenti', label_settimane_precedenti: 'Settimane precedenti',
+    label_ciclo_contabile: 'Ciclo contabile',
+
+    th_spese_fisse_label: 'Spese fisse', th_stipendio_label: 'Stipendio',
+    th_periodo_giorno: 'al giorno', th_periodo_settimana: 'a settimana',
+    th_ogni_giorno: 'ogni giorno', th_ogni_settimana: 'ogni settimana',
+    th_spese_fisse_sub: 'Quanto ti serve {ogni} solo per coprire le spese fisse',
+    th_stipendio_sub: 'Quanto vale, in media, {periodo2} del tuo stipendio',
+    th_periodo2_giorno: 'una giornata', th_periodo2_settimana: 'una settimana',
+    th_disponibile_label_day: 'Quanto puoi spendere al giorno', th_disponibile_label_week: 'Quanto puoi spendere a settimana',
+    th_disponibile_sub: 'Quello che ti resta {ogni} dopo le spese fisse, senza andare in rosso',
+    th_live_label_day: 'Quanto ti resta oggi', th_live_label_week: 'Quanto ti resta questa settimana',
+    th_live_sub_day: 'La cifra ideale da non superare oggi, per non andare in rosso',
+    th_live_sub_week: 'La cifra ideale da non superare questa settimana, per non andare in rosso',
+    th_cum_label: 'Margine cumulato',
+    th_cum_sub_data: 'Quanto hai incassato finora senza spenderlo, in tutto il ciclo (fino al Giorno {n})',
+    th_cum_sub_empty: 'Nessun dato ancora registrato: per ora coincide con quanto puoi spendere',
+
+    deficit_title: 'Sei in rosso di {amount}',
+    deficit_intro: 'Da inizio ciclo hai speso più di quanto guadagnato: se continui con questo ritmo, il ciclo rischia di chiudersi in deficit.',
+    deficit_plan: 'Per rimetterti in pari entro la fine {scope} ({note}), prova a ridurre le spese di circa',
+    deficit_perday_suffix: 'al giorno rispetto al tuo margine ideale &mdash; punta a circa',
+    deficit_final_suffix: '/giorno invece di {ideal}/giorno.',
+    deficit_scope_current: 'di questa settimana', deficit_scope_next: 'della prossima settimana',
+    deficit_days_singular: 'giorno rimanente', deficit_days_plural: 'giorni rimanenti', deficit_seven_days: '7 giorni',
+
+    tut_eyebrow: 'Prima di iniziare',
+    tut_greeting: 'Ciao {name}, benvenuto!',
+    tut_mission: 'L\'idea è semplice: ogni giorno guadagni qualcosa e hai delle spese fisse da coprire. Quello che resta è tuo, per vivere — ma se lo spendi tutto, giorno dopo giorno, alla fine del mese ti ritrovi con zero messo da parte. Il senso di questa app è aiutarti a tenere un po\' da parte ogni giorno, così quello che non spendi diventa <strong>margine</strong>: soldi veri, tuoi, che si accumulano. Quando arriva una spesa in più, non peserà su quanto guadagni oggi, ma su quello che hai già messo via — ed è così che, con calma, costruisci qualcosa: prima un po\' di sicurezza, poi magari anche un capitale da far crescere.',
+    tut_sections_title: 'Le sezioni, una alla volta',
+    tut_desc_setup: 'Qui inserisci stipendio e spese fisse: la base da cui parte tutto il resto.',
+    tut_desc_soglie: 'Il tuo limite sano per oggi o per questa settimana, calcolato al volo.',
+    tut_desc_bilancio: 'Un colpo d\'occhio su quanto stai mettendo da parte, giorno dopo giorno.',
+    tut_desc_categorie: 'Le tue spese divise per categoria, per capire subito cosa pesa di più.',
+    tut_desc_registro: 'Qui annoti ogni spesa e ogni entrata, giorno per giorno o a settimane.',
+    tut_desc_investimenti: 'Quando hai margine, qui tieni traccia di trading e scommesse.',
+    tut_desc_altriconti: 'Il tuo fondo per le emergenze, tenuto separato dal resto.',
+    tut_close_btn: 'Ho capito, iniziamo!',
+    tut_guide_link: 'Preferisci un percorso guidato, passo passo?',
+
+    confirm_restart_month: 'Vuoi ricominciare il mese da capo? Tutti i valori giornalieri inseriti verranno azzerati.',
+    confirm_clear_week: 'Vuoi svuotare tutte le spese e le entrate inserite a livello di settimana? L\'azione non si può annullare.',
+    confirm_clear_day: 'Vuoi svuotare tutte le spese e le entrate inserite giorno per giorno? L\'azione non si può annullare.',
+
+    label_guadagno: 'Guadagno €', label_ti_resta: 'Ti resta €', label_aggiornato: 'aggiornato',
+    label_bilancio_giorno: 'Bilancio del giorno', label_bilancio_settimana: 'Bilancio della settimana',
+    past_editor_title_day: 'Modifica i giorni precedenti', past_editor_title_week: 'Modifica le settimane precedenti',
+    past_editor_empty: 'Non ci sono ancora giorni precedenti a oggi in questo mese.',
+    archivio_empty: 'Non hai ancora cicli conclusi: qui troverai lo storico dei mesi passati man mano che si chiudono.',
+  },
+  en: {
+    nav_cassa: 'Portfolio Management', nav_investimenti: 'Investments', nav_altriconti: 'Other Accounts',
+    panel_setup: 'Month settings', panel_soglie: 'How much you can spend',
+    panel_bilancio: 'How the month is going', panel_categorie: 'Where your money goes',
+    panel_registro: 'Expense log', panel_archivio: 'Accounting archive',
+    panel_trading: 'Trading', panel_betting: 'Betting', panel_altriconti: 'Emergency fund',
+    view_day: 'Daily', view_week: 'Weekly',
+    btn_cancel: 'Cancel', btn_confirm: 'Confirm', btn_add_row: '+ add item',
+    btn_restart_month: 'Restart the month', btn_add_expense: '+ add expense', btn_add_income: '+ add income',
+    btn_save: 'Save', btn_undo: 'Undo',
+
+    auth_login_title: 'Welcome back', auth_login_subtitle: 'Sign in to get back to your portfolio, investments and net worth, synced across every device.',
+    auth_login_submit: 'Sign in', auth_login_switch_text: "Don't have an account?", auth_login_switch_btn: 'Create account',
+    auth_register_title: 'Create your account', auth_register_subtitle: 'An account to save your data securely and find it again on any device.',
+    auth_register_submit: 'Create account', auth_register_switch_text: 'Already have an account?', auth_register_switch_btn: 'Sign in',
+    auth_email_label: 'Email', auth_password_label: 'Password',
+    auth_email_placeholder: 'name@example.com', auth_password_placeholder: 'At least 8 characters',
+
+    onboarding_slide1: 'Organize your finances',
+    onboarding_slide2_title: "What's your name?", onboarding_nome_placeholder: 'E.g. Alex', onboarding_nome_error: 'Enter your name to continue.',
+    onboarding_slide3_title: 'How many people are in your household?', onboarding_persone_placeholder: 'E.g. 1', onboarding_persone_error: 'Enter a valid number (at least 1).',
+    onboarding_slide4_title: 'How much is your salary or monthly income?', onboarding_stipendio_placeholder: 'E.g. 2000', onboarding_stipendio_error: 'Enter a valid amount.',
+    onboarding_slide5_title: 'What day of the month do you get paid?', onboarding_giorno_placeholder: 'E.g. 27', onboarding_giorno_error: 'Enter a valid day, from 1 to 31.',
+    onboarding_continue: 'Continue', onboarding_enter: 'Enter',
+
+    guide_skip: 'Skip the tour', guide_back: 'Back', guide_next: 'Next', guide_finish: 'Done', guide_count: '{n} of {tot}',
+    guide_step1_title: 'Shall we take a quick tour?', guide_step1_text: "I'll show you in a few steps where to click to set everything up. You can skip at any time.",
+    guide_step2_title: 'Your fixed expenses', guide_step2_text: 'You\'ve already entered your salary and payday. Add here rent, bills, subscriptions — anything you pay a fixed amount for every month.',
+    guide_step3_title: 'How much you can spend', guide_step3_text: 'Here you see your healthy margin right away, updated automatically — both daily and weekly.',
+    guide_step4_title: 'The expense log', guide_step4_text: 'Click on a day to open it, and note down an expense or income there.',
+    guide_step5_title: 'Daily or weekly', guide_step5_text: 'Switch between views at any time, from here.',
+    guide_step6_title: 'Your alerts', guide_step6_text: "If you risk going into the red, I'll flag it here, with a concrete plan to get back on track.",
+    guide_step7_title: 'The accounting archive', guide_step7_text: 'Once a cycle closes, you\'ll find it here, with the final result — always viewable, never editable.',
+    guide_step8_title: "You're done with the tour!", guide_step8_text: 'Now feel free to explore the rest at your own pace. You can revisit it anytime from the info button up top, next to the theme toggle.',
+
+    notif_title: 'Alerts', notif_empty: "No alerts right now. All good!",
+
+    cat_casa: 'Home', cat_abbonamenti: 'Subscriptions', cat_veicolo: 'Vehicle', cat_cibo: 'Food',
+    cat_bar: 'Bar/Restaurants', cat_market: 'Groceries', cat_investimenti: 'Investments', cat_risparmi: 'Savings', cat_altro: 'Other',
+
+    day_close_btn: 'No expenses this day', day_closed_badge: 'Day closed: no expenses',
+    week_close_btn: 'No expenses this week', week_closed_badge: 'Week closed: no expenses',
+
+    field_giorno_pagamento: 'Payday', field_giorni_ciclo: 'Days in cycle', field_stipendio: 'Monthly salary (€)',
+    field_spese_fisse: 'Fixed monthly expenses',
+
+    label_giorni_precedenti: 'Previous days', label_settimane_precedenti: 'Previous weeks',
+    label_ciclo_contabile: 'Accounting cycle',
+
+    th_spese_fisse_label: 'Fixed expenses', th_stipendio_label: 'Salary',
+    th_periodo_giorno: 'per day', th_periodo_settimana: 'per week',
+    th_ogni_giorno: 'every day', th_ogni_settimana: 'every week',
+    th_spese_fisse_sub: 'What you need {ogni} just to cover fixed expenses',
+    th_stipendio_sub: 'What {periodo2} of your salary is worth, on average',
+    th_periodo2_giorno: 'a day', th_periodo2_settimana: 'a week',
+    th_disponibile_label_day: 'How much you can spend per day', th_disponibile_label_week: 'How much you can spend per week',
+    th_disponibile_sub: "What's left {ogni} after fixed expenses, without going into the red",
+    th_live_label_day: 'How much is left today', th_live_label_week: 'How much is left this week',
+    th_live_sub_day: "The ideal amount not to exceed today, to avoid going into the red",
+    th_live_sub_week: "The ideal amount not to exceed this week, to avoid going into the red",
+    th_cum_label: 'Cumulative margin',
+    th_cum_sub_data: "How much you've earned so far without spending it, over the whole cycle (up to Day {n})",
+    th_cum_sub_empty: "No data yet: for now it matches what you can spend",
+
+    deficit_title: "You're {amount} in the red",
+    deficit_intro: "Since the cycle started you've spent more than you've earned: if you keep this pace, the cycle risks ending in deficit.",
+    deficit_plan: 'To catch up by the end {scope} ({note}), try cutting your spending by about',
+    deficit_perday_suffix: 'a day compared to your ideal margin &mdash; aim for about',
+    deficit_final_suffix: '/day instead of {ideal}/day.',
+    deficit_scope_current: 'of this week', deficit_scope_next: 'of next week',
+    deficit_days_singular: 'day left', deficit_days_plural: 'days left', deficit_seven_days: '7 days',
+
+    tut_eyebrow: 'Before you start',
+    tut_greeting: 'Hi {name}, welcome!',
+    tut_mission: "It's simple: every day you earn something and have fixed expenses to cover. What's left is yours, to live on — but if you spend it all, day after day, by the end of the month you're left with nothing set aside. The point of this app is to help you set a little aside every day, so what you don't spend becomes <strong>margin</strong>: real money, yours, that adds up. When an extra expense comes along, it won't weigh on what you earn today, but on what you've already set aside — and that's how, calmly, you build something: first some security, then maybe even capital to grow.",
+    tut_sections_title: 'The sections, one at a time',
+    tut_desc_setup: 'Here you enter your salary and fixed expenses: the base everything else starts from.',
+    tut_desc_soglie: 'Your healthy limit for today or this week, calculated on the fly.',
+    tut_desc_bilancio: 'A quick glance at how much you\'re setting aside, day after day.',
+    tut_desc_categorie: 'Your expenses split by category, to instantly see what weighs the most.',
+    tut_desc_registro: 'Here you note down every expense and income, day by day or by week.',
+    tut_desc_investimenti: 'Once you have margin, track trading and betting here.',
+    tut_desc_altriconti: 'Your emergency fund, kept separate from the rest.',
+    tut_close_btn: "Got it, let's start!",
+    tut_guide_link: 'Prefer a step-by-step guided tour?',
+
+    confirm_restart_month: 'Do you want to restart the month from scratch? All the daily values entered will be reset.',
+    confirm_clear_week: "Do you want to clear all the expenses and income entered at the week level? This can't be undone.",
+    confirm_clear_day: "Do you want to clear all the expenses and income entered day by day? This can't be undone.",
+
+    label_guadagno: 'Income €', label_ti_resta: 'Left €', label_aggiornato: 'updated',
+    label_bilancio_giorno: 'Balance for the day', label_bilancio_settimana: 'Balance for the week',
+    past_editor_title_day: 'Edit previous days', past_editor_title_week: 'Edit previous weeks',
+    past_editor_empty: "There are no previous days yet this month.",
+    archivio_empty: "You don't have any closed cycles yet: you'll find the history of past months here as they close.",
+  },
+};
+let currentLang = localStorage.getItem('__app_lang__') || 'it';
+function tr(key){
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.it;
+  return (dict && dict[key] !== undefined) ? dict[key] : (TRANSLATIONS.it[key] !== undefined ? TRANSLATIONS.it[key] : key);
+}
+function applyStaticTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const val = tr(key);
+    if(val !== undefined) el.textContent = val;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    const val = tr(key);
+    if(val !== undefined) el.placeholder = val;
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => { btn.textContent = currentLang.toUpperCase(); });
+  document.querySelectorAll('.lang-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === currentLang);
+  });
+  // riallinea anche i testi che cambiano in base allo stato (login/registrazione)
+  if(typeof setAuthMode === 'function' && typeof authMode !== 'undefined'){ setAuthMode(authMode); }
+}
+function setLang(lang){
+  if(!TRANSLATIONS[lang]) return;
+  currentLang = lang;
+  localStorage.setItem('__app_lang__', lang);
+  applyStaticTranslations();
+  if(typeof renderAll === 'function' && document.getElementById('app-root').style.display !== 'none'){
+    renderAll();
+  }
+}
+// ogni coppia pulsante+tendina lingua (una per schermata: login, onboarding,
+// app vera e propria) si comporta allo stesso modo, in modo indipendente
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  const dropdown = btn.nextElementSibling;
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.lang-dropdown').forEach(d => { if(d !== dropdown) d.style.display = 'none'; });
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+  });
+});
+document.querySelectorAll('.lang-dropdown').forEach(dropdown => {
+  dropdown.querySelectorAll('.lang-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      setLang(opt.dataset.lang);
+      dropdown.style.display = 'none';
+    });
+  });
+});
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.notif-wrap').forEach(wrap => {
+    if(wrap.querySelector('.lang-dropdown') && !wrap.contains(e.target)){
+      wrap.querySelector('.lang-dropdown').style.display = 'none';
+    }
+  });
+});
+
 const PANEL_INFO = {
   setup: 'Qui inserisci stipendio e spese fisse: la base da cui parte tutto il resto.',
   soglie: 'Il tuo limite sano per oggi o per questa settimana, calcolato al volo.',
@@ -4112,7 +4418,8 @@ document.getElementById('tutorial-guide-link').addEventListener('click', () => {
 });
 // il pulsante "i" in alto riapre la stessa spiegazione in qualsiasi momento
 document.getElementById('general-info-btn').addEventListener('click', () => {
-  document.getElementById('tutorial-name').textContent = greetingName() || 'amico';
+  document.getElementById('tutorial-greeting').textContent = tr('tut_greeting').replace('{name}', greetingName() || (currentLang === 'en' ? 'friend' : 'amico'));
+  document.getElementById('tutorial-mission-text').innerHTML = tr('tut_mission');
   document.getElementById('tutorial-overlay').style.display = 'flex';
 });
 
@@ -4123,7 +4430,7 @@ function renderOnboardingStep(){
   document.querySelectorAll('.onboarding-dot').forEach(d => {
     d.classList.toggle('active', parseInt(d.dataset.dot, 10) === onboardingStep);
   });
-  document.getElementById('onboarding-next-btn').textContent = onboardingStep === ONBOARDING_STEPS ? 'Entra' : 'Continua';
+  document.getElementById('onboarding-next-btn').textContent = onboardingStep === ONBOARDING_STEPS ? tr('onboarding_enter') : tr('onboarding_continue');
   if(onboardingStep === 2){
     requestAnimationFrame(() => document.getElementById('onboarding-nome').focus());
   }else if(onboardingStep === 3){
@@ -4220,18 +4527,18 @@ function setAuthMode(mode){
   const passwordInput = document.getElementById('auth-password');
   document.getElementById('auth-error').style.display = 'none';
   if(mode === 'login'){
-    title.textContent = 'Bentornato';
-    subtitle.textContent = 'Accedi per ritrovare la tua gestione del portafoglio, i tuoi investimenti e il tuo patrimonio, sincronizzati su ogni dispositivo.';
-    submit.textContent = 'Accedi';
-    switchText.textContent = 'Non hai un account?';
-    switchBtn.textContent = 'Crea account';
+    title.textContent = tr('auth_login_title');
+    subtitle.textContent = tr('auth_login_subtitle');
+    submit.textContent = tr('auth_login_submit');
+    switchText.textContent = tr('auth_login_switch_text');
+    switchBtn.textContent = tr('auth_login_switch_btn');
     passwordInput.setAttribute('autocomplete', 'current-password');
   }else{
-    title.textContent = 'Crea il tuo account';
-    subtitle.textContent = 'Un account per salvare i tuoi dati in modo sicuro e ritrovarli su qualsiasi dispositivo.';
-    submit.textContent = 'Crea account';
-    switchText.textContent = 'Hai già un account?';
-    switchBtn.textContent = 'Accedi';
+    title.textContent = tr('auth_register_title');
+    subtitle.textContent = tr('auth_register_subtitle');
+    submit.textContent = tr('auth_register_submit');
+    switchText.textContent = tr('auth_register_switch_text');
+    switchBtn.textContent = tr('auth_register_switch_btn');
     passwordInput.setAttribute('autocomplete', 'new-password');
   }
 }
@@ -4443,6 +4750,7 @@ document.querySelectorAll('.panel-head-left').forEach(left => {
 });
 
 bootstrap();
+applyStaticTranslations(); // applica subito la lingua salvata (o l'italiano di default)
 
 // tiene la barra di oggi aggiornata anche se l'app resta aperta a cavallo
 // di mezzanotte, e — se nel frattempo il ciclo contabile è cambiato (nuovo
